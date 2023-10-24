@@ -1,21 +1,29 @@
-import Home from "./home/Home";
-import Login from "./login/Login";
-import OnBording from "./onBording/OnBording";
-import Avatar from "./profile/Avatar";
-import DateOfBirth from "./resgister/DateOfBirth";
-import Email from "./resgister/Email";
-import NameUser from "./resgister/NameUser";
-import OTP from "./resgister/OTP";
-import Success from "./resgister/Success";
+import CreateNewPassword from "./Login/CreateNewPassword";
+import FindPhone from "./Login/FindPhone";
+import LoginProfile from "./Login/LoginProfile";
+import LoginScreen from "./Login/LoginScreen";
+import OTPCode from "./Login/OTPCode";
+import AccountBirthDay from "./Register/AccountBithDay";
+import AccountGender from "./Register/AccountGender";
+import AccountName from "./Register/AccountName";
+import AccountNumber from "./Register/AccountNumber";
+import AccountPassword from "./Register/AccountPassword";
+import AccountTermsPrivacy from "./Register/AccountTermsPrivacy";
+import Register from "./Register/Register";
+import SplashScreen from "./SplashScreen/Home";
 
 export {
-  OnBording,
-  NameUser,
-  Login,
-  DateOfBirth,
-  Email,
-  OTP,
-  Success,
-  Home,
-  Avatar,
+  SplashScreen,
+  LoginProfile,
+  Register,
+  AccountBirthDay,
+  AccountTermsPrivacy,
+  AccountName,
+  AccountGender,
+  AccountNumber,
+  AccountPassword,
+  LoginScreen,
+  FindPhone,
+  OTPCode,
+  CreateNewPassword,
 };

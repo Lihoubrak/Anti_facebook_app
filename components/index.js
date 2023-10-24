@@ -1,4 +1,13 @@
-import ButtonCus from "./Buttons/ButtonCus";
-import InputCus from "./TextInput/InputCus";
+import ButtonComponent from "./ButtonComponent";
+import InputTextComponent from "./InputTextComponent";
+import PickerDateComponent from "./PickerDateComponent";
+import RegisterComponent from "./RegisterComponent";
+import CheckBoxComponent from "./CheckBoxComponent";
 
-export { ButtonCus, InputCus };
+export {
+  ButtonComponent,
+  RegisterComponent,
+  InputTextComponent,
+  PickerDateComponent,
+  CheckBoxComponent,
+};

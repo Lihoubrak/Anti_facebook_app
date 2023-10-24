@@ -1,97 +1,19 @@
-import React, { useCallback } from "react";
-import { useFonts } from "expo-font";
-import * as SplashScreen from "expo-splash-screen";
-import { NavigationContainer } from "@react-navigation/native";
-import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import { StyleSheet, Text, View } from "react-native";
+import React from "react";
 import {
-  NameUser,
-  Login,
-  DateOfBirth,
-  OnBording,
-  Email,
-  OTP,
-  Success,
-  Home,
-  Avatar,
+  AccountGender,
+  AccountName,
+  CreateNewPassword,
+  FindPhone,
+  LoginScreen,
+  OTPCode,
+  SplashScreen,
 } from "./screens";
+import FindEmail from "./screens/Login/FindEmail";
+const App = () => {
+  return <CreateNewPassword />;
+};
 
-const Stack = createNativeStackNavigator();
+export default App;
 
-export default function App() {
-  const [fontsLoaded] = useFonts({
-    Regular: require("./assets/fonts/Gilroy-Regular.otf"),
-    Bold: require("./assets/fonts/Gilroy-Bold.otf"),
-    Medium: require("./assets/fonts/Gilroy-Medium.otf"),
-    SemiBold: require("./assets/fonts/Gilroy-SemiBold.otf"),
-  });
-
-  const onLayoutRootView = useCallback(async () => {
-    if (fontsLoaded) {
-      await SplashScreen.hideAsync();
-    }
-  }, [fontsLoaded]);
-
-  if (!fontsLoaded) {
-    return null;
-  }
-
-  return (
-    <NavigationContainer>
-      <Stack.Navigator
-        initialRouteName="OnBording"
-        screenOptions={{
-          headerTitleStyle: {
-            fontFamily: "Bold",
-            fontSize: 18,
-          },
-        }}
-      >
-        <Stack.Screen
-          name="OnBording"
-          component={OnBording}
-          options={{ headerShown: false }}
-        />
-        <Stack.Screen
-          name="Login"
-          component={Login}
-          options={{ title: "Login" }}
-        />
-        <Stack.Screen
-          name="NameUser"
-          component={NameUser}
-          options={{ title: "Create an Account" }}
-        />
-        <Stack.Screen
-          name="DateOfBirth"
-          component={DateOfBirth}
-          options={{ title: "Create an Account" }}
-        />
-        <Stack.Screen
-          name="Email"
-          component={Email}
-          options={{ title: "Create an Account" }}
-        />
-        <Stack.Screen
-          name="OTP"
-          component={OTP}
-          options={{ title: "Create an Account" }}
-        />
-        <Stack.Screen
-          name="Success"
-          component={Success}
-          options={{ title: "Create an Account" }}
-        />
-        <Stack.Screen
-          name="Home"
-          component={Home}
-          options={{ headerShown: false }}
-        />
-        <Stack.Screen
-          name="Avatar"
-          component={Avatar}
-          options={{ headerShown: false }}
-        />
-      </Stack.Navigator>
-    </NavigationContainer>
-  );
-}
+const styles = StyleSheet.create({});
