@@ -14,6 +14,5 @@ const App = () => {
   return <CreateNewPassword />;
 };
 
-export default App;
 
 const styles = StyleSheet.create({});
