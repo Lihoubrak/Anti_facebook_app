@@ -1,3 +1,4 @@
+import Home from "./Home/Home";
 import CreateNewPassword from "./Login/CreateNewPassword";
 import FindPhone from "./Login/FindPhone";
 import LoginProfile from "./Login/LoginProfile";
@@ -10,7 +11,7 @@ import AccountNumber from "./Register/AccountNumber";
 import AccountPassword from "./Register/AccountPassword";
 import AccountTermsPrivacy from "./Register/AccountTermsPrivacy";
 import Register from "./Register/Register";
-import SplashScreen from "./SplashScreen/Home";
+import SplashScreen from "./SplashScreen/SplashScreen";
 
 export {
   SplashScreen,
@@ -26,4 +27,5 @@ export {
   FindPhone,
   OTPCode,
   CreateNewPassword,
+  Home,
 };
