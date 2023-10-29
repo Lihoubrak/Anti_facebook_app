@@ -1,18 +1,11 @@
-import { StyleSheet, Text, View } from "react-native";
-import React from "react";
-import {
-  AccountGender,
-  AccountName,
-  CreateNewPassword,
-  FindPhone,
-  LoginScreen,
-  OTPCode,
-  SplashScreen,
-} from "./screens";
-import FindEmail from "./screens/Login/FindEmail";
-const App = () => {
-  return <CreateNewPassword />;
-};
+import { StatusBar } from 'expo-status-bar';
+import { StyleSheet, Text, View } from 'react-native';
 
-
-const styles = StyleSheet.create({});
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#fff',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+});
