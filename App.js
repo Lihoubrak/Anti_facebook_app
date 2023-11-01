@@ -1,9 +1,11 @@
-import React, { useCallback, useEffect, useState } from "react";
-import { StyleSheet, Text, View } from "react-native";
+import React, { useCallback } from "react";
 import { useFonts } from "expo-font";
 import * as SplashScreen from "expo-splash-screen";
+import { NavigationContainer } from "@react-navigation/native";
+import { createStackNavigator } from "@react-navigation/stack";
+import TabNavigator from "./navigation/TabNavigator";
+import { Text } from "react-native";
 
-// Define the main App component
 const App = () => {
   const [fontsLoaded] = useFonts({
     Regular: require("./assets/fonts/SF-Pro-Text-Regular.otf"),
@@ -21,23 +23,22 @@ const App = () => {
   }, [fontsLoaded]);
 
   if (!fontsLoaded) {
-    return null; // Return a loading screen or any other component while fonts are loading.
+    return null;
   }
 
+  const Stack = createStackNavigator();
+
   return (
-    <View style={styles.container} onLayout={onLayoutRootView}>
-      <Text style={{ fontFamily: "Light" }}>Hello</Text>
-    </View>
+    <NavigationContainer>
+      <Stack.Navigator>
+        <Stack.Screen
+          name="TabNavigator"
+          component={TabNavigator}
+          options={{ headerShown: false }}
+        />
+      </Stack.Navigator>
+    </NavigationContainer>
   );
 };
-
-// Define your styles
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-});
 
 export default App;
