@@ -15,7 +15,7 @@ function WelcomeScreen({ user }) {
   const handleLogout = () => {
     signOut(auth)
       .then(() => {
-        navigation.navigate("Login");
+        navigation.navigate("2");
       })
       .catch((error) => {
         console.log(error);

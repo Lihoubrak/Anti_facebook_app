@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useEffect } from "react";
 import {
   StyleSheet,
   Text,
@@ -8,36 +8,49 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { signInWithEmailAndPassword } from "firebase/auth";
+import { onAuthStateChanged, signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "../config/firebaseConfig";
-import WelcomeScreen from "./WelcomeScreen";
-const LoginScreen = ({ user }) => {
+
+const LoginScreen = ({ navigation }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [passwordVisible, setPasswordVisible] = useState(false);
+  const [user, setUser] = useState(null);
 
   useEffect(() => {
-    setTimeout(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      setUser(user);
       setLoading(false);
-    }, 2000);
-  }, []);
+      if (user) {
+        // User is signed in, navigate to WelcomeScreen or other desired screen
+        navigation.navigate("WelcomeScreen");
+      }
+    });
+
+    // Cleanup function to unsubscribe the observer when the component unmounts
+    return () => unsubscribe();
+  }, [navigation]);
 
   const handleLogin = async () => {
     setLoading(true);
     setError("");
     try {
-      const userCredential = await signInWithEmailAndPassword(
-        auth,
-        email,
-        password
-      );
+      await signInWithEmailAndPassword(auth, email, password);
     } catch (error) {
       const errorMessage = error.message;
       setError(errorMessage);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const onChange = (key, value) => {
+    if (key === "email") {
+      setEmail(value);
+    } else if (key === "password") {
+      setPassword(value);
     }
   };
 
@@ -50,8 +63,6 @@ const LoginScreen = ({ user }) => {
           color="blue"
           animating
         />
-      ) : user ? (
-        <WelcomeScreen user={user} />
       ) : (
         <View style={styles.formContainer}>
           <Text style={styles.title}>Login</Text>
@@ -59,7 +70,7 @@ const LoginScreen = ({ user }) => {
             style={styles.input}
             placeholder="Enter your email"
             value={email}
-            onChangeText={(text) => setEmail(text)}
+            onChangeText={(text) => onChange("email", text)}
           />
           <View style={styles.passwordInput}>
             <TextInput
@@ -67,7 +78,7 @@ const LoginScreen = ({ user }) => {
               placeholder="Enter your password"
               secureTextEntry={!passwordVisible}
               value={password}
-              onChangeText={(text) => setPassword(text)}
+              onChangeText={(text) => onChange("password", text)}
             />
             <TouchableOpacity
               style={styles.passwordVisibilityButton}
@@ -85,7 +96,6 @@ const LoginScreen = ({ user }) => {
     </SafeAreaView>
   );
 };
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
