@@ -6,6 +6,7 @@ import CheckBoxComponent from "./CheckBoxComponent";
 import PostComponent from "./PostComponent";
 import PostProfileComponet from "./PostProfileComponet";
 import FriendRequestComponent from "./FriendRequestComponent";
+import ShortcutMenu from "./ShortcutMenu";
 
 export {
   ButtonComponent,
@@ -16,4 +17,6 @@ export {
   PostComponent,
   PostProfileComponet,
   FriendRequestComponent,
+  // shortcut menu
+  ShortcutMenu,
 };
