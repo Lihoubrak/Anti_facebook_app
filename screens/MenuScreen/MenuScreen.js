@@ -9,7 +9,7 @@ const MenuScreen = () => {
   const [showSearchBar, setShowSearchBar] = useState(false);
   const [searchText, setSearchText] = useState("");
 
-  // handle search text into searchbar
+  // handle search
   const handleSearchPress = () => {
     if (typeof searchText === "string" && searchText.trim() === "") {
       setShowSearchBar(!showSearchBar);
