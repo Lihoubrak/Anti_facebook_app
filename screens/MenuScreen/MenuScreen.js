@@ -1,29 +1,65 @@
-import React from "react";
-import {
-  StyleSheet,
-  Text,
-  View,
-  ScrollView,
-  TouchableOpacity,
-} from "react-native";
+import React, { useState } from "react";
+import { SafeAreaView, TextInput } from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { ShortcutMenu } from "../../components";
-import { useState } from "react";
 
 const MenuScreen = () => {
   const [showAllShortCuts, setShowAllShortCuts] = useState(false);
+  const [showSearchBar, setShowSearchBar] = useState(false);
+  const [searchText, setSearchText] = useState("");
+
+  // handle search text into searchbar
+  const handleSearchPress = () => {
+    if (typeof searchText === "string" && searchText.trim() === "") {
+      setShowSearchBar(!showSearchBar);
+    }
+  };
   const Separator = () => {
     return <View style={styles.separator} />;
   };
   return (
-    <ScrollView>
+    <SafeAreaView>
       <View style={styles.container}>
-        <Text style={{ fontWeight: 600, fontSize: 30 }}>Menu</Text>
-        <TouchableOpacity style={styles.searchButton}>
+        <Text
+          style={{
+            fontSize: 30,
+            fontWeight: 500,
+            shadowColor: "#000",
+            shadowOffset: { width: 0, height: 1 },
+            shadowOpacity: 0.2,
+            shadowRadius: 1.41,
+            elevation: 2,
+          }}
+        >
+          Menu
+        </Text>
+        {/* searchbar */}
+        {showSearchBar && (
+          <View style={styles.searchBarContainer}>
+            <TextInput
+              placeholder="Search..."
+              style={styles.searchBar}
+              // Debbuging Log
+              // onChangeText={(text) => {
+              //   // setSearchText(text)
+              //   console.log("Input type:", typeof text);
+              //   setSearchText(text);
+              // }}
+              onChangeText={(text) => setSearchText(text)}
+              value={searchText}
+            />
+          </View>
+        )}
+        <TouchableOpacity
+          style={styles.searchButton}
+          // onPress={() => setShowSearchBar(!showSearchBar)}
+          onPress={handleSearchPress}
+        >
           <Ionicons name="search" size={25} color="black" />
         </TouchableOpacity>
       </View>
-      <View style={styles.container1}>
+      <View style={styles.text}>
         <Text style={{ fontWeight: 500, fontSize: 20, color: "#A9A9A9" }}>
           All Shortcut
         </Text>
@@ -80,20 +116,23 @@ const MenuScreen = () => {
       </View>
       {/* menu footer */}
       <View style={styles.footer}>
-        <TouchableOpacity>
-          <ShortcutMenu iconName="build-outline" label="Help & Support" />
-        </TouchableOpacity>
-        <TouchableOpacity>
-          <ShortcutMenu
-            iconName="settings-outline"
-            label="Settings & Privacy"
-          />
-        </TouchableOpacity>
+        <View>
+          <TouchableOpacity>
+            <ShortcutMenu iconName="build-outline" label="Help & Support" />
+          </TouchableOpacity>
+        </View>
+        <View>
+          <TouchableOpacity>
+            <ShortcutMenu
+              iconName="settings-outline"
+              label="Settings & Privacy"
+            />
+          </TouchableOpacity>
+        </View>
       </View>
-    </ScrollView>
+    </SafeAreaView>
   );
 };
-
 const styles = StyleSheet.create({
   container: {
     flexDirection: "row",
@@ -101,6 +140,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     padding: 15,
   },
+  text: { paddingLeft: 15 },
   searchButton: {
     padding: 8,
     borderRadius: 10,
@@ -108,11 +148,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#d9d9d9",
   },
-  container1: {
-    paddingLeft: 15,
-  },
   shortcutMenu: {
-    flex: 1,
     alignItems: "center",
     justifyContent: "center",
   },
@@ -123,16 +159,31 @@ const styles = StyleSheet.create({
     borderRadius: 5,
   },
   separator1: {
-    flex: 1,
     alignItems: "center",
     justifyContent: "center",
     top: 25,
   },
   footer: {
-    flex: 1,
     top: 20,
     alignItems: "center",
     justifyContent: "center",
   },
+  searchBarContainer: {
+    backgroundColor: "#F0F0F0",
+  },
+  searchBar: {
+    backgroundColor: "#FFFFFF",
+    borderRadius: 10,
+    padding: 8,
+    fontSize: 16,
+    width: 200,
+    height: 40,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.2,
+    shadowRadius: 1.41,
+    elevation: 2,
+  },
 });
+
 export default MenuScreen;
