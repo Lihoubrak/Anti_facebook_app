@@ -319,6 +319,7 @@ const styles = StyleSheet.create({
   actionIcon: {
     fontSize: 24,
     color: "#333",
+    
   },
   likesComments: {
     flexDirection: "row",
@@ -343,7 +344,6 @@ const styles = StyleSheet.create({
   commenterImage: {
     width: 40,
     height: 40,
-    borderRadius: 20,
   },
   commentTextContainer: {
     marginLeft: 10,

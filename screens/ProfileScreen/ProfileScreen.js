@@ -9,8 +9,31 @@ import {
   View,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { PostProfileSection } from "../../components";
+import * as ImagePicker from "expo-image-picker";
+import { useState } from "react";
 
 const ProfileScreen = () => {
+  // handle image picker
+  const pickImage = async () => {
+    // Requesting the permission to access the photo library
+    const { status } = await ImagePicker.requestCameraPermissionsAsync();
+    if (status !== "granted") {
+      alert("Sorry, we need camera roll permissions to make this work!");
+      return;
+    }
+    // Launching the image picker
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 1,
+    });
+    if (!result.canceled) {
+      // Do something with the image URI
+      console.log(result.uri);
+    }
+  };
   const Separator = () => {
     return <View style={styles.separator} />;
   };
@@ -22,10 +45,24 @@ const ProfileScreen = () => {
             source={require("../../assets/images/cover.jpg")}
             style={styles.coverImage}
           />
-          <Image
-            source={require("../../assets/images/man.jpg")}
-            style={styles.profileImag}
-          />
+          <TouchableOpacity
+            style={styles.cameraCoverButton}
+            onPress={pickImage}
+          >
+            <Ionicons name="camera" size={25} color="grey" />
+          </TouchableOpacity>
+          <View>
+            <Image
+              source={require("../../assets/images/man.jpg")}
+              style={styles.profileImage}
+            />
+            <TouchableOpacity
+              style={styles.cameraProfileButton}
+              onPress={pickImage}
+            >
+              <Ionicons name="camera" size={25} color="grey" />
+            </TouchableOpacity>
+          </View>
         </View>
         {/* User Name */}
         <View style={styles.profileDetails}>
@@ -51,7 +88,6 @@ const ProfileScreen = () => {
               </Text>
             </View>
           </TouchableOpacity>
-
           <TouchableOpacity style={styles.Iconbutton}>
             <Ionicons
               name="ellipsis-vertical"
@@ -148,6 +184,36 @@ const ProfileScreen = () => {
             </TouchableOpacity>
           </View>
         </View>
+        {/* Photo Post */}
+        <View>
+          <PostProfileSection
+            username="Brak Lihou"
+            time="2h"
+            caption="សួស្ដីបាទ! ខ្ញុំហួរ Zin II BC Zin 023."
+            ImagePost={require("../../assets/images/post2.jpg")}
+            countLike={100}
+            countComment={200}
+            countShare={200}
+          />
+          <PostProfileSection
+            username="Brak Lihou"
+            time="4h"
+            caption="សួស្ដីបាទ! ខ្ញុំហួរ Zin II BC Zin 023."
+            ImagePost={require("../../assets/images/post3.jpg")}
+            countLike={10}
+            countComment={200}
+            countShare={200}
+          />
+          <PostProfileSection
+            username="Brak Lihou"
+            time="2h"
+            caption="សួស្ដីបាទ! ខ្ញុំហួរ Zin II BC Zin 023."
+            ImagePost={require("../../assets/images/post4.jpg")}
+            countLike={100}
+            countComment={200}
+            countShare={300}
+          />
+        </View>
       </ScrollView>
     </SafeAreaView>
   );
@@ -157,21 +223,41 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  coverImage: { width: "100%", height: 190 },
-  profileImag: {
+  coverImage: { width: "100%", height: 200 },
+  profileImage: {
     width: 140,
     height: 140,
     borderRadius: 70,
     borderColor: "white",
     borderWidth: 1,
-    bottom: 70,
+    bottom: 90,
   },
-  profileDetails: { alignItems: "center", bottom: 50 },
+  cameraCoverButton: {
+    width: 30,
+    height: 30,
+    backgroundColor: "#EEF7FC",
+    borderRadius: 15,
+    left: 170,
+    bottom: 40,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  cameraProfileButton: {
+    width: 30,
+    height: 30,
+    backgroundColor: "#EEF7FC",
+    borderRadius: 15,
+    bottom: 130,
+    left: 105,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  profileDetails: { alignItems: "center", bottom: 100 },
   buttonContainer: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-evenly",
-    bottom: 30,
+    bottom: 70,
   },
   Storybutton: {
     width: 150,
@@ -212,7 +298,7 @@ const styles = StyleSheet.create({
   separator1: {
     alignItems: "center",
     justifyContent: "center",
-    bottom: 10,
+    bottom: 50,
   },
 
   data: {
@@ -225,10 +311,11 @@ const styles = StyleSheet.create({
     height: 40,
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: "white",
+    borderColor: "#A9BDC6",
     backgroundColor: "#fff",
     alignItems: "center",
     justifyContent: "center",
+    bottom: 40,
   },
   detailsInfoContainer: {
     padding: 10,
@@ -238,6 +325,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space",
     padding: 5,
+    bottom: 50,
   },
 });
 
