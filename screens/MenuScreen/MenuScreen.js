@@ -3,11 +3,13 @@ import { SafeAreaView, TextInput } from "react-native";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { ShortcutMenu } from "../../components";
+import { useNavigation } from "@react-navigation/native";
 
 const MenuScreen = () => {
   const [showAllShortCuts, setShowAllShortCuts] = useState(false);
   const [showSearchBar, setShowSearchBar] = useState(false);
   const [searchText, setSearchText] = useState("");
+  const navigation = useNavigation();
 
   // handle search
   const handleSearchPress = () => {
@@ -72,7 +74,7 @@ const MenuScreen = () => {
         <TouchableOpacity>
           <ShortcutMenu iconName="earth-outline" label="Marketplace" />
         </TouchableOpacity>
-        <TouchableOpacity>
+        <TouchableOpacity onPress={() => navigation.navigate("Friends")}>
           <ShortcutMenu iconName="person-add-outline" label="Friends" />
         </TouchableOpacity>
         <TouchableOpacity>

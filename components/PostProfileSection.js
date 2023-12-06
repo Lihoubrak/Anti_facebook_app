@@ -18,7 +18,6 @@ const PostProfileSection = ({
   const [likeCount, setLikeCount] = useState(countLike);
 
   // function to handle like press
-  // function to handle like press
   const handleLikePress = () => {
     const newCount = isLiked ? likeCount - 1 : likeCount + 1; // Determine the new count.
     setLikeCount(newCount); // Set the new like count.

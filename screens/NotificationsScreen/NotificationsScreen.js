@@ -1,21 +1,27 @@
 import React, { useState } from "react";
 import {
+  FlatList,
   Image,
   SafeAreaView,
   StyleSheet,
   Text,
   View,
   Modal,
-  Button,
+  TextInput,
+  TouchableOpacity,
 } from "react-native";
 import notificationsData from "../../data/notificationdata";
 import { Ionicons } from "@expo/vector-icons";
-import { FlatList } from "react-native-gesture-handler";
-import { TouchableOpacity } from "react-native";
-import { TextInput } from "react-native";
-import { ActionSheetIOS } from "react-native";
 
-const NotificationItem = ({ type, content, time, profileImage, read }) => {
+const NotificationItem = ({
+  id,
+  type,
+  content,
+  time,
+  profileImage,
+  read,
+  onEllipsisPress,
+}) => {
   const getIconName = () => {
     switch (type) {
       case "video":
@@ -47,6 +53,12 @@ const NotificationItem = ({ type, content, time, profileImage, read }) => {
           {time}
         </Text>
       </View>
+      <TouchableOpacity
+        onPress={() => onEllipsisPress(id)}
+        style={styles.optionsButton}
+      >
+        <Ionicons name="ellipsis-horizontal" size={20} color="grey" />
+      </TouchableOpacity>
     </View>
   );
 };
@@ -79,23 +91,13 @@ const NotificationsScreen = () => {
   const [isSearchActive, setIsSearchActive] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
   const [notifications, setNotifications] = useState(notificationsData);
+  const [modalVisibleEllipsis, setModalVisibleEllipsis] = useState(false);
+  const [currentNotificationId, setCurrentNotificationId] = useState(null);
 
   const handleSearchToggle = () => {
     setIsSearchActive(!isSearchActive);
   };
   const handleSettingsPress = () => {
-    // ActionSheetIOS.showActionSheetWithOptions(
-    //   {
-    //     options: ["Cancel", "Mark All as Read"],
-    //     destructiveButtonIndex: 1,
-    //     cancelButtonIndex: 0,
-    //   },
-    //   (buttonIndex) => {
-    //     if (buttonIndex === 1) {
-    //       markAllAsRead();
-    //     }
-    //   }
-    // );
     setModalVisible(true);
   };
 
@@ -107,6 +109,49 @@ const NotificationsScreen = () => {
     setNotifications(updatedNotifications);
     setModalVisible(false);
   };
+  // Function to handle ellipsis press
+  const handleEllipsisPress = (notificationId) => {
+    setCurrentNotificationId(notificationId);
+    setModalVisibleEllipsis(true);
+  };
+  // Function to remove a notification
+  const handleRemoveNotification = () => {
+    setNotifications((currentNotifications) =>
+      currentNotifications.filter(
+        (notification) => notification.id !== currentNotificationId
+      )
+    );
+    // Close the modal and reset the current notification ID
+    setCurrentNotificationId(null);
+    setModalVisibleEllipsis(false);
+  };
+  // Render the modal within the component
+  const renderModal = () => (
+    <Modal
+      animationType="fade"
+      transparent={true}
+      visible={modalVisibleEllipsis}
+      onRequestClose={() => setModalVisibleEllipsis(false)}
+    >
+      <TouchableOpacity
+        style={styles.modalOverlay1}
+        activeOpacity={1}
+        onPressOut={() => setModalVisibleEllipsis(false)}
+      >
+        <View style={styles.modalContent1}>
+          <TouchableOpacity
+            style={styles.modalOption1}
+            onPress={handleRemoveNotification}
+          >
+            <Text style={{ fontSize: 17, fontWeight: 600 }}>
+              Remove This Notification
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </TouchableOpacity>
+    </Modal>
+  );
+
   return (
     <SafeAreaView style={styles.container}>
       <Header
@@ -117,7 +162,9 @@ const NotificationsScreen = () => {
       <FlatList
         data={notifications}
         keyExtractor={(item) => item.id}
-        renderItem={({ item }) => <NotificationItem {...item} />}
+        renderItem={({ item }) => (
+          <NotificationItem {...item} onEllipsisPress={handleEllipsisPress} />
+        )}
         ItemSeparatorComponent={() => <View style={styles.separator} />}
       />
       <Modal
@@ -130,16 +177,26 @@ const NotificationsScreen = () => {
       >
         <View style={styles.modalOverlay}>
           <View style={styles.modalContainer}>
+            {/* "Mark all as read" button */}
+            <TouchableOpacity style={styles.markbtn} onPress={markAllAsRead}>
+              <Text style={{ fontSize: 16, color: "white", fontWeight: 600 }}>
+                Mark All As Read
+              </Text>
+            </TouchableOpacity>
             <TouchableOpacity
               style={styles.modalCloseButton}
               onPress={() => setModalVisible(false)}
             >
-              <Text style={styles.modalCloseButtonText}>Close</Text>
+              <View style={styles.closebtn}>
+                <Text style={{ fontSize: 16, color: "white", fontWeight: 600 }}>
+                  Close
+                </Text>
+              </View>
             </TouchableOpacity>
-            <Button title="Mark all as read" onPress={markAllAsRead} />
           </View>
         </View>
       </Modal>
+      {renderModal()}
     </SafeAreaView>
   );
 };
@@ -207,10 +264,9 @@ const styles = StyleSheet.create({
     paddingLeft: 10,
     width: 180,
     height: 40,
-    marginRight: 10,
   },
   iconButton: {
-    marginLeft: 10,
+    marginLeft: 20,
   },
   notificationRead: {
     backgroundColor: "#EDF2F8",
@@ -226,14 +282,18 @@ const styles = StyleSheet.create({
   },
   modalOverlay: {
     flex: 1,
-    justifyContent: "flex-end",
-    backgroundColor: "rgba(0, 0, 0, 0.5)", // Dim the background
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
   },
   modalContainer: {
+    alignItems: "center",
+    justifyContent: "center",
     backgroundColor: "white",
     padding: 16,
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
+    borderRadius: 20,
+    borderWidth: 2,
+    borderColor: "grey",
     shadowColor: "#000",
     shadowOffset: {
       width: 0,
@@ -242,14 +302,50 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.25,
     shadowRadius: 4,
     elevation: 5,
+    width: 300,
   },
   modalCloseButton: {
-    alignSelf: "flex-end",
+    width: "100%",
+    alignSelf: "center",
+    marginTop: 10,
     padding: 8,
   },
-  modalCloseButtonText: {
-    fontSize: 16,
-    color: "#007aff",
+  markbtn: {
+    width: "100%",
+    height: 40,
+    borderRadius: 10,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#4698B6",
+  },
+  closebtn: {
+    height: 40,
+    borderRadius: 10,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#69D76C",
+  },
+  optionsButton: {
+    marginLeft: "auto",
+    padding: 10,
+  },
+  modalOverlay1: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "flex-end",
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    bottom: 30,
+  },
+  modalContent1: {
+    width: "100%",
+    height: 60,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#fff",
+    borderRadius: 10,
+    borderWidth: 2,
+    borderColor: "#85E888",
+    padding: 10,
   },
 });
 export default NotificationsScreen;
