@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useCallback, useState } from "react";
 import {
   FlatList,
   Image,
@@ -9,9 +9,15 @@ import {
   Modal,
   TextInput,
   TouchableOpacity,
+  ActivityIndicator,
+  RefreshControl,
 } from "react-native";
 import notificationsData from "../../data/notificationdata";
 import { Ionicons } from "@expo/vector-icons";
+import {
+  LoaderComponent,
+  refreshControl,
+} from "../../components/LoadingSpinner";
 
 const NotificationItem = ({
   id,
@@ -93,6 +99,8 @@ const NotificationsScreen = () => {
   const [notifications, setNotifications] = useState(notificationsData);
   const [modalVisibleEllipsis, setModalVisibleEllipsis] = useState(false);
   const [currentNotificationId, setCurrentNotificationId] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   const handleSearchToggle = () => {
     setIsSearchActive(!isSearchActive);
@@ -125,6 +133,32 @@ const NotificationsScreen = () => {
     setCurrentNotificationId(null);
     setModalVisibleEllipsis(false);
   };
+
+  // Empty notification
+  const renderEmptyComponent = () => {
+    return (
+      <View style={styles.emptyContainer}>
+        <Text style={styles.emptyText}>No Notifications</Text>
+      </View>
+    );
+  };
+  // Dummy function to simulate loading more notifications
+  const loadMoreNotifications = () => {
+    if (!isLoading) {
+      setIsLoading(true);
+      setTimeout(() => {
+        // After fetching new notifications, update the state and set loading to false
+        setIsLoading(false);
+      }, 2000);
+    }
+  };
+  const refreshNotifications = useCallback(() => {
+    setIsRefreshing(true);
+    setTimeout(() => {
+      setIsRefreshing(false);
+    }, 1500);
+  }, []);
+
   // Render the modal within the component
   const renderModal = () => (
     <Modal
@@ -166,6 +200,11 @@ const NotificationsScreen = () => {
           <NotificationItem {...item} onEllipsisPress={handleEllipsisPress} />
         )}
         ItemSeparatorComponent={() => <View style={styles.separator} />}
+        ListEmptyComponent={renderEmptyComponent}
+        onEndReached={loadMoreNotifications}
+        onEndReachedThreshold={0.5}
+        ListFooterComponent={<LoaderComponent isLoading={isLoading} />}
+        refreshControl={refreshControl(isRefreshing, refreshNotifications)}
       />
       <Modal
         animationType="slide"
@@ -346,6 +385,19 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: "#85E888",
     padding: 10,
+  },
+  emptyContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    marginTop: 300,
+  },
+  emptyText: {
+    fontSize: 20,
+    color: "#666",
+  },
+  spinner: {
+    marginVertical: 20,
   },
 });
 export default NotificationsScreen;

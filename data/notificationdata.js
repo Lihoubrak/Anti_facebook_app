@@ -44,6 +44,42 @@ const notificationsData = [
     profileImage: require("../assets/images/post2.jpg"),
     read: false,
   },
+  {
+    id: "6",
+    type: "post",
+    content: "BBBB added a new photo.",
+    time: "1m",
+    // icon: "paper-plane",
+    profileImage: require("../assets/images/post2.jpg"),
+    read: false,
+  },
+  {
+    id: "7",
+    type: "post",
+    content: "AAAA added a new photo.",
+    time: "1m",
+    // icon: "paper-plane",
+    profileImage: require("../assets/images/post2.jpg"),
+    read: false,
+  },
+  {
+    id: "8",
+    type: "post",
+    content: "BBBB added a new photo.",
+    time: "1m",
+    // icon: "paper-plane",
+    profileImage: require("../assets/images/post2.jpg"),
+    read: false,
+  },
+  {
+    id: "9",
+    type: "post",
+    content: "AAAA added a new photo.",
+    time: "1m",
+    // icon: "paper-plane",
+    profileImage: require("../assets/images/post2.jpg"),
+    read: false,
+  },
 ];
 
 export default notificationsData;
