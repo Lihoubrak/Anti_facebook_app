@@ -6,6 +6,7 @@ import {
   Text,
   TouchableOpacity,
   View,
+  Modal,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { ScrollView } from "react-native-gesture-handler";
@@ -13,6 +14,9 @@ import { ScrollView } from "react-native-gesture-handler";
 const WatchScreen = () => {
   const [activeTab, setActiveTab] = useState("ForYou");
   const [filteredCards, setFilteredCards] = useState([]);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [selectedProfile, setSelectedProfile] = useState(null);
+  const [followStatus, setFollowStatus] = useState({});
 
   // render tabs function
   const renderTab = (tabName) => (
@@ -56,7 +60,7 @@ const WatchScreen = () => {
         likes: "300K",
         comments: "8K",
         shares: "2K",
-        name: "World docs",
+        name: "Work Out 24",
         profileImg: require("../../assets/images/fitness.jpg"),
         time: "2h ago",
       },
@@ -71,7 +75,7 @@ const WatchScreen = () => {
         likes: "1.2M",
         comments: "20K",
         shares: "10K",
-        name: "World docs",
+        name: "City Life Style",
         profileImg: require("../../assets/images/city.jpg"),
         time: "LIVE",
       },
@@ -83,7 +87,7 @@ const WatchScreen = () => {
         likes: "500K",
         comments: "12K",
         shares: "3K",
-        name: "World docs",
+        name: "Let's Dance",
         profileImg: require("../../assets/images/concert.jpg"),
         time: "LIVE",
       },
@@ -108,7 +112,7 @@ const WatchScreen = () => {
         likes: "2M",
         comments: "25K",
         shares: "15K",
-        name: "World docs",
+        name: "Singing",
         profileImg: require("../../assets/images/man.jpg"),
         time: "2h ago",
       },
@@ -120,7 +124,7 @@ const WatchScreen = () => {
         likes: "700K",
         comments: "10K",
         shares: "4K",
-        name: "World docs",
+        name: "Classic Music 24h",
         profileImg: require("../../assets/images/man.jpg"),
         time: "2h ago",
       },
@@ -133,7 +137,7 @@ const WatchScreen = () => {
         likes: "2.5M",
         comments: "30K",
         shares: "20K",
-        name: "World docs",
+        name: "Zin II Gaming",
         profileImg: require("../../assets/images/man.jpg"),
         time: "2h ago",
       },
@@ -145,8 +149,8 @@ const WatchScreen = () => {
         likes: "1M",
         comments: "16K",
         shares: "8K",
-        name: "World docs",
-        profileImg: require("../../assets/images/man.jpg"),
+        name: "Mobile Legends Official",
+        profileImg: require("../../assets/images/mbllofficial.jpg"),
         time: "2h ago",
       },
     ],
@@ -155,6 +159,27 @@ const WatchScreen = () => {
     // Filter cards based on the active tab
     setFilteredCards(videoData[activeTab]);
   }, [activeTab]);
+
+  // handle follow toggle
+  const handleFollowToggle = (profileName) => {
+    const currentStatus = followStatus[profileName] || false;
+    setFollowStatus({ ...followStatus, [profileName]: !currentStatus });
+    setModalVisible(false); // Close the modal after toggling follow/unfollow
+  };
+
+  // handle open modal
+  const openModal = (profileName) => {
+    setSelectedProfile(profileName);
+    setModalVisible(true);
+  };
+
+  // Function to handle video deletion
+  const deleteVideo = (profileName) => {
+    setFilteredCards((prevCards) =>
+      prevCards.filter((card) => card.name !== profileName)
+    );
+    setModalVisible(false);
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -179,10 +204,19 @@ const WatchScreen = () => {
                   <Text style={styles.postTime}>{card.time}</Text>
                 </View>
               </View>
-              <TouchableOpacity style={styles.followButton}>
-                <Text style={styles.followButtonText}>Follow</Text>
+              <TouchableOpacity
+                style={styles.followButton}
+                onPress={() => handleFollowToggle(card.name)}
+              >
+                <Text style={styles.followButtonText}>
+                  {" "}
+                  {followStatus[card.name] ? "Following" : "Follow"}
+                </Text>
               </TouchableOpacity>
-              <TouchableOpacity style={styles.optionsButton}>
+              <TouchableOpacity
+                style={styles.optionsButton}
+                onPress={() => openModal(card.name)}
+              >
                 <Ionicons name="ellipsis-horizontal" size={20} color="black" />
               </TouchableOpacity>
             </View>
@@ -217,6 +251,46 @@ const WatchScreen = () => {
           </View>
         ))}
       </ScrollView>
+      {/* modal following and unfollow */}
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={modalVisible}
+        onRequestClose={() => setModalVisible(false)}
+      >
+        <View style={styles.centeredView}>
+          <View style={styles.modalView}>
+            {/* Follow/Unfollow Text */}
+            <Text style={styles.modalText}>
+              {followStatus[selectedProfile] ? "Unfollow" : "Follow"}{" "}
+              {selectedProfile}
+            </Text>
+            <TouchableOpacity
+              style={[styles.button, styles.buttonClose]}
+              onPress={() => handleFollowToggle(selectedProfile)}
+            >
+              <Text style={styles.textStyle}>
+                {followStatus[selectedProfile] ? "Unfollow" : "Follow"}{" "}
+                {selectedProfile}
+              </Text>
+            </TouchableOpacity>
+            {/* Delete Video Button */}
+            <TouchableOpacity
+              style={[styles.button, styles.buttonDelete]}
+              onPress={() => deleteVideo(selectedProfile)}
+            >
+              <Text style={styles.textStyle}>Delete this video</Text>
+            </TouchableOpacity>
+            {/* Close Button */}
+            <TouchableOpacity
+              style={[styles.button, styles.buttonClose, styles.closebtn]}
+              onPress={() => setModalVisible(false)}
+            >
+              <Text style={styles.textStyle}>Close</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 };
@@ -299,11 +373,11 @@ const styles = StyleSheet.create({
     marginHorizontal: 16,
     borderRadius: 8,
     overflow: "hidden",
-    elevation: 3, // for Android shadow
-    shadowColor: "#000", // for iOS shadow
-    shadowOffset: { width: 0, height: 2 }, // for iOS shadow
-    shadowOpacity: 0.25, // for iOS shadow
-    shadowRadius: 3.84, // for iOS shadow
+    elevation: 3,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
   },
   thumbnail: {
     width: "100%",
@@ -351,6 +425,57 @@ const styles = StyleSheet.create({
   },
   engagementText: {
     fontSize: 12,
+  },
+  centeredView: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    marginTop: 22,
+  },
+  modalView: {
+    margin: 20,
+    backgroundColor: "white",
+    borderRadius: 20,
+    padding: 35,
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  modalText: {
+    marginBottom: 15,
+    textAlign: "center",
+    fontSize: 18,
+  },
+  button: {
+    borderRadius: 10,
+    padding: 10,
+    elevation: 2,
+  },
+  buttonClose: {
+    backgroundColor: "#2196F3",
+  },
+  closebtn: {
+    top: 10,
+    width: 120,
+    borderRadius: 10,
+  },
+  textStyle: {
+    color: "white",
+    fontWeight: "bold",
+    textAlign: "center",
+  },
+  buttonDelete: {
+    backgroundColor: "#ff4d4d", // Red color for delete button
+    padding: 10,
+    borderRadius: 5,
+    elevation: 2,
+    marginTop: 10,
   },
 });
 export default WatchScreen;
