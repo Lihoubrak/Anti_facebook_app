@@ -34,42 +34,6 @@ const WatchScreen = () => {
       </Text>
     </TouchableOpacity>
   );
-  // ContentCard Function
-  const renderCard = (title, thumbnail, view, likes, comments, shares, key) => (
-    <View style={styles.card} key={key}>
-      <Image
-        style={styles.thumbnail}
-        source={{ uri: thumbnail }}
-        // source={{ uri: "https://placekitten.com/200/200" }} // Placeholder for video thumbnail
-      />
-      <View style={styles.liveBadgeContainer}>
-        {activeTab === "Live" && (
-          <View style={styles.liveBadge}>
-            <Text style={styles.liveText}>LIVE</Text>
-          </View>
-        )}
-        <Text style={styles.viewerCount}>{view} watching</Text>
-      </View>
-      <Text style={styles.title}>{title}</Text>
-      <View style={styles.socialRow}>
-        <TouchableOpacity style={styles.socialButton}>
-          <Ionicons name="heart-outline" size={24} color="black" />
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.socialButton}>
-          <Ionicons name="chatbox-outline" size={24} color="black" />
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.socialButton}>
-          <Ionicons name="share-outline" size={24} color="black" />
-        </TouchableOpacity>
-      </View>
-      <View style={styles.engagementStats}>
-        <Text style={styles.engagementText}>{likes} likes</Text>
-        <Text style={styles.engagementText}>{comments} Comments</Text>
-        <Text style={styles.engagementText}>{shares} Shares</Text>
-      </View>
-    </View>
-  );
-
   const videoData = {
     ForYou: [
       {
@@ -80,6 +44,9 @@ const WatchScreen = () => {
         likes: "950K",
         comments: "15K",
         shares: "5K",
+        name: "World docs",
+        profileImg: require("../../assets/images/naturedoc.jpg"),
+        time: "2h ago",
       },
       {
         title: "Daily Workout Routine",
@@ -89,6 +56,9 @@ const WatchScreen = () => {
         likes: "300K",
         comments: "8K",
         shares: "2K",
+        name: "World docs",
+        profileImg: require("../../assets/images/fitness.jpg"),
+        time: "2h ago",
       },
       // ... more videos for ForYou
     ],
@@ -101,6 +71,9 @@ const WatchScreen = () => {
         likes: "1.2M",
         comments: "20K",
         shares: "10K",
+        name: "World docs",
+        profileImg: require("../../assets/images/city.jpg"),
+        time: "LIVE",
       },
       {
         title: "Live Music Concert",
@@ -110,6 +83,9 @@ const WatchScreen = () => {
         likes: "500K",
         comments: "12K",
         shares: "3K",
+        name: "World docs",
+        profileImg: require("../../assets/images/concert.jpg"),
+        time: "LIVE",
       },
       {
         title: "Mobile Legends",
@@ -118,6 +94,9 @@ const WatchScreen = () => {
         likes: "2.5M",
         comments: "30K",
         shares: "20K",
+        name: "World docs",
+        profileImg: require("../../assets/images/mbll.jpg"),
+        time: "LIVE",
       },
     ],
     Music: [
@@ -129,6 +108,9 @@ const WatchScreen = () => {
         likes: "2M",
         comments: "25K",
         shares: "15K",
+        name: "World docs",
+        profileImg: require("../../assets/images/man.jpg"),
+        time: "2h ago",
       },
       {
         title: "Classical Music Evening",
@@ -138,6 +120,9 @@ const WatchScreen = () => {
         likes: "700K",
         comments: "10K",
         shares: "4K",
+        name: "World docs",
+        profileImg: require("../../assets/images/man.jpg"),
+        time: "2h ago",
       },
     ],
     Gaming: [
@@ -148,6 +133,9 @@ const WatchScreen = () => {
         likes: "2.5M",
         comments: "30K",
         shares: "20K",
+        name: "World docs",
+        profileImg: require("../../assets/images/man.jpg"),
+        time: "2h ago",
       },
       {
         title: "M5 World Champioonship 2023",
@@ -157,6 +145,9 @@ const WatchScreen = () => {
         likes: "1M",
         comments: "16K",
         shares: "8K",
+        name: "World docs",
+        profileImg: require("../../assets/images/man.jpg"),
+        time: "2h ago",
       },
     ],
   };
@@ -177,17 +168,54 @@ const WatchScreen = () => {
       </View>
       {/* content card */}
       <ScrollView style={styles.feed}>
-        {filteredCards?.map((card, index) =>
-          renderCard(
-            card.title,
-            card.thumbnail,
-            card.view,
-            card.likes,
-            card.comments,
-            card.shares
-            // `card-${index}`
-          )
-        )}
+        {filteredCards.map((card, index) => (
+          <View style={styles.card} key={`card-${index}`}>
+            <View style={styles.postHeader}>
+              <Image source={card.profileImg} style={styles.profileImg} />
+              <View style={styles.postInfo}>
+                <Text style={styles.profileName}>{card.name}</Text>
+                <View style={styles.postTimeContainer}>
+                  <Ionicons name="earth" size={12} color="black" />
+                  <Text style={styles.postTime}>{card.time}</Text>
+                </View>
+              </View>
+              <TouchableOpacity style={styles.followButton}>
+                <Text style={styles.followButtonText}>Follow</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.optionsButton}>
+                <Ionicons name="ellipsis-horizontal" size={20} color="black" />
+              </TouchableOpacity>
+            </View>
+            <Image style={styles.thumbnail} source={{ uri: card.thumbnail }} />
+            <View style={styles.liveBadgeContainer}>
+              {activeTab === "Live" && (
+                <View style={styles.liveBadge}>
+                  <Text style={styles.liveText}>LIVE</Text>
+                </View>
+              )}
+              <Text style={styles.viewerCount}>{card.view} watching</Text>
+            </View>
+            <Text style={styles.title}>{card.title}</Text>
+            <View style={styles.socialRow}>
+              <TouchableOpacity style={styles.socialButton}>
+                <Ionicons name="heart-outline" size={24} color="black" />
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.socialButton}>
+                <Ionicons name="chatbox-outline" size={24} color="black" />
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.socialButton}>
+                <Ionicons name="share-outline" size={24} color="black" />
+              </TouchableOpacity>
+            </View>
+            <View style={styles.engagementStats}>
+              <Text style={styles.engagementText}>{card.likes} likes</Text>
+              <Text style={styles.engagementText}>
+                {card.comments} Comments
+              </Text>
+              <Text style={styles.engagementText}>{card.shares} Shares</Text>
+            </View>
+          </View>
+        ))}
       </ScrollView>
     </SafeAreaView>
   );
@@ -197,6 +225,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
+
   headerText: {
     padding: 10,
   },
@@ -221,6 +250,48 @@ const styles = StyleSheet.create({
   },
   feed: {
     flex: 1,
+  },
+  postHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    padding: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: "#ececec",
+  },
+  profileImg: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+  },
+  postInfo: {
+    flex: 1,
+    marginLeft: 10,
+  },
+  profileName: {
+    fontWeight: "bold",
+  },
+  postTimeContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  postTime: {
+    marginLeft: 5,
+    color: "#65676b",
+  },
+  followButton: {
+    borderColor: "#1a77f2",
+    borderWidth: 1,
+    borderRadius: 5,
+    paddingVertical: 5,
+    paddingHorizontal: 10,
+  },
+  followButtonText: {
+    color: "#1a77f2",
+    fontWeight: "bold",
+  },
+  optionsButton: {
+    padding: 10,
   },
   card: {
     backgroundColor: "white",
