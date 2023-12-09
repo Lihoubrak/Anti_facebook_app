@@ -18,37 +18,34 @@ import * as ImagePicker from "expo-image-picker";
 import { useState } from "react";
 import friendsData from "../../data/friendsData";
 import photosData from "../../data/photoData";
+import { useNavigation } from "@react-navigation/native";
 
 const Tab = createMaterialTopTabNavigator();
 const screenWidth = Dimensions.get("window").width;
 
-const Header = () => {
-  const [profileImage, setProfileImage] = useState(
-    require("../../assets/images/post2.jpg")
-  );
-  const [coverImage, setCoverImage] = useState(
-    require("../../assets/images/post2.jpg")
-  );
-  const pickImage = async (setImage) => {
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
-      aspect: [4, 3],
-      quality: 1,
-    });
+const Header = ({
+  pickProfileImage,
+  pickCoverImage,
+  profileImage,
+  coverImage,
+}) => {
+  const navigation = useNavigation();
 
-    if (!result.canceled) {
-      setImage({ uri: result.uri });
-    }
-  };
   return (
     <View style={[styles.header]}>
       <View>
         <Image
           style={[styles.coverPhoto, { width: screenWidth }]}
-          source={require("../../assets/images/post2.jpg")}
+          source={
+            coverImage
+              ? { uri: coverImage }
+              : require("../../assets/images/post2.jpg")
+          }
         />
-        <TouchableOpacity style={styles.cameraIconCover} onPress={pickImage}>
+        <TouchableOpacity
+          style={styles.cameraIconCover}
+          onPress={pickCoverImage}
+        >
           <Ionicons name="camera" size={24} color="white" />
         </TouchableOpacity>
       </View>
@@ -56,9 +53,16 @@ const Header = () => {
       <View>
         <Image
           style={styles.profilePhoto}
-          source={require("../../assets/images/post2.jpg")}
+          source={
+            profileImage
+              ? { uri: profileImage }
+              : require("../../assets/images/post2.jpg")
+          }
         />
-        <TouchableOpacity style={styles.cameraIconProfile} onPress={pickImage}>
+        <TouchableOpacity
+          style={styles.cameraIconProfile}
+          onPress={pickProfileImage}
+        >
           <Ionicons name="camera" size={16} color="white" />
         </TouchableOpacity>
       </View>
@@ -70,7 +74,10 @@ const Header = () => {
             <Text style={styles.buttonText}>Add to Story</Text>
           </View>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.button2}>
+        <TouchableOpacity
+          style={styles.button2}
+          onPress={() => navigation.navigate("EditProfile")}
+        >
           <View style={styles.EditPFBtn}>
             <Ionicons name="construct" color="white" style={{ right: 5 }} />
             <Text style={styles.buttonText}>Edit Profile</Text>
@@ -86,13 +93,13 @@ const Header = () => {
   );
 };
 
-const PostsScreen = () => (
+const PostsScreen = ({ profileImage }) => (
   <ScrollView style={styles.detailsContainer}>
     <View style={styles.detailItem}>
       <Ionicons name="book-outline" size={20} color="#000" />
       <Text style={styles.detailText}>
         Studied at{" "}
-        <Text style={styles.boldText}>Institute of Technology of Cambodia</Text>
+        <Text style={styles.boldText}>Sovanrith Technology Institute</Text>
       </Text>
     </View>
     <View style={styles.detailItem}>
@@ -124,7 +131,11 @@ const PostsScreen = () => (
         time="2h"
         postText="សួស្ដីបាទ! ខ្ញុំហួរ Zin II BC Zin 023."
         postImage={require("../../assets/images/post2.jpg")}
-        profileImage={require("../../assets/images/post2.jpg")}
+        profileImage={
+          profileImage
+            ? { uri: profileImage }
+            : require("../../assets/images/post2.jpg")
+        }
         likes={100}
         commentsCount={200}
         tagText="feeling love with"
@@ -136,7 +147,11 @@ const PostsScreen = () => (
         time="2h"
         postText="សួស្ដីបាទ! ខ្ញុំហួរ Zin II BC Zin 023."
         postImage={require("../../assets/images/post2.jpg")}
-        profileImage={require("../../assets/images/post2.jpg")}
+        profileImage={
+          profileImage
+            ? { uri: profileImage }
+            : require("../../assets/images/post2.jpg")
+        }
         likes={100}
         commentsCount={200}
         tagText="feeling sad with"
@@ -185,10 +200,13 @@ const FriendScreen = () => {
     />
   );
 };
-const Tabs = () => {
+const Tabs = ({ profileImage }) => {
   return (
     <Tab.Navigator>
-      <Tab.Screen name="Posts" component={PostsScreen} />
+      <Tab.Screen
+        name="Posts"
+        children={() => <PostsScreen profileImage={profileImage} />}
+      />
       <Tab.Screen name="Photos" component={PhotosScreen} />
       <Tab.Screen name="Friends" component={FriendScreen} />
     </Tab.Navigator>
@@ -196,10 +214,55 @@ const Tabs = () => {
 };
 
 const ProfileScreen = () => {
+  const [profileImage, setProfileImage] = useState(null);
+  const [coverImage, setCoverImage] = useState(null);
+  //handle Pick Profile Image
+  const pickProfileImage = async () => {
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== "granted") {
+      alert("Sorry, we need camera roll permissions to make this work!");
+      return;
+    }
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: false,
+      aspect: [1, 1],
+      quality: 1,
+    });
+
+    if (!result.canceled && result.assets) {
+      const imageUri = result.assets[0].uri;
+      setProfileImage(imageUri);
+    }
+  };
+  // handle Pick cover Image
+  const pickCoverImage = async () => {
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== "granted") {
+      alert("Sorry, we need camera roll permissions to make this work!");
+      return;
+    }
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: false,
+      aspect: [1, 1],
+      quality: 1,
+    });
+
+    if (!result.canceled && result.assets) {
+      const imageUri = result.assets[0].uri;
+      setCoverImage(imageUri);
+    }
+  };
   return (
     <View style={styles.container}>
-      <Header />
-      <Tabs />
+      <Header
+        pickProfileImage={pickProfileImage}
+        pickCoverImage={pickCoverImage}
+        profileImage={profileImage}
+        coverImage={coverImage}
+      />
+      <Tabs profileImage={profileImage} />
     </View>
   );
 };

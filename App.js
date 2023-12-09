@@ -5,6 +5,7 @@ import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
 import TabNavigator from "./navigation/TabNavigator";
 import AuthNavigator from "./navigation/AuthNavigator";
+import EditProfileScreen from "./screens/EditProfile/EditProfileScreen";
 
 const App = () => {
   const [fontsLoaded] = useFonts({
@@ -43,6 +44,12 @@ const App = () => {
         ) : (
           <Stack.Screen name="AuthNavigator" component={AuthNavigator} />
         )}
+
+        <Stack.Screen
+          name="EditProfile"
+          component={EditProfileScreen}
+          options={{ headerShown: true, headerBackTitle: "Back" }}
+        />
       </Stack.Navigator>
     </NavigationContainer>
   );
