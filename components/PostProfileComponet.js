@@ -10,6 +10,7 @@ import {
   Modal,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { EvilIcons } from "@expo/vector-icons";
 
 const PostProfileComponent = ({
   username,
@@ -108,7 +109,12 @@ const PostProfileComponent = ({
           <Text style={styles.username}>{username}</Text>
           <View style={styles.timeLocation}>
             <Text style={styles.time}>{time}</Text>
-            <Ionicons name="location" size={16} style={styles.locationIcon} />
+            <EvilIcons
+              name="location"
+              size={20}
+              color="black"
+              style={styles.locationIcon}
+            />
             <Text style={styles.locationText}>{location}</Text>
           </View>
         </View>
@@ -120,22 +126,22 @@ const PostProfileComponent = ({
       </View>
       <View style={styles.actions}>
         <TouchableOpacity onPress={handleLikeClick}>
-          <Ionicons name="heart" size={24} style={styles.actionIcon} />
+          <EvilIcons name="like" size={30} color="black" />
         </TouchableOpacity>
         <TouchableOpacity onPress={handleCommentClick}>
-          <Ionicons name="chatbox" size={24} style={styles.actionIcon} />
+          <EvilIcons name="comment" size={30} color="black" />
         </TouchableOpacity>
         <TouchableOpacity onPress={handleMessageClick}>
-          <Ionicons name="send" size={24} style={styles.actionIcon} />
+          <EvilIcons name="share-apple" size={30} color="black" />
         </TouchableOpacity>
       </View>
       <View style={styles.likesComments}>
         <View style={styles.likeCommentIcons}>
           <TouchableOpacity onPress={handleLikeClick}>
-            <Ionicons name="heart" size={16} style={styles.smallIcon} />
+            <EvilIcons name="like" size={20} color="black" />
           </TouchableOpacity>
           <TouchableOpacity>
-            <Ionicons name="chatbox" size={16} style={styles.smallIcon} />
+            <EvilIcons name="comment" size={20} color="black" />
           </TouchableOpacity>
           <Text style={styles.likeText}>{likes} Likes</Text>
         </View>
@@ -253,12 +259,12 @@ const PostProfileComponent = ({
 
 const styles = StyleSheet.create({
   container: {
-    margin: 10,
+    // margin: 10,
     backgroundColor: "#fff",
-    borderRadius: 15,
-    padding: 10,
-    borderTopColor: "lightgray",
+    // borderRadius: 15,
     borderTopWidth: 1,
+    borderTopColor: "#eee",
+    padding: 10,
   },
   header: {
     flexDirection: "row",
@@ -315,16 +321,17 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
+    paddingTop: 15,
   },
   actionIcon: {
     fontSize: 24,
     color: "#333",
-    
   },
   likesComments: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
+    paddingTop: 10,
   },
   likeCommentIcons: {
     flexDirection: "row",
@@ -336,7 +343,8 @@ const styles = StyleSheet.create({
     marginRight: 5,
   },
   likeText: {
-    fontWeight: "bold",
+    fontWeight: "normal",
+    color: "#555",
   },
   commentCount: {
     color: "#555",

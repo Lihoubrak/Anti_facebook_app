@@ -28,6 +28,8 @@ const FindEmail = () => {
       titleBtn={"Find Your Account"}
       isFindAccount={true}
       searchByText={"Search by number instead"}
+      navigationFindText={"findphone"}
+      navigationText={"otpcode"}
     >
       <InputTextComponent
         label="Email"

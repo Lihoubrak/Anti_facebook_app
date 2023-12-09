@@ -6,7 +6,7 @@ import {
   RegisterComponent,
 } from "../../components";
 
-const FindPhone = () => {
+const FindPhone = ({ navigation }) => {
   const [phoneNumber, setPhoneNumber] = useState("");
   const [isPhoneNumberFocused, setIsPhoneNumberFocused] = useState(false);
 
@@ -28,6 +28,8 @@ const FindPhone = () => {
       titleBtn={"Find Your Account"}
       isFindAccount={true}
       searchByText={"Search by email instead"}
+      navigationFindText={"findemail"}
+      navigationText={"otpcode"}
     >
       <InputTextComponent
         label="Phone number"

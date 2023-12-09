@@ -25,6 +25,7 @@ const CreateNewPassword = () => {
         "You will use this password to access your account. Enter a combination of at least six numbers, letters, and punctuation marks."
       }
       titleBtn={"Login"}
+      navigationText={"login"}
     >
       <InputTextComponent
         isFlex={true}

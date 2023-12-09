@@ -1,10 +1,10 @@
-import React, { useCallback } from "react";
+import React, { useEffect, useState } from "react";
 import { useFonts } from "expo-font";
-import * as SplashScreen from "expo-splash-screen";
+import * as Splash_Screen from "expo-splash-screen";
 import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
 import TabNavigator from "./navigation/TabNavigator";
-import { Text } from "react-native";
+import AuthNavigator from "./navigation/AuthNavigator";
 
 const App = () => {
   const [fontsLoaded] = useFonts({
@@ -15,11 +15,16 @@ const App = () => {
     Light: require("./assets/fonts/SF-Pro-Text-Light.otf"),
     Heavy: require("./assets/fonts/SF-Pro-Text-Heavy.otf"),
   });
+  const [userAuthenticated, setUserAuthenticated] = useState(true);
 
-  const onLayoutRootView = useCallback(async () => {
-    if (fontsLoaded) {
-      await SplashScreen.hideAsync();
-    }
+  useEffect(() => {
+    const initializeApp = async () => {
+      if (fontsLoaded) {
+        await Splash_Screen.hideAsync();
+      }
+    };
+
+    initializeApp();
   }, [fontsLoaded]);
 
   if (!fontsLoaded) {
@@ -27,15 +32,17 @@ const App = () => {
   }
 
   const Stack = createStackNavigator();
-
   return (
     <NavigationContainer>
-      <Stack.Navigator>
-        <Stack.Screen
-          name="TabNavigator"
-          component={TabNavigator}
-          options={{ headerShown: false }}
-        />
+      <Stack.Navigator
+        initialRouteName={userAuthenticated ? "TabNavigator" : "AuthNavigator"}
+        headerMode="none"
+      >
+        {userAuthenticated ? (
+          <Stack.Screen name="TabNavigator" component={TabNavigator} />
+        ) : (
+          <Stack.Screen name="AuthNavigator" component={AuthNavigator} />
+        )}
       </Stack.Navigator>
     </NavigationContainer>
   );

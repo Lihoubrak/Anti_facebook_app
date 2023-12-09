@@ -10,6 +10,8 @@ const AccountGender = () => {
     <RegisterComponent
       title={"What's your gender?"}
       subtitle={"You can change who sees your gender on your profile later"}
+      titleBtn={"Next"}
+      navigationText={"number"}
     >
       <View>
         <CheckBoxComponent

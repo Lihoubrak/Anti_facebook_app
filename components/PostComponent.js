@@ -1,7 +1,8 @@
 import { Image, StyleSheet, Text, View } from "react-native";
 import React from "react";
 import { Ionicons } from "@expo/vector-icons";
-
+import { EvilIcons } from "@expo/vector-icons";
+import { TouchableOpacity } from "react-native-gesture-handler";
 const PostComponent = ({
   username,
   time,
@@ -11,32 +12,65 @@ const PostComponent = ({
   profileImage,
   likes,
   commentsCount,
+  tagUsername,
+  tagText,
 }) => {
+  const handleMessageClick = () => {
+    // Handle message click
+  };
+
+  const handleLikeClick = () => {
+    // Handle like click
+  };
+
+  const handleCommentClick = () => {};
   return (
     <View style={styles.container}>
       <View style={styles.header}>
         <Image source={profileImage} style={styles.profileImage} />
         <View style={styles.headerText}>
-          <Text style={styles.username}>{username}</Text>
+          <Text style={styles.username}>
+            {username} <Text style={{ fontWeight: "normal" }}>{tagText} </Text>
+            {tagUsername}
+          </Text>
           <View style={styles.timeLocation}>
             <Text style={styles.time}>{time}</Text>
-            <Ionicons name="location" size={16} style={styles.locationIcon} />
+            <EvilIcons
+              name="location"
+              size={20}
+              color="black"
+              style={styles.locationIcon}
+            />
             <Text style={styles.locationText}>{location}</Text>
           </View>
         </View>
-        <Ionicons name="ellipsis-vertical" style={styles.moreIcon} />
+        <Ionicons
+          name="ellipsis-vertical"
+          style={styles.moreIcon}
+          color={"#333"}
+        />
       </View>
       <Text style={styles.postText}>{postText}</Text>
       <Image source={postImage} style={styles.postImage} />
       <View style={styles.actions}>
-        <Ionicons name="heart" size={24} style={styles.actionIcon} />
-        <Ionicons name="chatbox" size={24} style={styles.actionIcon} />
-        <Ionicons name="send" size={24} style={styles.actionIcon} />
+        <TouchableOpacity onPress={handleLikeClick}>
+          <EvilIcons name="like" size={30} color="black" />
+        </TouchableOpacity>
+        <TouchableOpacity onPress={handleCommentClick}>
+          <EvilIcons name="comment" size={30} color="black" />
+        </TouchableOpacity>
+        <TouchableOpacity onPress={handleMessageClick}>
+          <EvilIcons name="share-apple" size={30} color="black" />
+        </TouchableOpacity>
       </View>
       <View style={styles.likesComments}>
         <View style={styles.likeCommentIcons}>
-          <Ionicons name="heart" size={16} style={styles.smallIcon} />
-          <Ionicons name="chatbox" size={16} style={styles.smallIcon} />
+          <TouchableOpacity onPress={handleLikeClick}>
+            <EvilIcons name="like" size={20} color="black" />
+          </TouchableOpacity>
+          <TouchableOpacity>
+            <EvilIcons name="comment" size={20} color="black" />
+          </TouchableOpacity>
           <Text style={styles.likeText}>{likes} Likes</Text>
         </View>
         <Text style={styles.commentCount}>{commentsCount} Comments</Text>
@@ -47,12 +81,11 @@ const PostComponent = ({
 
 const styles = StyleSheet.create({
   container: {
-    margin: 10,
+    // margin: 10,
     backgroundColor: "#fff",
-    borderRadius: 15,
-    padding: 10,
-    borderTopColor: "gray",
     borderTopWidth: 1,
+    borderTopColor: "#eee",
+    padding: 10,
   },
   header: {
     flexDirection: "row",
@@ -103,7 +136,7 @@ const styles = StyleSheet.create({
   actions: {
     flexDirection: "row",
     justifyContent: "space-between",
-    marginTop: 10,
+    paddingTop: 15,
   },
   actionIcon: {
     fontSize: 24,
@@ -113,6 +146,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
+    paddingTop: 10,
   },
   likeCommentIcons: {
     flexDirection: "row",
@@ -124,7 +158,7 @@ const styles = StyleSheet.create({
     marginRight: 5,
   },
   likeText: {
-    fontWeight: "bold",
+    color: "#555",
   },
   commentCount: {
     marginTop: 5,

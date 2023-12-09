@@ -20,6 +20,8 @@ const AccountPassword = () => {
       subtitle={
         "Create a password with at least 6 characters. It should be something others couldn't guess."
       }
+      titleBtn={"Next"}
+      navigationText={"terms"}
     >
       <InputTextComponent
         label={"Password"}
@@ -29,6 +31,7 @@ const AccountPassword = () => {
         clear={password !== ""}
         clearFunction={clearPassword}
         onFocus={handlePasswordFocus}
+        isFlex={true}
       />
     </RegisterComponent>
   );

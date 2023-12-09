@@ -26,10 +26,13 @@ const AccountName = () => {
   const clearLastName = () => {
     setLastName("");
   };
+
   return (
     <RegisterComponent
       title={"What's is your name ?"}
       subtitle={"Enter the name you use in real life"}
+      titleBtn={"Next"}
+      navigationText={"birthday"}
     >
       <InputTextComponent
         label="First Name"

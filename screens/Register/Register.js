@@ -4,7 +4,10 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { ButtonComponent } from "../../components";
 import { COLORS, SIZES } from "../../constants/theme";
 
-const Register = () => {
+const Register = ({ navigation }) => {
+  const handleNextClick = () => {
+    navigation.navigate("name");
+  };
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.contentContainer}>
@@ -20,24 +23,16 @@ const Register = () => {
         </View>
         <ButtonComponent title={"Next"} onPress={handleNextClick} />
         <View style={styles.haveAccountContainer}>
-          <TouchableOpacity>
+          <TouchableOpacity onPress={() => navigation.navigate("login")}>
             <Text style={styles.alreadyhaveAccountText}>
               Already have an account?
             </Text>
           </TouchableOpacity>
-          <View style={styles.lineBlack}></View>
         </View>
       </View>
     </SafeAreaView>
   );
 };
-
-const handleNextClick = () => {
-  // Handle the click event for the "Next" button
-  console.log("Next button clicked");
-  // Add your custom logic here
-};
-
 export default Register;
 
 const styles = StyleSheet.create({
@@ -69,13 +64,6 @@ const styles = StyleSheet.create({
   haveAccountContainer: {
     marginTop: 150,
     alignItems: "center",
-  },
-  lineBlack: {
-    marginTop: 10,
-    width: 134,
-    height: 5,
-    borderRadius: SIZES.large,
-    backgroundColor: COLORS.black,
   },
   alreadyhaveAccountText: {
     marginBottom: 10,

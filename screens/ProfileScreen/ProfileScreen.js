@@ -14,7 +14,9 @@ import { Ionicons } from "@expo/vector-icons";
 import { TabBar } from "react-native-tab-view";
 import { createMaterialTopTabNavigator } from "@react-navigation/material-top-tabs";
 import { NavigationContainer } from "@react-navigation/native";
-import { PostComponent } from "../../components";
+import { PostComponent, PostProfileSection } from "../../components";
+import * as ImagePicker from "expo-image-picker";
+import { useState } from "react";
 
 const Tab = createMaterialTopTabNavigator();
 const screenWidth = Dimensions.get("window").width;
@@ -144,131 +146,6 @@ const ProfileScreen = () => {
     </View>
   );
 };
-// const styles = StyleSheet.create({
-//   screen: {
-//     flex: 1,
-//     alignItems: "center",
-//     justifyContent: "center",
-//   },
-//   container: {
-//     flex: 1,
-//   },
-//   coverPhotoContainer: {
-//     height: 200,
-//   },
-//   coverPhoto: {
-//     width: "100%",
-//     height: "100%",
-//   },
-//   coverPhotoButton: {
-//     position: "absolute",
-//     right: 10,
-//     top: 10,
-//   },
-//   profileInfoContainer: {
-//     marginLeft: 10,
-//   },
-//   profilePhoto: {
-//     width: 100,
-//     height: 100,
-//     borderRadius: 50,
-//     borderWidth: 3,
-//     borderColor: "#FFFFFF",
-//     position: "absolute",
-//     top: 150,
-//     left: 20,
-//   },
-//   profileName: {
-//     fontWeight: "600",
-//     fontSize: 26,
-//     marginTop: 60,
-//     marginLeft: 10,
-//   },
-//   profileInfo: {
-//     fontSize: 16,
-//     marginLeft: 120,
-//   },
-//   postsScreen: {},
-//   detailsScreen: {
-//     padding: 10,
-//   },
-//   detailItem: {
-//     fontSize: 16,
-//     paddingVertical: 5,
-//   },
-//   screen: {
-//     flex: 1,
-//     justifyContent: "center",
-//     alignItems: "center",
-//   },
-//   NumFri: {
-//     flexDirection: "row",
-//     justifyContent: "space",
-//     marginLeft: 10,
-//     marginTop: 10,
-//   },
-//   buttonContainer: {
-//     flexDirection: "row",
-//     justifyContent: "space-evenly",
-//     marginTop: 10,
-//     marginBottom: 20,
-//   },
-//   button: {
-//     backgroundColor: "#E1E1E1",
-//     padding: 10,
-//     borderRadius: 5,
-//     alignItems: "center",
-//     justifyContent: "center",
-//   },
-//   Addbutton: {
-//     width: 150,
-//     backgroundColor: "#5188B8",
-//     padding: 10,
-//     borderRadius: 10,
-//     borderWidth: 1,
-//     borderColor: "#A9AFAA",
-//     alignItems: "center",
-//     justifyContent: "center",
-//   },
-//   Editbutton: {
-//     width: 150,
-//     backgroundColor: "#6FC978",
-//     padding: 10,
-//     borderRadius: 10,
-//     borderWidth: 1,
-//     borderColor: "#A9AFAA",
-//     alignItems: "center",
-//     justifyContent: "center",
-//   },
-//   buttonText: {
-//     fontSize: 16,
-//     fontWeight: "600",
-//     color: "white",
-//   },
-//   addStory_Edit: {
-//     flexDirection: "row",
-//   },
-//   ellipsisbtn: {
-//     backgroundColor: "#E1E1E1",
-//     padding: 10,
-//     borderRadius: 10,
-//     borderWidth: 1,
-//     borderColor: "#A9AFAA",
-//   },
-//   detailsContainer: {
-//     flex: 1,
-//     padding: 10,
-//   },
-//   detailItem: {
-//     flexDirection: "row",
-//     alignItems: "center",
-//     paddingVertical: 5,
-//   },
-//   detailText: {
-//     fontSize: 16,
-//     paddingLeft: 10,
-//   },
-// });
 const styles = StyleSheet.create({
   container: {
     flex: 1,

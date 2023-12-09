@@ -10,6 +10,7 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { ScrollView } from "react-native-gesture-handler";
+import { EvilIcons } from "@expo/vector-icons";
 
 const WatchScreen = () => {
   const [activeTab, setActiveTab] = useState("ForYou");
@@ -37,6 +38,41 @@ const WatchScreen = () => {
         {tabName}
       </Text>
     </TouchableOpacity>
+  );
+  // ContentCard Function
+  const renderCard = (title, thumbnail, view, likes, comments, shares, key) => (
+    <View style={styles.card} key={key}>
+      <Image
+        style={styles.thumbnail}
+        source={{ uri: thumbnail }}
+        // source={{ uri: "https://placekitten.com/200/200" }} // Placeholder for video thumbnail
+      />
+      <View style={styles.liveBadgeContainer}>
+        {activeTab === "Live" && (
+          <View style={styles.liveBadge}>
+            <Text style={styles.liveText}>LIVE</Text>
+          </View>
+        )}
+        <Text style={styles.viewerCount}>{view} watching</Text>
+      </View>
+      <Text style={styles.title}>{title}</Text>
+      <View style={styles.socialRow}>
+        <TouchableOpacity style={styles.socialButton}>
+          <EvilIcons name="like" size={30} color="black" />
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.socialButton}>
+          <EvilIcons name="comment" size={30} color="black" />
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.socialButton}>
+          <EvilIcons name="share-apple" size={30} color="black" />
+        </TouchableOpacity>
+      </View>
+      <View style={styles.engagementStats}>
+        <Text style={styles.engagementText}>{likes} likes</Text>
+        <Text style={styles.engagementText}>{comments} Comments</Text>
+        <Text style={styles.engagementText}>{shares} Shares</Text>
+      </View>
+    </View>
   );
   const videoData = {
     ForYou: [
@@ -369,9 +405,11 @@ const styles = StyleSheet.create({
   },
   card: {
     backgroundColor: "white",
-    marginVertical: 8,
-    marginHorizontal: 16,
-    borderRadius: 8,
+    // marginVertical: 8,
+    // marginHorizontal: 16,
+    // borderRadius: 8,
+    borderTopColor: "#eee",
+    borderTopWidth: 1,
     overflow: "hidden",
     elevation: 3,
     shadowColor: "#000",
@@ -409,8 +447,9 @@ const styles = StyleSheet.create({
   },
   socialRow: {
     flexDirection: "row",
-    justifyContent: "space-around",
+    justifyContent: "space-between",
     paddingVertical: 8,
+    paddingHorizontal: 10,
   },
   socialButton: {
     flexDirection: "row",
@@ -418,8 +457,9 @@ const styles = StyleSheet.create({
   },
   engagementStats: {
     flexDirection: "row",
-    justifyContent: "space-around",
+    justifyContent: "space-between",
     paddingVertical: 8,
+    paddingHorizontal: 10,
     borderTopWidth: 1,
     borderTopColor: "#eee",
   },
