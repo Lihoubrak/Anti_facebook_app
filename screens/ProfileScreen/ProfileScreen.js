@@ -21,6 +21,24 @@ const Tab = createMaterialTopTabNavigator();
 const screenWidth = Dimensions.get("window").width;
 
 const Header = () => {
+  const [profileImage, setProfileImage] = useState(
+    require("../../assets/images/post2.jpg")
+  );
+  const [coverImage, setCoverImage] = useState(
+    require("../../assets/images/post2.jpg")
+  );
+  const pickImage = async (setImage) => {
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 1,
+    });
+
+    if (!result.canceled) {
+      setImage({ uri: result.uri });
+    }
+  };
   return (
     <View style={[styles.header]}>
       <View>
@@ -28,7 +46,7 @@ const Header = () => {
           style={[styles.coverPhoto, { width: screenWidth }]}
           source={require("../../assets/images/post2.jpg")}
         />
-        <TouchableOpacity style={styles.cameraIconCover}>
+        <TouchableOpacity style={styles.cameraIconCover} onPress={pickImage}>
           <Ionicons name="camera" size={24} color="white" />
         </TouchableOpacity>
       </View>
@@ -38,7 +56,7 @@ const Header = () => {
           style={styles.profilePhoto}
           source={require("../../assets/images/post2.jpg")}
         />
-        <TouchableOpacity style={styles.cameraIconProfile}>
+        <TouchableOpacity style={styles.cameraIconProfile} onPress={pickImage}>
           <Ionicons name="camera" size={16} color="white" />
         </TouchableOpacity>
       </View>
