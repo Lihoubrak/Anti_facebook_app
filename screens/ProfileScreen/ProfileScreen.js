@@ -13,7 +13,6 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { TabBar } from "react-native-tab-view";
 import { createMaterialTopTabNavigator } from "@react-navigation/material-top-tabs";
-import { NavigationContainer } from "@react-navigation/native";
 import { PostComponent, PostProfileSection } from "../../components";
 import * as ImagePicker from "expo-image-picker";
 import { useState } from "react";
@@ -24,14 +23,25 @@ const screenWidth = Dimensions.get("window").width;
 const Header = () => {
   return (
     <View style={[styles.header]}>
-      <Image
-        style={[styles.coverPhoto, { width: screenWidth }]}
-        source={require("../../assets/images/post2.jpg")}
-      />
-      <Image
-        style={styles.profilePhoto}
-        source={require("../../assets/images/post2.jpg")}
-      />
+      <View>
+        <Image
+          style={[styles.coverPhoto, { width: screenWidth }]}
+          source={require("../../assets/images/post2.jpg")}
+        />
+        <TouchableOpacity style={styles.cameraIconCover}>
+          <Ionicons name="camera" size={24} color="white" />
+        </TouchableOpacity>
+      </View>
+
+      <View>
+        <Image
+          style={styles.profilePhoto}
+          source={require("../../assets/images/post2.jpg")}
+        />
+        <TouchableOpacity style={styles.cameraIconProfile}>
+          <Ionicons name="camera" size={16} color="white" />
+        </TouchableOpacity>
+      </View>
       <Text style={styles.profileName}>Brak Lihou</Text>
       <View style={styles.buttonContainer}>
         <TouchableOpacity style={styles.button1}>
@@ -97,7 +107,7 @@ const PostsScreen = () => (
         profileImage={require("../../assets/images/post2.jpg")}
         likes={100}
         commentsCount={200}
-        tagText="Zin II BC"
+        tagText="feeling love with"
         location="Cambodia"
         tagUsername="Zin 023"
       />
@@ -109,9 +119,9 @@ const PostsScreen = () => (
         profileImage={require("../../assets/images/post2.jpg")}
         likes={100}
         commentsCount={200}
-        tagText="Zin II BC"
+        tagText="feeling sad with"
         location="Cambodia"
-        tagUsername="Zin 023"
+        tagUsername="Sochita"
       />
     </View>
   </ScrollView>
@@ -167,6 +177,22 @@ const styles = StyleSheet.create({
     borderWidth: 3,
     borderColor: "white",
     marginTop: -60,
+  },
+  cameraIconCover: {
+    position: "absolute",
+    right: 10,
+    bottom: 10,
+    backgroundColor: "rgba(0, 0, 0, 0.6)",
+    padding: 8,
+    borderRadius: 20,
+  },
+  cameraIconProfile: {
+    position: "absolute",
+    right: -1,
+    bottom: 0,
+    backgroundColor: "rgba(0, 0, 0, 0.6)",
+    padding: 8,
+    borderRadius: 20,
   },
   profileName: {
     fontSize: 24,
