@@ -8,14 +8,16 @@ import {
   ScrollView,
   Animated,
   Dimensions,
+  FlatList,
 } from "react-native";
 
 import { Ionicons } from "@expo/vector-icons";
-import { TabBar } from "react-native-tab-view";
 import { createMaterialTopTabNavigator } from "@react-navigation/material-top-tabs";
-import { PostComponent, PostProfileSection } from "../../components";
+import { PostComponent } from "../../components";
 import * as ImagePicker from "expo-image-picker";
 import { useState } from "react";
+import friendsData from "../../data/friendsData";
+import photosData from "../../data/photoData";
 
 const Tab = createMaterialTopTabNavigator();
 const screenWidth = Dimensions.get("window").width;
@@ -144,18 +146,45 @@ const PostsScreen = () => (
     </View>
   </ScrollView>
 );
-
+// Photo Tab
+const columns = 3;
+const { width } = Dimensions.get("window");
+const photoSize = width / columns;
 const PhotosScreen = () => (
-  <View style={styles.tabScreen}>
-    <Text>Photos content</Text>
+  <View style={styles.container}>
+    <Text style={styles.headerText}>Your photos</Text>
+    <FlatList
+      data={photosData}
+      renderItem={({ item }) => (
+        <Image style={styles.photo} source={item.uri} />
+      )}
+      keyExtractor={(item) => item.id}
+      numColumns={columns}
+    />
   </View>
 );
-
-const FriendScreen = () => (
-  <View style={styles.tabScreen}>
-    <Text>List of Friends</Text>
-  </View>
-);
+// Friends Section
+const numColums = 3;
+const size = Dimensions.get("window").width / numColums;
+const FriendScreen = () => {
+  const renderItem = ({ item }) => (
+    <View style={styles.itemContainer}>
+      <TouchableOpacity style={styles.card}>
+        <Image source={item.imageUri} style={styles.image} />
+        <Text style={styles.name}>{item.name}</Text>
+      </TouchableOpacity>
+    </View>
+  );
+  // render list of friends
+  return (
+    <FlatList
+      data={friendsData}
+      renderItem={renderItem}
+      keyExtractor={(item) => item.id}
+      numColumns={numColums}
+    />
+  );
+};
 const Tabs = () => {
   return (
     <Tab.Navigator>
@@ -284,6 +313,40 @@ const styles = StyleSheet.create({
   },
   boldText: {
     fontWeight: "600",
+  },
+  //Photo Tab
+  headerText: {
+    fontWeight: "bold",
+    fontSize: 20,
+    margin: 10,
+  },
+  photo: {
+    width: photoSize,
+    height: photoSize,
+    margin: 1,
+  },
+  // Friends Tab
+  itemContainer: {
+    width: size,
+    height: size + 20,
+    padding: 2,
+  },
+  card: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#fff",
+    borderRadius: 10,
+    overflow: "hidden",
+  },
+  image: {
+    width: "100%",
+    height: size,
+  },
+  name: {
+    fontWeight: "bold",
+    textAlign: "center",
+    padding: 4,
   },
 });
 
