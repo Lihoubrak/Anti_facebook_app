@@ -47,6 +47,7 @@ const HomeScreen = () => {
   const data = Array.from({ length: 20 }, (_, i) => ({ id: String(i) }));
   return (
     <FlatList
+      style={{ backgroundColor: "#FFF" }}
       data={data}
       keyExtractor={(item) => item.id}
       renderItem={({ item, index }) => {
@@ -59,7 +60,9 @@ const HomeScreen = () => {
         } else if (index === 3) {
           return (
             <PostComponent
-              username="Deven Mestry is with Mashesh"
+              username="Deven Mestry"
+              tagText="is with"
+              tagUsername="Mashesh"
               time="1h"
               location="Cambodia"
               postText="Old is Gold...!!"
@@ -114,13 +117,19 @@ const Reels = () => {
       {reelItemStyles.map((item, index) => (
         <TouchableOpacity key={index} style={styles.reelItemContainer}>
           <View
-            style={[styles.reelItem, { backgroundColor: item.backgroundColor }]}
+            style={[
+              styles.reelItem,
+              {
+                backgroundColor: item.backgroundColor,
+                flexDirection: "row",
+                alignItems: "center",
+                gap: 5,
+              },
+            ]}
           >
             <Ionicons name={item.icon} size={25} color={item.textColor} />
+            <Text style={{ color: item.textColor }}>{item.text}</Text>
           </View>
-          <Text style={{ color: item.textColor, marginTop: 5 }}>
-            {item.text}
-          </Text>
         </TouchableOpacity>
       ))}
     </View>
@@ -199,6 +208,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     padding: 10,
+    gap: 3,
   },
   reelItemContainer: {
     alignItems: "center",

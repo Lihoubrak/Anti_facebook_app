@@ -19,6 +19,8 @@ const AccountBirthDay = () => {
       subtitle={
         "Choose your date of birth. You can always make this private later"
       }
+      titleBtn={"Next"}
+      navigationText={"gender"}
     >
       <PickerDateComponent
         date={selectedDate}

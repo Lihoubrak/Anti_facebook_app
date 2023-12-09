@@ -12,7 +12,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { COLORS, SIZES } from "../../constants/theme";
 import { ButtonComponent, InputTextComponent } from "../../components";
 
-const LoginScreen = () => {
+const LoginScreen = ({ navigation }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [emailFocused, setEmailFocused] = useState(false);
@@ -91,14 +91,14 @@ const LoginScreen = () => {
           />
           <ButtonComponent title={"Log In"} />
 
-          <TouchableOpacity>
+          <TouchableOpacity onPress={() => navigation.navigate("findphone")}>
             <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
             style={styles.createAccountButton}
             onPress={() => {
-              // Add your navigation logic here to navigate to the signup screen
+              navigation.navigate("Register");
             }}
           >
             <Text style={styles.createAccountButtonText}>

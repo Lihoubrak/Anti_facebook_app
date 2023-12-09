@@ -3,6 +3,7 @@ import { Text, View, StyleSheet, TouchableOpacity } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { COLORS } from "../constants/theme";
 import ButtonComponent from "./ButtonComponent";
+import { useNavigation } from "@react-navigation/native";
 
 const RegisterComponent = ({
   title,
@@ -11,7 +12,13 @@ const RegisterComponent = ({
   titleBtn,
   isFindAccount,
   searchByText,
+  navigationText,
+  navigationFindText,
 }) => {
+  const navigation = useNavigation();
+  const handleNextClick = () => {
+    navigation.navigate(navigationText);
+  };
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.content}>
@@ -20,9 +27,11 @@ const RegisterComponent = ({
           <Text style={styles.subtitle}>{subtitle}</Text>
         </View>
         <View style={styles.inputRow}>{children}</View>
-        <ButtonComponent title={titleBtn} />
+        <ButtonComponent title={titleBtn} onPress={handleNextClick} />
         {isFindAccount && (
-          <TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => navigation.navigate(navigationFindText)}
+          >
             <Text
               style={{
                 textAlign: "center",

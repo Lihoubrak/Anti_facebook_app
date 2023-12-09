@@ -9,7 +9,7 @@ import {
   View,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { PostProfileSection } from "../../components";
+import { PostComponent, PostProfileSection } from "../../components";
 import * as ImagePicker from "expo-image-picker";
 import { useState } from "react";
 
@@ -186,32 +186,42 @@ const ProfileScreen = () => {
         </View>
         {/* Photo Post */}
         <View>
-          <PostProfileSection
+          <PostComponent
             username="Brak Lihou"
             time="2h"
-            caption="សួស្ដីបាទ! ខ្ញុំហួរ Zin II BC Zin 023."
-            ImagePost={require("../../assets/images/post2.jpg")}
-            countLike={100}
-            countComment={200}
-            countShare={200}
+            postText="សួស្ដីបាទ! ខ្ញុំហួរ Zin II BC Zin 023."
+            postImage={require("../../assets/images/post2.jpg")}
+            profileImage={require("../../assets/images/post2.jpg")}
+            likes={100}
+            commentsCount={200}
+            tagText="Zin II BC"
+            location="Cambodia"
+            tagUsername="Zin 023"
           />
-          <PostProfileSection
-            username="Brak Lihou"
-            time="4h"
-            caption="សួស្ដីបាទ! ខ្ញុំហួរ Zin II BC Zin 023."
-            ImagePost={require("../../assets/images/post3.jpg")}
-            countLike={10}
-            countComment={200}
-            countShare={200}
-          />
-          <PostProfileSection
+
+          <PostComponent
             username="Brak Lihou"
             time="2h"
-            caption="សួស្ដីបាទ! ខ្ញុំហួរ Zin II BC Zin 023."
-            ImagePost={require("../../assets/images/post4.jpg")}
-            countLike={100}
-            countComment={200}
-            countShare={300}
+            postText="សួស្ដីបាទ! ខ្ញុំហួរ Zin II BC Zin 023."
+            postImage={require("../../assets/images/post2.jpg")}
+            profileImage={require("../../assets/images/post2.jpg")}
+            likes={100}
+            commentsCount={200}
+            tagText="Zin II BC"
+            location="Cambodia"
+            tagUsername="Zin 023"
+          />
+          <PostComponent
+            username="Brak Lihou"
+            time="2h"
+            postText="សួស្ដីបាទ! ខ្ញុំហួរ Zin II BC Zin 023."
+            postImage={require("../../assets/images/post2.jpg")}
+            profileImage={require("../../assets/images/post2.jpg")}
+            likes={100}
+            commentsCount={200}
+            tagText="Zin II BC"
+            location="Cambodia"
+            tagUsername="Zin 023"
           />
         </View>
       </ScrollView>
@@ -303,7 +313,7 @@ const styles = StyleSheet.create({
 
   data: {
     flexDirection: "row",
-    justifyContent: "space-around",
+    // justifyContent: "space-around",
     padding: 10,
   },
   posts: {

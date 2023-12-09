@@ -1,39 +1,41 @@
-import { StyleSheet, Text, View, Image } from "react-native";
-import React from "react";
+import React, { useEffect } from "react";
+import { StyleSheet, Image, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { COLORS, SIZES } from "../../constants/theme";
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withSpring,
+} from "react-native-reanimated";
+import { COLORS } from "../../constants/theme";
 
-const SplashScreen = () => {
+const SplashScreen = ({ navigation }) => {
+  const heightValue = useSharedValue(200);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      navigation.navigate("login");
+    }, 2000);
+    return () => clearTimeout(timer);
+  }, [navigation, heightValue]);
+
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={styles.container}>
       <View>
         <Image source={require("../../assets/images/FacebookLogo.png")} />
       </View>
-      <View style={styles.metalogo}>
+      <View>
         <Image source={require("../../assets/images/MetaLogo.png")} />
       </View>
-      <View style={styles.lineblack}></View>
-    </SafeAreaView>
+    </View>
   );
 };
 
-export default SplashScreen;
-
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: COLORS.lightWhite,
     flex: 1,
     alignItems: "center",
-    justifyContent: "center",
-  },
-  metalogo: {
-    marginTop: 300,
-  },
-  lineblack: {
-    marginTop: 35,
-    width: 134,
-    height: 5,
-    borderRadius: SIZES.large,
-    backgroundColor: COLORS.black,
+    justifyContent: "space-around",
   },
 });
+
+export default SplashScreen;

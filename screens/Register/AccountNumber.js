@@ -20,6 +20,8 @@ const AccountNumber = () => {
       subtitle={
         "Enter your mobile number where you can be reached. No one else will see this on your profile."
       }
+      titleBtn={"Next"}
+      navigationText={"password"}
     >
       <InputTextComponent
         label={"Mobile number"}
@@ -29,6 +31,7 @@ const AccountNumber = () => {
         clear={phoneNumber !== ""}
         clearFunction={clearPhoneNumber}
         onFocus={handlePhoneNumberFocus}
+        isFlex={true}
       />
     </RegisterComponent>
   );

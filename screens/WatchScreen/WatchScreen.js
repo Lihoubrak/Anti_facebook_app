@@ -9,6 +9,7 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { ScrollView } from "react-native-gesture-handler";
+import { EvilIcons } from "@expo/vector-icons";
 
 const WatchScreen = () => {
   const [activeTab, setActiveTab] = useState("ForYou");
@@ -53,13 +54,13 @@ const WatchScreen = () => {
       <Text style={styles.title}>{title}</Text>
       <View style={styles.socialRow}>
         <TouchableOpacity style={styles.socialButton}>
-          <Ionicons name="heart-outline" size={24} color="black" />
+          <EvilIcons name="like" size={30} color="black" />
         </TouchableOpacity>
         <TouchableOpacity style={styles.socialButton}>
-          <Ionicons name="chatbox-outline" size={24} color="black" />
+          <EvilIcons name="comment" size={30} color="black" />
         </TouchableOpacity>
         <TouchableOpacity style={styles.socialButton}>
-          <Ionicons name="share-outline" size={24} color="black" />
+          <EvilIcons name="share-apple" size={30} color="black" />
         </TouchableOpacity>
       </View>
       <View style={styles.engagementStats}>
@@ -224,9 +225,11 @@ const styles = StyleSheet.create({
   },
   card: {
     backgroundColor: "white",
-    marginVertical: 8,
-    marginHorizontal: 16,
-    borderRadius: 8,
+    // marginVertical: 8,
+    // marginHorizontal: 16,
+    // borderRadius: 8,
+    borderTopColor: "#eee",
+    borderTopWidth: 1,
     overflow: "hidden",
     elevation: 3, // for Android shadow
     shadowColor: "#000", // for iOS shadow
@@ -264,8 +267,9 @@ const styles = StyleSheet.create({
   },
   socialRow: {
     flexDirection: "row",
-    justifyContent: "space-around",
+    justifyContent: "space-between",
     paddingVertical: 8,
+    paddingHorizontal: 10,
   },
   socialButton: {
     flexDirection: "row",
@@ -273,8 +277,9 @@ const styles = StyleSheet.create({
   },
   engagementStats: {
     flexDirection: "row",
-    justifyContent: "space-around",
+    justifyContent: "space-between",
     paddingVertical: 8,
+    paddingHorizontal: 10,
     borderTopWidth: 1,
     borderTopColor: "#eee",
   },

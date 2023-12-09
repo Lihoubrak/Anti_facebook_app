@@ -17,6 +17,8 @@ import Register from "./Register/Register";
 import SplashScreen from "./SplashScreen/SplashScreen";
 import WatchScreen from "./WatchScreen/WatchScreen";
 import HomeScreen from "./HomeScreen/HomeScreen";
+import FindEmail from "./Login/FindEmail";
+
 export {
   SplashScreen,
   LoginProfile,
@@ -37,4 +39,5 @@ export {
   NotificationsScreen,
   MenuScreen,
   ProfileScreen,
+  FindEmail,
 };

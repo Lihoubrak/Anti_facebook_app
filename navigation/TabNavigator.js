@@ -16,9 +16,8 @@ import { getFocusedRouteNameFromRoute } from "@react-navigation/native";
 const Tab = createMaterialTopTabNavigator();
 
 const TabNavigator = ({ route }) => {
-  const routeName = getFocusedRouteNameFromRoute(route);
-  const headerOpacity = routeName === "Home" ? 1 : 0;
-  console.log(routeName);
+  const routeName = getFocusedRouteNameFromRoute(route) || "Home";
+  const isHomeScreen = routeName === "Home";
   const handleIconClick = () => {
     // Handle your button click here
   };
@@ -26,8 +25,8 @@ const TabNavigator = ({ route }) => {
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: "#fff" }}>
       <View style={styles.headerContainer}>
-        {routeName === "Home" && (
-          <View style={{ ...styles.header, opacity: headerOpacity }}>
+        {isHomeScreen && (
+          <View style={styles.header}>
             <Text style={styles.headerText}>Facebook</Text>
             <TouchableOpacity onPress={handleIconClick}>
               <Ionicons name="chatbubble-ellipses" size={24} color="blue" />

@@ -68,7 +68,7 @@ const styles = StyleSheet.create({
   },
   friendAge: {
     fontSize: 14,
-    fontWeight: "bold",
+    fontWeight: "normal",
     color: "#65676b",
   },
   actions: {
@@ -77,23 +77,26 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   confirmButton: {
-    padding: 8,
     borderRadius: 4,
     backgroundColor: "#1877f2",
     justifyContent: "center",
     alignItems: "center",
+    paddingVertical: 5, // Combine paddingTop and paddingBottom into paddingVertical
+    paddingHorizontal: 20,
   },
+
   confirmButtonText: {
     fontSize: 16,
     color: "white",
   },
   deleteButton: {
-    padding: 8,
     borderRadius: 4,
     borderWidth: 1,
     borderColor: "#e4e6eb",
     justifyContent: "center",
     alignItems: "center",
+    paddingVertical: 5, // Combine paddingTop and paddingBottom into paddingVertical
+    paddingHorizontal: 20,
   },
   deleteButtonText: {
     fontSize: 16,

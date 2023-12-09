@@ -4,10 +4,12 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { ButtonComponent, InputTextComponent } from "../../components"; // Make sure these imports are correct
 import { Ionicons } from "@expo/vector-icons";
 
-const OTPCode = () => {
+const OTPCode = ({ navigation }) => {
   const [otpValue, setOtpValue] = useState("");
   const [isOtpFocused, setIsOtpFocused] = useState(false);
-
+  const handelClick = () => {
+    navigation.navigate("createnewpassword");
+  };
   const handleOtpChange = (text) => {
     setOtpValue(text);
   };
@@ -56,7 +58,7 @@ const OTPCode = () => {
           <Text style={styles.buttonText}>Change Email</Text>
         </TouchableOpacity>
       </View>
-      <ButtonComponent title={"Continue"} />
+      <ButtonComponent title={"Continue"} onPress={handelClick} />
     </SafeAreaView>
   );
 };

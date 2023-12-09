@@ -145,14 +145,14 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 16,
     fontWeight: "bold",
-    backgroundColor: "blue",
+    backgroundColor: "#1877f2",
     padding: 8,
     color: "white",
     borderRadius: 4,
   },
   sectionSubtitle: {
     fontSize: 16,
-    backgroundColor: "blue",
+    backgroundColor: "#1877f2",
     padding: 8,
     color: "white",
     borderRadius: 4,

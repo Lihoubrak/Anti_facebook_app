@@ -10,6 +10,8 @@ const AccountTermsPrivacy = () => {
       subtitle={
         "By tapping Sign up, you agree to our Terms, Data Policy, and Cookies Policy"
       }
+      titleBtn={"Next"}
+      navigationText={"login"}
     >
       <View>
         <Text style={styles.contentText}>
