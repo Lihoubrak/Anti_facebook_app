@@ -1,331 +1,368 @@
-import React from "react";
+import React, { useRef } from "react";
 import {
-  Image,
-  SafeAreaView,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
   View,
+  Text,
+  Image,
+  TouchableOpacity,
+  StyleSheet,
+  ScrollView,
+  Animated,
+  Dimensions,
 } from "react-native";
+
 import { Ionicons } from "@expo/vector-icons";
-import { PostProfileSection } from "../../components";
-import * as ImagePicker from "expo-image-picker";
-import { useState } from "react";
+import { TabBar } from "react-native-tab-view";
+import { createMaterialTopTabNavigator } from "@react-navigation/material-top-tabs";
+import { NavigationContainer } from "@react-navigation/native";
+import { PostComponent } from "../../components";
 
-const ProfileScreen = () => {
-  // handle image picker
-  const pickImage = async () => {
-    // Requesting the permission to access the photo library
-    const { status } = await ImagePicker.requestCameraPermissionsAsync();
-    if (status !== "granted") {
-      alert("Sorry, we need camera roll permissions to make this work!");
-      return;
-    }
-    // Launching the image picker
-    let result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
-      aspect: [4, 3],
-      quality: 1,
-    });
-    if (!result.canceled) {
-      // Do something with the image URI
-      console.log(result.uri);
-    }
-  };
-  const Separator = () => {
-    return <View style={styles.separator} />;
-  };
+const Tab = createMaterialTopTabNavigator();
+const screenWidth = Dimensions.get("window").width;
+
+const Header = () => {
   return (
-    <SafeAreaView>
-      <ScrollView>
-        <View style={styles.header}>
-          <Image
-            source={require("../../assets/images/cover.jpg")}
-            style={styles.coverImage}
-          />
-          <TouchableOpacity
-            style={styles.cameraCoverButton}
-            onPress={pickImage}
-          >
-            <Ionicons name="camera" size={25} color="grey" />
-          </TouchableOpacity>
-          <View>
-            <Image
-              source={require("../../assets/images/man.jpg")}
-              style={styles.profileImage}
-            />
-            <TouchableOpacity
-              style={styles.cameraProfileButton}
-              onPress={pickImage}
-            >
-              <Ionicons name="camera" size={25} color="grey" />
-            </TouchableOpacity>
+    <View style={[styles.header]}>
+      <Image
+        style={[styles.coverPhoto, { width: screenWidth }]}
+        source={require("../../assets/images/post2.jpg")}
+      />
+      <Image
+        style={styles.profilePhoto}
+        source={require("../../assets/images/post2.jpg")}
+      />
+      <Text style={styles.profileName}>Brak Lihou</Text>
+      <View style={styles.buttonContainer}>
+        <TouchableOpacity style={styles.button1}>
+          <View style={styles.addStoryBtn}>
+            <Ionicons name="add" color="white" />
+            <Text style={styles.buttonText}>Add to Story</Text>
           </View>
-        </View>
-        {/* User Name */}
-        <View style={styles.profileDetails}>
-          <Text style={{ fontSize: 24, fontWeight: 500 }}>Brak Lihou</Text>
-        </View>
-        <View style={styles.buttonContainer}>
-          <TouchableOpacity style={styles.Storybutton}>
-            <View style={{ flexDirection: "row", alignItems: "center" }}>
-              <Text style={{ fontSize: 20, color: "white", fontWeight: 500 }}>
-                <Ionicons name="add" style={{ fontSize: 20 }} />
-                Add to Story
-              </Text>
-            </View>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.Editbutton}>
-            <View style={{ flexDirection: "row", alignItems: "center" }}>
-              <Ionicons
-                name="construct"
-                style={{ fontSize: 20, marginRight: 8, color: "white" }}
-              />
-              <Text style={{ fontSize: 20, fontWeight: 500, color: "white" }}>
-                Edit Profile
-              </Text>
-            </View>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.Iconbutton}>
-            <Ionicons
-              name="ellipsis-vertical"
-              style={{ fontSize: 20, fontWeight: 500 }}
-            />
-          </TouchableOpacity>
-        </View>
-        {/* line */}
-        <View style={styles.separator1}>
-          <Separator />
-        </View>
-
-        {/* post friends follower following */}
-        <View style={styles.data}>
-          <View>
-            <TouchableOpacity style={styles.posts}>
-              <Text style={{ fontSize: 15, fontWeight: 600 }}>Posts</Text>
-              {/* <Text style={{ fontSize: 15, fontWeight: 600 }}>100</Text> */}
-            </TouchableOpacity>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.button2}>
+          <View style={styles.EditPFBtn}>
+            <Ionicons name="construct" color="white" style={{ right: 5 }} />
+            <Text style={styles.buttonText}>Edit Profile</Text>
           </View>
-          <View>
-            <TouchableOpacity style={styles.posts}>
-              <Text style={{ fontSize: 15, fontWeight: 600 }}>Friends</Text>
-              {/* <Text style={{ fontSize: 15, fontWeight: 600 }}>100</Text> */}
-            </TouchableOpacity>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.button3}>
+          <View style={styles.ellipsisBtn}>
+            <Ionicons name="ellipsis-horizontal" />
           </View>
-          <View>
-            <TouchableOpacity style={styles.posts}>
-              <Text style={{ fontSize: 15, fontWeight: 600 }}>Followers</Text>
-              {/* <Text style={{ fontSize: 15, fontWeight: 600 }}>100</Text> */}
-            </TouchableOpacity>
-          </View>
-          <View>
-            <TouchableOpacity style={styles.posts}>
-              <Text style={{ fontSize: 15, fontWeight: 600 }}>Following</Text>
-              {/* <Text style={{ fontSize: 15, fontWeight: 600 }}>100</Text> */}
-            </TouchableOpacity>
-          </View>
-        </View>
-
-        {/* Details */}
-        <View style={styles.detailsInfoContainer}>
-          <View style={styles.detailsInfo}>
-            <Ionicons
-              name="briefcase"
-              style={{ fontSize: 20, fontWeight: 500 }}
-            />
-            <Text style={{ fontSize: 16, fontWeight: 400, marginLeft: 5 }}>
-              Founder and CEO at
-            </Text>
-            <Text style={{ fontSize: 16, fontWeight: 600, marginLeft: 5 }}>
-              Jing Harb .Co, Ltd
-            </Text>
-          </View>
-          <View style={styles.detailsInfo}>
-            <Ionicons name="book" style={{ fontSize: 20, fontWeight: 500 }} />
-            <Text style={{ fontSize: 16, fontWeight: 400, marginLeft: 5 }}>
-              Studied CS at
-            </Text>
-            <Text style={{ fontSize: 16, fontWeight: 600, marginLeft: 5 }}>
-              Sovanrith International College
-            </Text>
-          </View>
-          <View style={styles.detailsInfo}>
-            <Ionicons name="home" style={{ fontSize: 20, fontWeight: 500 }} />
-            <Text style={{ fontSize: 16, fontWeight: 400, marginLeft: 5 }}>
-              Lives in
-            </Text>
-            <Text style={{ fontSize: 16, fontWeight: 600, marginLeft: 5 }}>
-              Hanoi, Vietnam
-            </Text>
-          </View>
-          <View style={styles.detailsInfo}>
-            <Ionicons
-              name="location"
-              style={{ fontSize: 20, fontWeight: 500 }}
-            />
-            <Text style={{ fontSize: 16, fontWeight: 400, marginLeft: 5 }}>
-              From
-            </Text>
-            <Text style={{ fontSize: 16, fontWeight: 600, marginLeft: 5 }}>
-              Kampong Thom, Cambodia
-            </Text>
-          </View>
-          <View style={styles.detailsInfo}>
-            <Ionicons
-              name="ellipsis-horizontal"
-              style={{ fontSize: 20, fontWeight: 500 }}
-            />
-            <TouchableOpacity>
-              <Text style={{ fontSize: 16, fontWeight: 400, marginLeft: 5 }}>
-                See your About info
-              </Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-        {/* Photo Post */}
-        <View>
-          <PostProfileSection
-            username="Brak Lihou"
-            time="2h"
-            caption="សួស្ដីបាទ! ខ្ញុំហួរ Zin II BC Zin 023."
-            ImagePost={require("../../assets/images/post2.jpg")}
-            countLike={100}
-            countComment={200}
-            countShare={200}
-          />
-          <PostProfileSection
-            username="Brak Lihou"
-            time="4h"
-            caption="សួស្ដីបាទ! ខ្ញុំហួរ Zin II BC Zin 023."
-            ImagePost={require("../../assets/images/post3.jpg")}
-            countLike={10}
-            countComment={200}
-            countShare={200}
-          />
-          <PostProfileSection
-            username="Brak Lihou"
-            time="2h"
-            caption="សួស្ដីបាទ! ខ្ញុំហួរ Zin II BC Zin 023."
-            ImagePost={require("../../assets/images/post4.jpg")}
-            countLike={100}
-            countComment={200}
-            countShare={300}
-          />
-        </View>
-      </ScrollView>
-    </SafeAreaView>
+        </TouchableOpacity>
+      </View>
+    </View>
   );
 };
+
+const PostsScreen = () => (
+  <ScrollView style={styles.detailsContainer}>
+    <View style={styles.detailItem}>
+      <Ionicons name="book-outline" size={20} color="#000" />
+      <Text style={styles.detailText}>
+        Studied at{" "}
+        <Text style={styles.boldText}>Institute of Technology of Cambodia</Text>
+      </Text>
+    </View>
+    <View style={styles.detailItem}>
+      <Ionicons name="briefcase-outline" size={20} color="#000" />
+      <Text style={styles.detailText}>
+        Founder and CEO at{" "}
+        <Text style={styles.boldText}>Jing Harb .Co, Ltd</Text>
+      </Text>
+    </View>
+    <View style={styles.detailItem}>
+      <Ionicons name="home-outline" size={20} color="#000" />
+      <Text style={styles.detailText}>
+        Lives in <Text style={styles.boldText}>Hanoi</Text>
+      </Text>
+    </View>
+    <View style={styles.detailItem}>
+      <Ionicons name="location-outline" size={20} color="#000" />
+      <Text style={styles.detailText}>
+        From <Text style={styles.boldText}>Kampong Thom, Cambodia</Text>
+      </Text>
+    </View>
+    <TouchableOpacity style={styles.detailItem}>
+      <Ionicons name="ellipsis-horizontal-outline" size={20} color="#000" />
+      <Text style={styles.detailText}>See your About info</Text>
+    </TouchableOpacity>
+    <View>
+      <PostComponent
+        username="Brak Lihou"
+        time="2h"
+        postText="សួស្ដីបាទ! ខ្ញុំហួរ Zin II BC Zin 023."
+        postImage={require("../../assets/images/post2.jpg")}
+        profileImage={require("../../assets/images/post2.jpg")}
+        likes={100}
+        commentsCount={200}
+        tagText="Zin II BC"
+        location="Cambodia"
+        tagUsername="Zin 023"
+      />
+      <PostComponent
+        username="Brak Lihou"
+        time="2h"
+        postText="សួស្ដីបាទ! ខ្ញុំហួរ Zin II BC Zin 023."
+        postImage={require("../../assets/images/post2.jpg")}
+        profileImage={require("../../assets/images/post2.jpg")}
+        likes={100}
+        commentsCount={200}
+        tagText="Zin II BC"
+        location="Cambodia"
+        tagUsername="Zin 023"
+      />
+    </View>
+  </ScrollView>
+);
+
+const PhotosScreen = () => (
+  <View style={styles.tabScreen}>
+    <Text>Photos content</Text>
+  </View>
+);
+
+const FriendScreen = () => (
+  <View style={styles.tabScreen}>
+    <Text>List of Friends</Text>
+  </View>
+);
+const Tabs = () => {
+  return (
+    <Tab.Navigator>
+      <Tab.Screen name="Posts" component={PostsScreen} />
+      <Tab.Screen name="Photos" component={PhotosScreen} />
+      <Tab.Screen name="Friends" component={FriendScreen} />
+    </Tab.Navigator>
+  );
+};
+
+const ProfileScreen = () => {
+  return (
+    <View style={styles.container}>
+      <Header />
+      <Tabs />
+    </View>
+  );
+};
+// const styles = StyleSheet.create({
+//   screen: {
+//     flex: 1,
+//     alignItems: "center",
+//     justifyContent: "center",
+//   },
+//   container: {
+//     flex: 1,
+//   },
+//   coverPhotoContainer: {
+//     height: 200,
+//   },
+//   coverPhoto: {
+//     width: "100%",
+//     height: "100%",
+//   },
+//   coverPhotoButton: {
+//     position: "absolute",
+//     right: 10,
+//     top: 10,
+//   },
+//   profileInfoContainer: {
+//     marginLeft: 10,
+//   },
+//   profilePhoto: {
+//     width: 100,
+//     height: 100,
+//     borderRadius: 50,
+//     borderWidth: 3,
+//     borderColor: "#FFFFFF",
+//     position: "absolute",
+//     top: 150,
+//     left: 20,
+//   },
+//   profileName: {
+//     fontWeight: "600",
+//     fontSize: 26,
+//     marginTop: 60,
+//     marginLeft: 10,
+//   },
+//   profileInfo: {
+//     fontSize: 16,
+//     marginLeft: 120,
+//   },
+//   postsScreen: {},
+//   detailsScreen: {
+//     padding: 10,
+//   },
+//   detailItem: {
+//     fontSize: 16,
+//     paddingVertical: 5,
+//   },
+//   screen: {
+//     flex: 1,
+//     justifyContent: "center",
+//     alignItems: "center",
+//   },
+//   NumFri: {
+//     flexDirection: "row",
+//     justifyContent: "space",
+//     marginLeft: 10,
+//     marginTop: 10,
+//   },
+//   buttonContainer: {
+//     flexDirection: "row",
+//     justifyContent: "space-evenly",
+//     marginTop: 10,
+//     marginBottom: 20,
+//   },
+//   button: {
+//     backgroundColor: "#E1E1E1",
+//     padding: 10,
+//     borderRadius: 5,
+//     alignItems: "center",
+//     justifyContent: "center",
+//   },
+//   Addbutton: {
+//     width: 150,
+//     backgroundColor: "#5188B8",
+//     padding: 10,
+//     borderRadius: 10,
+//     borderWidth: 1,
+//     borderColor: "#A9AFAA",
+//     alignItems: "center",
+//     justifyContent: "center",
+//   },
+//   Editbutton: {
+//     width: 150,
+//     backgroundColor: "#6FC978",
+//     padding: 10,
+//     borderRadius: 10,
+//     borderWidth: 1,
+//     borderColor: "#A9AFAA",
+//     alignItems: "center",
+//     justifyContent: "center",
+//   },
+//   buttonText: {
+//     fontSize: 16,
+//     fontWeight: "600",
+//     color: "white",
+//   },
+//   addStory_Edit: {
+//     flexDirection: "row",
+//   },
+//   ellipsisbtn: {
+//     backgroundColor: "#E1E1E1",
+//     padding: 10,
+//     borderRadius: 10,
+//     borderWidth: 1,
+//     borderColor: "#A9AFAA",
+//   },
+//   detailsContainer: {
+//     flex: 1,
+//     padding: 10,
+//   },
+//   detailItem: {
+//     flexDirection: "row",
+//     alignItems: "center",
+//     paddingVertical: 5,
+//   },
+//   detailText: {
+//     fontSize: 16,
+//     paddingLeft: 10,
+//   },
+// });
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
   header: {
+    width: screenWidth,
     alignItems: "center",
     justifyContent: "center",
+    backgroundColor: "#f8f8f8",
   },
-  coverImage: { width: "100%", height: 200 },
-  profileImage: {
-    width: 140,
-    height: 140,
-    borderRadius: 70,
+  coverPhoto: {
+    height: 200,
+    resizeMode: "cover",
+  },
+  profilePhoto: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    borderWidth: 3,
     borderColor: "white",
-    borderWidth: 1,
-    bottom: 90,
+    marginTop: -60,
   },
-  cameraCoverButton: {
-    width: 30,
-    height: 30,
-    backgroundColor: "#EEF7FC",
-    borderRadius: 15,
-    left: 170,
-    bottom: 40,
+  profileName: {
+    fontSize: 24,
+    fontWeight: "bold",
+    marginBottom: 20,
+  },
+  tabScreen: {
+    flex: 1,
     alignItems: "center",
     justifyContent: "center",
   },
-  cameraProfileButton: {
-    width: 30,
-    height: 30,
-    backgroundColor: "#EEF7FC",
-    borderRadius: 15,
-    bottom: 130,
-    left: 105,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  profileDetails: { alignItems: "center", bottom: 100 },
   buttonContainer: {
     flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-evenly",
-    bottom: 70,
-  },
-  Storybutton: {
-    width: 150,
-    height: 50,
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: "white",
-    backgroundColor: "#0174BE",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  Editbutton: {
-    width: 150,
-    height: 50,
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: "white",
-    backgroundColor: "grey",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  Iconbutton: {
-    width: 40,
-    height: 50,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: "white",
-    backgroundColor: "#fff",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  separator: {
-    height: 1,
+    justifyContent: "space-around",
     width: "100%",
-    backgroundColor: "#5F6F52",
+    alignItems: "center",
+    bottom: 10,
+  },
+  button1: {
+    backgroundColor: "#E1E1E1",
+    padding: 10,
+    borderRadius: 5,
+    backgroundColor: "#5993BD",
+  },
+  button2: {
+    backgroundColor: "#E1E1E1",
+    padding: 10,
+    borderRadius: 5,
+    backgroundColor: "#63AF51",
+  },
+  button3: {
+    backgroundColor: "#E1E1E1",
+    padding: 10,
     borderRadius: 5,
   },
-  separator1: {
+  buttonText: {
+    color: "white",
+    fontWeight: "bold",
+  },
+  addStoryBtn: {
+    flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    bottom: 50,
+    width: 140,
   },
-
-  data: {
+  EditPFBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    width: 140,
+  },
+  // Post section
+  detailsContainer: {
+    marginLeft: 5,
+  },
+  detailItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    padding: 5,
+  },
+  detailText: {
+    flex: 1,
+    paddingLeft: 10,
+    fontSize: 16,
+  },
+  deatils: {
     flexDirection: "row",
     justifyContent: "space-around",
+    alignItems: "center",
     padding: 10,
   },
-  posts: {
-    width: 90,
-    height: 40,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: "#A9BDC6",
-    backgroundColor: "#fff",
-    alignItems: "center",
-    justifyContent: "center",
-    bottom: 40,
-  },
-  detailsInfoContainer: {
-    padding: 10,
-  },
-  detailsInfo: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space",
-    padding: 5,
-    bottom: 50,
+  boldText: {
+    fontWeight: "600",
   },
 });
 
