@@ -6,6 +6,12 @@ import { createStackNavigator } from "@react-navigation/stack";
 import TabNavigator from "./navigation/TabNavigator";
 import AuthNavigator from "./navigation/AuthNavigator";
 import EditProfileScreen from "./screens/EditProfile/EditProfileScreen";
+import {
+  MessageChat,
+  MessageProfile,
+  MessageScreen,
+  NewMessage,
+} from "./screens";
 
 const App = () => {
   const [fontsLoaded] = useFonts({
@@ -37,7 +43,7 @@ const App = () => {
     <NavigationContainer>
       <Stack.Navigator
         initialRouteName={userAuthenticated ? "TabNavigator" : "AuthNavigator"}
-        headerMode="none"
+        screenOptions={{ headerShown: false }}
       >
         {userAuthenticated ? (
           <Stack.Screen name="TabNavigator" component={TabNavigator} />
@@ -49,6 +55,26 @@ const App = () => {
           name="EditProfile"
           component={EditProfileScreen}
           options={{ headerShown: true, headerBackTitle: "Back" }}
+        />
+        <Stack.Screen
+          name="message"
+          component={MessageScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="newMessage"
+          component={NewMessage}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="chat"
+          component={MessageChat}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="chatproflie"
+          component={MessageProfile}
+          options={{ headerShown: false }}
         />
       </Stack.Navigator>
     </NavigationContainer>

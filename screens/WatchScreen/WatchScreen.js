@@ -230,7 +230,7 @@ const WatchScreen = () => {
       {/* content card */}
       <ScrollView style={styles.feed}>
         {filteredCards.map((card, index) => (
-          <View style={styles.card} key={`card-${index}`}>
+          <View style={styles.card} key={index}>
             <View style={styles.postHeader}>
               <Image source={card.profileImg} style={styles.profileImg} />
               <View style={styles.postInfo}>

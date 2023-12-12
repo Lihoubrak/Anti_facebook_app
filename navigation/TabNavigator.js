@@ -14,12 +14,11 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { getFocusedRouteNameFromRoute } from "@react-navigation/native";
 
 const Tab = createMaterialTopTabNavigator();
-
-const TabNavigator = ({ route }) => {
+const TabNavigator = ({ route, navigation }) => {
   const routeName = getFocusedRouteNameFromRoute(route) || "Home";
   const isHomeScreen = routeName === "Home";
   const handleIconClick = () => {
-    // Handle your button click here
+    navigation.navigate("message");
   };
 
   return (

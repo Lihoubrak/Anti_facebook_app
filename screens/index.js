@@ -18,7 +18,10 @@ import SplashScreen from "./SplashScreen/SplashScreen";
 import WatchScreen from "./WatchScreen/WatchScreen";
 import HomeScreen from "./HomeScreen/HomeScreen";
 import FindEmail from "./Login/FindEmail";
-
+import MessageScreen from "./MessageScreen/MessageScreen";
+import NewMessage from "./NewMessage/NewMessage";
+import MessageChat from "./MessageChat/MessageChat";
+import MessageProfile from "./MessageProfile/MessageProfile";
 export {
   SplashScreen,
   LoginProfile,
@@ -40,4 +43,8 @@ export {
   MenuScreen,
   ProfileScreen,
   FindEmail,
+  MessageScreen,
+  NewMessage,
+  MessageChat,
+  MessageProfile,
 };

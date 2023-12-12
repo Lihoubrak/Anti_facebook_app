@@ -14,6 +14,7 @@ import {
   LoginScreen,
   OTPCode,
   FindEmail,
+  MessageScreen,
 } from "../screens";
 
 const Stack = createStackNavigator();
