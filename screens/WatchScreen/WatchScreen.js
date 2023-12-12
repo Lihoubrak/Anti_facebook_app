@@ -7,9 +7,9 @@ import {
   TouchableOpacity,
   View,
   Modal,
+  ScrollView,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { ScrollView } from "react-native-gesture-handler";
 import { EvilIcons } from "@expo/vector-icons";
 
 const WatchScreen = () => {
@@ -22,6 +22,7 @@ const WatchScreen = () => {
   // render tabs function
   const renderTab = (tabName) => (
     <TouchableOpacity
+      key={tabName}
       onPressIn={() => setActiveTab(tabName)}
       style={[
         styles.tabItem,
@@ -39,44 +40,69 @@ const WatchScreen = () => {
       </Text>
     </TouchableOpacity>
   );
-  // ContentCard Function
-  const renderCard = (title, thumbnail, view, likes, comments, shares, key) => (
-    <View style={styles.card} key={key}>
-      <Image
-        style={styles.thumbnail}
-        source={{ uri: thumbnail }}
-        // source={{ uri: "https://placekitten.com/200/200" }} // Placeholder for video thumbnail
-      />
-      <View style={styles.liveBadgeContainer}>
-        {activeTab === "Live" && (
-          <View style={styles.liveBadge}>
-            <Text style={styles.liveText}>LIVE</Text>
+
+  const VideoCard = ({ card }) => {
+    return (
+      <View style={styles.card}>
+        <View style={styles.postHeader}>
+          <Image source={card.profileImg} style={styles.profileImg} />
+          <View style={styles.postInfo}>
+            <Text style={styles.profileName}>{card.name}</Text>
+            <View style={styles.postTimeContainer}>
+              <Ionicons name="earth" size={12} color="black" />
+              <Text style={styles.postTime}>{card.time}</Text>
+            </View>
           </View>
-        )}
-        <Text style={styles.viewerCount}>{view} watching</Text>
+          <TouchableOpacity
+            style={styles.followButton}
+            onPress={() => handleFollowToggle(card.name)}
+          >
+            <Text style={styles.followButtonText}>
+              {" "}
+              {followStatus[card.name] ? "Following" : "Follow"}
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.optionsButton}
+            onPress={() => openModal(card.name)}
+          >
+            <Ionicons name="ellipsis-horizontal" size={20} color="black" />
+          </TouchableOpacity>
+        </View>
+        <Image style={styles.thumbnail} source={{ uri: card.thumbnail }} />
+        <View style={styles.liveBadgeContainer}>
+          {activeTab === "Live" && (
+            <View style={styles.liveBadge}>
+              <Text style={styles.liveText}>LIVE</Text>
+            </View>
+          )}
+          <Text style={styles.viewerCount}>{card.view} watching</Text>
+        </View>
+        <Text style={styles.title}>{card.title}</Text>
+        <View style={styles.socialRow}>
+          <TouchableOpacity style={styles.socialButton}>
+            <Ionicons name="heart-outline" size={24} color="black" />
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.socialButton}>
+            <Ionicons name="chatbox-outline" size={24} color="black" />
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.socialButton}>
+            <Ionicons name="share-outline" size={24} color="black" />
+          </TouchableOpacity>
+        </View>
+        <View style={styles.engagementStats}>
+          <Text style={styles.engagementText}>{card.likes} likes</Text>
+          <Text style={styles.engagementText}>{card.comments} Comments</Text>
+          <Text style={styles.engagementText}>{card.shares} Shares</Text>
+        </View>
       </View>
-      <Text style={styles.title}>{title}</Text>
-      <View style={styles.socialRow}>
-        <TouchableOpacity style={styles.socialButton}>
-          <EvilIcons name="like" size={30} color="black" />
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.socialButton}>
-          <EvilIcons name="comment" size={30} color="black" />
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.socialButton}>
-          <EvilIcons name="share-apple" size={30} color="black" />
-        </TouchableOpacity>
-      </View>
-      <View style={styles.engagementStats}>
-        <Text style={styles.engagementText}>{likes} likes</Text>
-        <Text style={styles.engagementText}>{comments} Comments</Text>
-        <Text style={styles.engagementText}>{shares} Shares</Text>
-      </View>
-    </View>
-  );
+    );
+  };
+
   const videoData = {
     ForYou: [
       {
+        id: 1,
         title: "Amazing Nature Documentary",
         thumbnail:
           "https://www.achieveglobalsafaris.com/wp-content/uploads/2019/08/Webp.net-compress-image-54.jpg",
@@ -86,9 +112,10 @@ const WatchScreen = () => {
         shares: "5K",
         name: "World docs",
         profileImg: require("../../assets/images/naturedoc.jpg"),
-        time: "2h ago",
+        time: "3h ago",
       },
       {
+        id: 2,
         title: "Daily Workout Routine",
         thumbnail:
           "https://cdn10.phillymag.com/wp-content/uploads/sites/3/2016/06/workout.jpg",
@@ -104,6 +131,7 @@ const WatchScreen = () => {
     ],
     Live: [
       {
+        id: 3,
         title: "City Life Stream",
         thumbnail:
           "https://th.bing.com/th/id/R.5c7d4f54bd2b1030853a49f576b01a27?rik=mkc0Xxl%2fE5qcOA&riu=http%3a%2f%2fstatic.asiawebdirect.com%2fm%2fbangkok%2fportals%2fvietnam%2fhomepage%2fhanoi%2ftop10%2fpagePropertiesImage%2fbest-of-hanoi.jpg.jpg&ehk=xeFgVjkYonqTObikk9dO%2f0TmZxV2PC9i0vvodeMSdCo%3d&risl=&pid=ImgRaw&r=0",
@@ -116,6 +144,7 @@ const WatchScreen = () => {
         time: "LIVE",
       },
       {
+        id: 4,
         title: "Live Music Concert",
         thumbnail:
           "https://th.bing.com/th/id/R.e2ff123c81217cbf19fd13443c22ccc9?rik=sxB9TJiz3liCpA&pid=ImgRaw&r=0",
@@ -128,6 +157,7 @@ const WatchScreen = () => {
         time: "LIVE",
       },
       {
+        id: 5,
         title: "Mobile Legends",
         thumbnail: "https://wallpaperset.com/w/full/c/7/2/235463.jpg",
         view: "5M",
@@ -141,6 +171,7 @@ const WatchScreen = () => {
     ],
     Music: [
       {
+        id: 6,
         title: "Top Pop Hits 2023",
         thumbnail:
           "https://th.bing.com/th/id/R.5181468e18b222366df5949880849a3b?rik=eFmmeCDPBo28uA&pid=ImgRaw&r=0",
@@ -150,9 +181,10 @@ const WatchScreen = () => {
         shares: "15K",
         name: "Singing",
         profileImg: require("../../assets/images/man.jpg"),
-        time: "2h ago",
+        time: "10h ago",
       },
       {
+        id: 7,
         title: "Classical Music Evening",
         thumbnail:
           "https://th.bing.com/th/id/R.7e8e83350b8f40f22217737f1a93147c?rik=01%2bJM7ChaWiEgw&pid=ImgRaw&r=0",
@@ -162,11 +194,12 @@ const WatchScreen = () => {
         shares: "4K",
         name: "Classic Music 24h",
         profileImg: require("../../assets/images/man.jpg"),
-        time: "2h ago",
+        time: "7h ago",
       },
     ],
     Gaming: [
       {
+        id: 8,
         title: "Mobile Legends",
         thumbnail: "https://wallpaperset.com/w/full/c/7/2/235463.jpg",
         view: "4M",
@@ -175,9 +208,10 @@ const WatchScreen = () => {
         shares: "20K",
         name: "Zin II Gaming",
         profileImg: require("../../assets/images/man.jpg"),
-        time: "2h ago",
+        time: "4h ago",
       },
       {
+        id: 9,
         title: "M5 World Champioonship 2023",
         thumbnail:
           "https://static.gosugamers.net/ac/7d/a1/8e34ee03cab7d984c486a296fc992c54ee62d0dc935f466d307126ac2c.jpg",
@@ -187,7 +221,7 @@ const WatchScreen = () => {
         shares: "8K",
         name: "Mobile Legends Official",
         profileImg: require("../../assets/images/mbllofficial.jpg"),
-        time: "2h ago",
+        time: "9h ago",
       },
     ],
   };
@@ -229,62 +263,8 @@ const WatchScreen = () => {
       </View>
       {/* content card */}
       <ScrollView style={styles.feed}>
-        {filteredCards.map((card, index) => (
-          <View style={styles.card} key={index}>
-            <View style={styles.postHeader}>
-              <Image source={card.profileImg} style={styles.profileImg} />
-              <View style={styles.postInfo}>
-                <Text style={styles.profileName}>{card.name}</Text>
-                <View style={styles.postTimeContainer}>
-                  <Ionicons name="earth" size={12} color="black" />
-                  <Text style={styles.postTime}>{card.time}</Text>
-                </View>
-              </View>
-              <TouchableOpacity
-                style={styles.followButton}
-                onPress={() => handleFollowToggle(card.name)}
-              >
-                <Text style={styles.followButtonText}>
-                  {" "}
-                  {followStatus[card.name] ? "Following" : "Follow"}
-                </Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={styles.optionsButton}
-                onPress={() => openModal(card.name)}
-              >
-                <Ionicons name="ellipsis-horizontal" size={20} color="black" />
-              </TouchableOpacity>
-            </View>
-            <Image style={styles.thumbnail} source={{ uri: card.thumbnail }} />
-            <View style={styles.liveBadgeContainer}>
-              {activeTab === "Live" && (
-                <View style={styles.liveBadge}>
-                  <Text style={styles.liveText}>LIVE</Text>
-                </View>
-              )}
-              <Text style={styles.viewerCount}>{card.view} watching</Text>
-            </View>
-            <Text style={styles.title}>{card.title}</Text>
-            <View style={styles.socialRow}>
-              <TouchableOpacity style={styles.socialButton}>
-                <Ionicons name="heart-outline" size={24} color="black" />
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.socialButton}>
-                <Ionicons name="chatbox-outline" size={24} color="black" />
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.socialButton}>
-                <Ionicons name="share-outline" size={24} color="black" />
-              </TouchableOpacity>
-            </View>
-            <View style={styles.engagementStats}>
-              <Text style={styles.engagementText}>{card.likes} likes</Text>
-              <Text style={styles.engagementText}>
-                {card.comments} Comments
-              </Text>
-              <Text style={styles.engagementText}>{card.shares} Shares</Text>
-            </View>
-          </View>
+        {filteredCards.map((card) => (
+          <VideoCard key={card.id} card={card} />
         ))}
       </ScrollView>
       {/* modal following and unfollow */}

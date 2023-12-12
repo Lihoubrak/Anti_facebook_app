@@ -1,190 +1,211 @@
 import React, { useState } from "react";
-import { SafeAreaView, TextInput } from "react-native";
-import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  StyleSheet,
+  FlatList,
+} from "react-native";
+import { SafeAreaView, SafeAreaProvider } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
-import { ShortcutMenu } from "../../components";
 import { useNavigation } from "@react-navigation/native";
 
-const MenuScreen = () => {
-  const [showAllShortCuts, setShowAllShortCuts] = useState(false);
-  const [showSearchBar, setShowSearchBar] = useState(false);
-  const [searchText, setSearchText] = useState("");
+const initialMenuItems = [
+  { icon: "ios-people", name: "Groups" },
+  { icon: "ios-person", name: "Friends" },
+  { icon: "clipboard", name: "Feeds" },
+  { icon: "calendar", name: "Events" },
+  { icon: "clipboard", name: "Feeds" },
+  { icon: "game-controller", name: "Gaming" },
+  { icon: "bookmark", name: "Saved" },
+  { icon: "ios-videocam", name: "Video" },
+];
+
+const additionalMenuItems = [
+  { icon: "stopwatch", name: "Memories" },
+  { icon: "ios-heart", name: "Dating" },
+];
+
+const MenuItem = ({ icon, name }) => {
   const navigation = useNavigation();
 
-  // handle search
-  const handleSearchPress = () => {
-    if (typeof searchText === "string" && searchText.trim() === "") {
-      setShowSearchBar(!showSearchBar);
+  const onPressHandler = () => {
+    if (name === "Friends") {
+      navigation.navigate("Friends");
+    }
+    // ==========
+    if (name === "Video") {
+      navigation.navigate("Watch");
+    }
+    if (name === "Feeds") {
+      navigation.navigate("Home");
     }
   };
-  const Separator = () => {
-    return <View style={styles.separator} />;
-  };
   return (
-    <SafeAreaView>
-      <View style={styles.container}>
-        <Text
-          style={{
-            fontSize: 30,
-            fontWeight: 500,
-            shadowColor: "#000",
-            shadowOffset: { width: 0, height: 1 },
-            shadowOpacity: 0.2,
-            shadowRadius: 1.41,
-            elevation: 2,
-          }}
-        >
-          Menu
-        </Text>
-        {/* searchbar */}
-        {showSearchBar && (
-          <View style={styles.searchBarContainer}>
-            <TextInput
-              placeholder="Search..."
-              style={styles.searchBar}
-              // Debbuging Log
-              // onChangeText={(text) => {
-              //   // setSearchText(text)
-              //   console.log("Input type:", typeof text);
-              //   setSearchText(text);
-              // }}
-              onChangeText={(text) => setSearchText(text)}
-              value={searchText}
-            />
-          </View>
-        )}
-        <TouchableOpacity
-          style={styles.searchButton}
-          // onPress={() => setShowSearchBar(!showSearchBar)}
-          onPress={handleSearchPress}
-        >
-          <Ionicons name="search" size={25} color="black" />
-        </TouchableOpacity>
-      </View>
-      <View style={styles.text}>
-        <Text style={{ fontWeight: 500, fontSize: 20, color: "#A9A9A9" }}>
-          All Shortcut
-        </Text>
-      </View>
-      {/* shortcut section */}
-      <View style={styles.shortcutMenu}>
-        <TouchableOpacity>
-          <ShortcutMenu iconName="briefcase-outline" label="Jobs" />
-        </TouchableOpacity>
-        <TouchableOpacity>
-          <ShortcutMenu iconName="earth-outline" label="Marketplace" />
-        </TouchableOpacity>
-        <TouchableOpacity onPress={() => navigation.navigate("Friends")}>
-          <ShortcutMenu iconName="person-add-outline" label="Friends" />
-        </TouchableOpacity>
-        <TouchableOpacity>
-          <ShortcutMenu iconName="calendar-outline" label="Events" />
-        </TouchableOpacity>
-        <TouchableOpacity>
-          <ShortcutMenu iconName="game-controller-outline" label="Gaming" />
-        </TouchableOpacity>
-        <TouchableOpacity>
-          <ShortcutMenu iconName="rainy-outline" label="Weather" />
-        </TouchableOpacity>
-        <TouchableOpacity>
-          <ShortcutMenu iconName="bookmark-outline" label="Saved" />
-        </TouchableOpacity>
-        {!showAllShortCuts && (
-          <TouchableOpacity onPress={() => setShowAllShortCuts(true)}>
-            <ShortcutMenu iconName="" label="See more" />
-          </TouchableOpacity>
-        )}
-        {showAllShortCuts && (
-          <View>
-            {/* Add more shortcut */}
-            <TouchableOpacity>
-              <ShortcutMenu iconName="heart-outline" label="Date" />
-            </TouchableOpacity>
-            <TouchableOpacity>
-              <ShortcutMenu iconName="people-outline" label="Group" />
-            </TouchableOpacity>
-            <TouchableOpacity>
-              <ShortcutMenu iconName="stopwatch-outline" label="Memories" />
-            </TouchableOpacity>
-            {/* See less button */}
-            <TouchableOpacity onPress={() => setShowAllShortCuts(false)}>
-              <ShortcutMenu iconName="" label="See less" />
-            </TouchableOpacity>
-          </View>
-        )}
-      </View>
-      <View style={styles.separator1}>
-        <Separator />
-      </View>
-      {/* menu footer */}
-      <View style={styles.footer}>
-        <View>
-          <TouchableOpacity>
-            <ShortcutMenu iconName="build-outline" label="Help & Support" />
-          </TouchableOpacity>
-        </View>
-        <View>
-          <TouchableOpacity>
-            <ShortcutMenu
-              iconName="settings-outline"
-              label="Settings & Privacy"
-            />
-          </TouchableOpacity>
-        </View>
-      </View>
-    </SafeAreaView>
+    <TouchableOpacity style={styles.menuItem} onPress={onPressHandler}>
+      <Ionicons name={icon} size={30} color="#FFFFFF" />
+      <Text style={styles.menuItemText}>{name}</Text>
+    </TouchableOpacity>
   );
 };
+
+const MenuScreen = () => {
+  const [menuItems, setMenuItems] = useState(initialMenuItems);
+  const [seeMore, setSeeMore] = useState(false);
+  const navigation = useNavigation();
+
+  const handleSeeMore = () => {
+    setSeeMore(!seeMore);
+  };
+
+  const combinedMenuItems = seeMore
+    ? [...initialMenuItems, ...additionalMenuItems]
+    : initialMenuItems;
+
+  const handlePress = (name) => {
+    switch (name) {
+      case "Help":
+        break;
+      case "Settings":
+        break;
+      case "Logout":
+        break;
+      default:
+        navigation.navigate(name);
+    }
+  };
+
+  const renderFooter = () => (
+    <View style={styles.footerContainer}>
+      <TouchableOpacity style={styles.seeMoreButton} onPress={handleSeeMore}>
+        <Text style={styles.seeMoreText}>
+          {seeMore ? "See Less" : "See More"}
+        </Text>
+      </TouchableOpacity>
+      <TouchableOpacity
+        style={styles.footerButton}
+        onPress={() => handlePress("Help")}
+      >
+        <Ionicons name="help-circle" color="white" size={24} />
+        <Text style={styles.footerButtonText}>Help and Support</Text>
+      </TouchableOpacity>
+      <TouchableOpacity
+        style={styles.footerButton}
+        onPress={() => handlePress("Settings")}
+      >
+        <Ionicons name="cog" color="white" size={24} />
+        <Text style={styles.footerButtonText}>Settings and Privacy</Text>
+      </TouchableOpacity>
+      <TouchableOpacity
+        style={styles.footerButton}
+        onPress={() => handlePress("Logout")}
+      >
+        <Ionicons name="log-out" color="white" size={24} />
+        <Text style={styles.footerButtonText}>Logout</Text>
+      </TouchableOpacity>
+    </View>
+  );
+
+  return (
+    <SafeAreaProvider>
+      <SafeAreaView style={styles.container}>
+        <View style={styles.header}>
+          <Text style={styles.headerText}>Menu</Text>
+        </View>
+        <View style={styles.shortcut}>
+          <Text style={styles.shortcutText}>All Shortcut</Text>
+        </View>
+        <FlatList
+          data={combinedMenuItems}
+          renderItem={({ item }) => (
+            <MenuItem
+              icon={item.icon}
+              name={item.name}
+              onPress={() => handlePress(item.name)}
+            />
+          )}
+          keyExtractor={(item) => item.name}
+          numColumns={2}
+          ListFooterComponent={renderFooter}
+        />
+      </SafeAreaView>
+    </SafeAreaProvider>
+  );
+};
+
 const styles = StyleSheet.create({
   container: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    padding: 15,
+    flex: 1,
+    backgroundColor: "#fff",
   },
-  text: { paddingLeft: 15 },
-  searchButton: {
-    padding: 8,
+  header: {
+    padding: 10,
+  },
+  headerText: {
+    fontSize: 28,
+    fontWeight: "600",
+  },
+  shortcut: {
+    left: 10,
+  },
+  shortcutText: {
+    fontSize: 20,
+    fontWeight: "500",
+    color: "#A8AAB3",
+  },
+  menuContainer: {
+    alignItems: "center",
+    justifyContent: "center",
+    padding: 10,
+  },
+  menuItem: {
+    backgroundColor: "#6B6C6D",
     borderRadius: 10,
-    backgroundColor: "#f7f7f7",
-    borderWidth: 1,
-    borderColor: "#d9d9d9",
-  },
-  shortcutMenu: {
+    padding: 7,
+    margin: 10,
+    width: "45%",
     alignItems: "center",
     justifyContent: "center",
   },
-  separator: {
-    height: 2,
-    width: 350,
-    backgroundColor: "#5F6F52",
-    borderRadius: 5,
-  },
-  separator1: {
-    alignItems: "center",
-    justifyContent: "center",
-    top: 25,
-  },
-  footer: {
-    top: 20,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  searchBarContainer: {
-    backgroundColor: "#F0F0F0",
-  },
-  searchBar: {
-    backgroundColor: "#FFFFFF",
-    borderRadius: 10,
-    padding: 8,
+  menuItemText: {
+    color: "#fff",
+    marginTop: 8,
     fontSize: 16,
-    width: 200,
-    height: 40,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.2,
-    shadowRadius: 1.41,
-    elevation: 2,
+    textAlign: "center",
+  },
+  seeMoreButton: {
+    padding: 15,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#385376",
+    borderRadius: 10,
+    width: "95%",
+  },
+  seeMoreText: {
+    fontSize: 16,
+    fontWeight: "500",
+    color: "white",
+    textAlign: "center",
+  },
+  footerContainer: {
+    alignItems: "center",
+  },
+  footerButton: {
+    flexDirection: "row",
+    backgroundColor: "#333",
+    borderRadius: 10,
+    alignItems: "center",
+    justifyContent: "center",
+    width: "95%",
+    height: 50,
+
+    marginTop: 10,
+  },
+  footerButtonText: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "500",
+    left: 10,
   },
 });
 
