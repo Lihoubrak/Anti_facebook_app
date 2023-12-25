@@ -112,7 +112,7 @@ const TabNavigator = ({ route, navigation }) => {
           })}
         />
         <Tab.Screen
-          name="Watchs"
+          name="Watch"
           component={WatchScreen}
           options={() => ({
             tabBarBadge: () => (
