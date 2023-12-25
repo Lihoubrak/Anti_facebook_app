@@ -14,6 +14,8 @@ const InputTextComponent = ({
   onFocus,
   isFlex,
   secureTextEntry,
+  keyboardType,
+  errorText, // New prop for error text
 }) => {
   return (
     <View style={styles.inputWrapper(isFlex)}>
@@ -31,6 +33,7 @@ const InputTextComponent = ({
         value={value}
         onChangeText={onChangeText}
         secureTextEntry={secureTextEntry}
+        keyboardType={keyboardType}
       />
       {value !== "" && (
         <Ionicons
@@ -41,6 +44,7 @@ const InputTextComponent = ({
           onPress={InputFunction}
         />
       )}
+      {errorText && <Text style={styles.errorText}>{errorText}</Text>}
     </View>
   );
 };
@@ -66,6 +70,11 @@ const styles = {
     position: "absolute",
     right: 5,
     top: 40,
+  },
+  errorText: {
+    color: "red",
+    fontSize: 14,
+    marginTop: 5,
   },
 };
 

@@ -22,6 +22,8 @@ import MessageScreen from "./MessageScreen/MessageScreen";
 import NewMessage from "./NewMessage/NewMessage";
 import MessageChat from "./MessageChat/MessageChat";
 import MessageProfile from "./MessageProfile/MessageProfile";
+import ShowAllImagePost from "./ShowAllImagePost/ShowAllImagePost";
+import AccountEmail from "./Register/AccountEmail";
 export {
   SplashScreen,
   LoginProfile,
@@ -31,6 +33,7 @@ export {
   AccountName,
   AccountGender,
   AccountNumber,
+  AccountEmail,
   AccountPassword,
   LoginScreen,
   FindPhone,
@@ -47,4 +50,5 @@ export {
   NewMessage,
   MessageChat,
   MessageProfile,
+  ShowAllImagePost,
 };

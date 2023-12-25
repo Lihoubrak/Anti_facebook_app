@@ -1,9 +1,18 @@
+// RegisterComponent.js
+import {
+  StyleSheet,
+  Text,
+  View,
+  TouchableOpacity,
+  ActivityIndicator,
+} from "react-native";
 import React, { useState } from "react";
-import { Text, View, StyleSheet, TouchableOpacity } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
 import { COLORS } from "../constants/theme";
 import ButtonComponent from "./ButtonComponent";
 import { useNavigation } from "@react-navigation/native";
+import { publicRequest } from "../RequestMethod/requestMethod";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { Alert } from "react-native";
 
 const RegisterComponent = ({
   title,
@@ -14,11 +23,62 @@ const RegisterComponent = ({
   searchByText,
   navigationText,
   navigationFindText,
+  email,
+  password,
+  passwordCreate,
+  emailCreate,
+  isNextButtonEnabled,
+  emailFind,
+  onPressBtn,
 }) => {
   const navigation = useNavigation();
-  const handleNextClick = () => {
-    navigation.navigate(navigationText);
+  const [loading, setLoading] = useState(false);
+  const handleNextClick = async () => {
+    const uuid = "a12345";
+    // Start loading
+    setLoading(true);
+
+    // Make a POST request
+    if (
+      typeof passwordCreate !== "undefined" &&
+      typeof emailCreate !== "undefined"
+    ) {
+      try {
+        const response = await publicRequest.post("/signup", {
+          email: emailCreate,
+          password: passwordCreate,
+          uuid: uuid,
+        });
+        console.log("Signup successful:", response.data);
+        // Navigate to the next screen
+        navigation.navigate("Login");
+      } catch (error) {
+        console.log("Response Data:", error.response?.data);
+        Alert.alert(
+          "Error",
+          `${error.response?.data.message}. Please try again.`,
+          [
+            { text: "OK", style: "cancel" },
+            {
+              text: "Go back home",
+              onPress: () => navigation.navigate("login"),
+            },
+          ]
+        );
+      } finally {
+        // Stop loading, whether the request succeeded or failed
+        setLoading(false);
+      }
+    } else {
+      // Navigate to the next screen
+      navigation.navigate(navigationText, {
+        email: email,
+        password: password,
+        emailFind: emailFind,
+      });
+    }
   };
+
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.content}>
@@ -27,7 +87,11 @@ const RegisterComponent = ({
           <Text style={styles.subtitle}>{subtitle}</Text>
         </View>
         <View style={styles.inputRow}>{children}</View>
-        <ButtonComponent title={titleBtn} onPress={handleNextClick} />
+        <ButtonComponent
+          title={titleBtn}
+          onPress={onPressBtn ? onPressBtn : handleNextClick}
+          isNextButtonEnabled={!loading && isNextButtonEnabled}
+        />
         {isFindAccount && (
           <TouchableOpacity
             onPress={() => navigation.navigate(navigationFindText)}
@@ -58,7 +122,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 30,
   },
   header: {
-    marginTop: 80,
+    // marginTop: 80,
     marginBottom: 50,
     gap: 5,
     alignItems: "center",

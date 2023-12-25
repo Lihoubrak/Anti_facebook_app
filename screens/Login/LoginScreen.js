@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useCallback, useContext, useEffect, useState } from "react";
 import {
   StyleSheet,
   View,
@@ -7,36 +7,78 @@ import {
   TouchableOpacity,
   KeyboardAvoidingView,
   Platform,
+  ActivityIndicator,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { COLORS, SIZES } from "../../constants/theme";
 import { ButtonComponent, InputTextComponent } from "../../components";
-
-const LoginScreen = ({ navigation }) => {
+import { publicRequest } from "../../RequestMethod/requestMethod";
+import { useFocusEffect, useNavigation } from "@react-navigation/native";
+import * as SecureStore from "expo-secure-store";
+import { AuthContext } from "../../hooks/AuthContext";
+import { Keyboard } from "react-native";
+const LoginScreen = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [emailFocused, setEmailFocused] = useState(false);
   const [passwordFocused, setPasswordFocused] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-
+  const [errorMessage, setErrorMessage] = useState("");
+  const [loading, setLoading] = useState(false);
+  const navigation = useNavigation();
   const clearEmail = () => {
     setEmail("");
   };
-
   const handleEmailFocus = () => {
     setEmailFocused(true);
     setPasswordFocused(false);
+    setErrorMessage("");
   };
 
   const handlePasswordFocus = () => {
     setPasswordFocused(true);
     setEmailFocused(false);
+    setErrorMessage("");
   };
 
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
   };
+  const refreshLoginScreen = useCallback(() => {
+    setEmail("");
+    setPassword("");
+    setErrorMessage("");
+  }, []);
+  useFocusEffect(refreshLoginScreen);
+  handleLogin = async () => {
+    setLoading(true);
+    Keyboard.dismiss();
+    try {
+      const response = await publicRequest.post("/login", {
+        email,
+        password,
+        uuid: "a12345",
+      });
 
+      if (response.data.message === "OK") {
+        await SecureStore.setItemAsync(
+          "loginToken",
+          response?.data?.data.token
+        );
+        // Navigate to TabNavigator after successful login
+        navigation.navigate("TabNavigator", {
+          coin: response?.data?.data.coins,
+        });
+      } else {
+        setErrorMessage("Invalid email or password. Please try again.");
+      }
+    } catch (error) {
+      console.error("Login error:", error);
+      setErrorMessage("Invalid email or password. Please try again.");
+    } finally {
+      setLoading(false); // Set loading to false in the finally block
+    }
+  };
   return (
     <SafeAreaView style={styles.container}>
       <Image
@@ -89,8 +131,8 @@ const LoginScreen = ({ navigation }) => {
             iconName={showPassword ? "eye-outline" : "eye-off-outline"}
             secureTextEntry={!showPassword}
           />
-          <ButtonComponent title={"Log In"} />
-
+          <ButtonComponent title={"Log In"} onPress={handleLogin} />
+          <Text style={styles.errorText}>{errorMessage}</Text>
           <TouchableOpacity onPress={() => navigation.navigate("findphone")}>
             <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
           </TouchableOpacity>
@@ -107,6 +149,12 @@ const LoginScreen = ({ navigation }) => {
           </TouchableOpacity>
         </KeyboardAvoidingView>
       </View>
+      {/* Full-screen loading component */}
+      {loading && (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#0000ff" />
+        </View>
+      )}
     </SafeAreaView>
   );
 };
@@ -151,6 +199,17 @@ const styles = StyleSheet.create({
   createAccountButtonText: {
     fontWeight: "bold",
     fontSize: 16,
+  },
+  errorText: {
+    color: "red",
+    textAlign: "center",
+    marginTop: 10,
+  },
+  loadingContainer: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "rgba(255, 255, 255, 0.7)",
+    justifyContent: "center",
+    alignItems: "center",
   },
 });
 

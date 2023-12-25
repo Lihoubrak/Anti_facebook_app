@@ -1,10 +1,15 @@
+// ButtonComponent.js
 import { StyleSheet, Text, View, TouchableOpacity } from "react-native";
 import React from "react";
 import { COLORS } from "../constants/theme";
 
-const ButtonComponent = ({ onPress, title }) => {
+const ButtonComponent = ({ onPress, title, isNextButtonEnabled }) => {
   return (
-    <TouchableOpacity onPress={onPress} style={styles.button}>
+    <TouchableOpacity
+      onPress={onPress}
+      style={[styles.button, isNextButtonEnabled && styles.disabledButton]}
+      disabled={isNextButtonEnabled}
+    >
       <Text style={styles.buttonText}>{title}</Text>
     </TouchableOpacity>
   );
@@ -29,5 +34,8 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "bold",
     textAlign: "center",
+  },
+  disabledButton: {
+    backgroundColor: COLORS.gray,
   },
 });

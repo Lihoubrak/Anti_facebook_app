@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { Ionicons } from "@expo/vector-icons";
 import { createMaterialTopTabNavigator } from "@react-navigation/material-top-tabs";
 import {
@@ -9,10 +9,14 @@ import {
   ProfileScreen,
   WatchScreen,
 } from "../screens";
-import { View, Text, TouchableOpacity } from "react-native";
+import { View, Text, TouchableOpacity, Modal, StyleSheet } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { getFocusedRouteNameFromRoute } from "@react-navigation/native";
-
+import { ModalContext } from "../hooks/useModalContext";
+import { ModalPostComponent } from "../components";
+import * as SecureStore from "expo-secure-store";
+import { AuthContext } from "../hooks/AuthContext";
+import { FontAwesome5 } from "@expo/vector-icons";
 const Tab = createMaterialTopTabNavigator();
 const TabNavigator = ({ route, navigation }) => {
   const routeName = getFocusedRouteNameFromRoute(route) || "Home";
@@ -20,16 +24,36 @@ const TabNavigator = ({ route, navigation }) => {
   const handleIconClick = () => {
     navigation.navigate("message");
   };
-
+  const { isModalVisible, setModalVisible } = useContext(ModalContext);
+  const coin = route.params.coin;
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: "#fff" }}>
+    <SafeAreaView
+      style={{
+        flex: 1,
+        backgroundColor: "#fff",
+      }}
+    >
       <View style={styles.headerContainer}>
         {isHomeScreen && (
           <View style={styles.header}>
             <Text style={styles.headerText}>Facebook</Text>
-            <TouchableOpacity onPress={handleIconClick}>
-              <Ionicons name="chatbubble-ellipses" size={24} color="blue" />
-            </TouchableOpacity>
+            <View
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                gap: 5,
+              }}
+            >
+              <View style={styles.coinContainer}>
+                <View style={styles.coinIcon}>
+                  <FontAwesome5 name="coins" size={20} color="#f1cf2e" />
+                </View>
+                <Text style={styles.coinText}>{coin}</Text>
+              </View>
+              <TouchableOpacity onPress={handleIconClick}>
+                <Ionicons name="chatbubble-ellipses" size={24} color="blue" />
+              </TouchableOpacity>
+            </View>
           </View>
         )}
       </View>
@@ -137,11 +161,12 @@ const TabNavigator = ({ route, navigation }) => {
           })}
         />
       </Tab.Navigator>
+      <ModalPostComponent isModalVisible={isModalVisible} />
     </SafeAreaView>
   );
 };
 
-const styles = {
+const styles = StyleSheet.create({
   headerContainer: {
     backgroundColor: "#fff",
     zIndex: 1,
@@ -174,6 +199,25 @@ const styles = {
     color: "white",
     fontSize: 12,
   },
-};
+  coinContainer: {
+    alignItems: "center",
+    flexDirection: "row",
+    borderRadius: 15,
+    backgroundColor: "#f5f5f5",
+    borderWidth: 1,
+    borderColor: "#ddd",
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+  },
 
+  coinIcon: {
+    marginRight: 20,
+  },
+
+  coinText: {
+    fontSize: 16,
+    fontWeight: "bold",
+    color: "black",
+  },
+});
 export default TabNavigator;

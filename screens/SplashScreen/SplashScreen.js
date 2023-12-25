@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useCallback, useEffect } from "react";
 import { StyleSheet, Image, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Animated, {
@@ -7,6 +7,7 @@ import Animated, {
   withSpring,
 } from "react-native-reanimated";
 import { COLORS } from "../../constants/theme";
+import { useFocusEffect } from "@react-navigation/native";
 
 const SplashScreen = ({ navigation }) => {
   const heightValue = useSharedValue(200);
@@ -17,7 +18,11 @@ const SplashScreen = ({ navigation }) => {
     }, 2000);
     return () => clearTimeout(timer);
   }, [navigation, heightValue]);
+  const refreshLoginScreen = useCallback(() => {
+    navigation.navigate("login");
+  }, [navigation]);
 
+  useFocusEffect(refreshLoginScreen);
   return (
     <View style={styles.container}>
       <View>

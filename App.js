@@ -1,19 +1,29 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { useFonts } from "expo-font";
 import * as Splash_Screen from "expo-splash-screen";
 import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
 import TabNavigator from "./navigation/TabNavigator";
 import AuthNavigator from "./navigation/AuthNavigator";
-import EditProfileScreen from "./screens/EditProfile/EditProfileScreen";
+import * as SecureStore from "expo-secure-store";
+import { ModalProvider } from "./hooks/useModalContext";
 import {
+  FindPhone,
+  LoginProfile,
+  LoginScreen,
   MessageChat,
   MessageProfile,
   MessageScreen,
   NewMessage,
+  Register,
+  ShowAllImagePost,
 } from "./screens";
+import { ModalPostComponent } from "./components";
+import EditProfileScreen from "./screens/EditProfile/EditProfileScreen";
+import { AuthContext, AuthProvider } from "./hooks/AuthContext";
 
 const App = () => {
+  // Load fonts
   const [fontsLoaded] = useFonts({
     Regular: require("./assets/fonts/SF-Pro-Text-Regular.otf"),
     Medium: require("./assets/fonts/SF-Pro-Text-Bold.otf"),
@@ -22,7 +32,7 @@ const App = () => {
     Light: require("./assets/fonts/SF-Pro-Text-Light.otf"),
     Heavy: require("./assets/fonts/SF-Pro-Text-Heavy.otf"),
   });
-  const [userAuthenticated, setUserAuthenticated] = useState(true);
+  const [userAuthencated, setAuthenticated] = useState(false);
 
   useEffect(() => {
     const initializeApp = async () => {
@@ -31,53 +41,120 @@ const App = () => {
       }
     };
 
-    initializeApp();
-  }, [fontsLoaded]);
+    const fetchToken = async () => {
+      try {
+        const token = await SecureStore.getItemAsync("loginToken");
+        setAuthenticated(!!token);
+      } catch (error) {
+        console.error("Error fetching token from SecureStore:", error);
+        throw error; // Re-throw to handle in initializeApp
+      }
+    };
 
+    // Fetch token only if not authenticated
+    if (!userAuthencated) {
+      fetchToken();
+    }
+
+    // Initialize app regardless of authentication status
+    initializeApp();
+  }, [fontsLoaded, userAuthencated, setAuthenticated]);
+
+  // If fonts are not loaded, return null
   if (!fontsLoaded) {
     return null;
   }
 
   const Stack = createStackNavigator();
   return (
-    <NavigationContainer>
-      <Stack.Navigator
-        initialRouteName={userAuthenticated ? "TabNavigator" : "AuthNavigator"}
-        screenOptions={{ headerShown: false }}
-      >
-        {userAuthenticated ? (
-          <Stack.Screen name="TabNavigator" component={TabNavigator} />
-        ) : (
-          <Stack.Screen name="AuthNavigator" component={AuthNavigator} />
-        )}
-
-        <Stack.Screen
-          name="EditProfile"
-          component={EditProfileScreen}
-          options={{ headerShown: true, headerBackTitle: "Back" }}
-        />
-        <Stack.Screen
-          name="message"
-          component={MessageScreen}
-          options={{ headerShown: false }}
-        />
-        <Stack.Screen
-          name="newMessage"
-          component={NewMessage}
-          options={{ headerShown: false }}
-        />
-        <Stack.Screen
-          name="chat"
-          component={MessageChat}
-          options={{ headerShown: false }}
-        />
-        <Stack.Screen
-          name="chatproflie"
-          component={MessageProfile}
-          options={{ headerShown: false }}
-        />
-      </Stack.Navigator>
-    </NavigationContainer>
+    <AuthProvider>
+      <ModalProvider>
+        <NavigationContainer>
+          <Stack.Navigator
+            initialRouteName={
+              userAuthencated ? "TabNavigator" : "AuthNavigator"
+            }
+            screenOptions={{ headerShown: false }}
+          >
+            <Stack.Screen name="TabNavigator" component={TabNavigator} />
+            <Stack.Screen name="AuthNavigator" component={AuthNavigator} />
+            <Stack.Screen
+              name="loginproflie"
+              component={LoginProfile}
+              options={{ headerShown: false }}
+            />
+            <Stack.Screen
+              name="EditProfile"
+              component={EditProfileScreen}
+              options={{ headerShown: true, headerBackTitle: "Back" }}
+            />
+            <Stack.Screen
+              name="message"
+              component={MessageScreen}
+              options={{ headerShown: false }}
+            />
+            <Stack.Screen
+              name="newMessage"
+              component={NewMessage}
+              options={{ headerShown: false }}
+            />
+            <Stack.Screen
+              name="chat"
+              component={MessageChat}
+              options={{ headerShown: false }}
+            />
+            <Stack.Screen
+              name="chatproflie"
+              component={MessageProfile}
+              options={{ headerShown: false }}
+            />
+            <Stack.Screen
+              name="showall"
+              component={ShowAllImagePost}
+              options={{ headerShown: false }}
+            />
+            <Stack.Screen
+              name="modal"
+              component={ModalPostComponent}
+              options={{ headerShown: false }}
+            />
+            <Stack.Screen
+              name="login"
+              component={LoginScreen}
+              options={{ headerShown: false }}
+            />
+            <Stack.Screen
+              name="Register"
+              component={Register}
+              options={{ headerShown: false }}
+            />
+            <Stack.Screen
+              name="findphone"
+              component={FindPhone}
+              options={{
+                headerShown: true,
+                headerBackTitleVisible: false,
+                headerTitleAlign: "center",
+                headerTitle: "Find Phone",
+                headerStyle: {
+                  backgroundColor: "#fff",
+                  // shadowColor: "#000",
+                  // shadowOffset: { width: 0, height: 2 },
+                  // shadowOpacity: 0.2,
+                  shadowRadius: 2,
+                  borderBottomWidth: 0.5,
+                },
+                headerTitleStyle: {
+                  color: "#000",
+                  fontSize: 18,
+                },
+                headerTintColor: "#000", // Set icon and back button color to black
+              }}
+            />
+          </Stack.Navigator>
+        </NavigationContainer>
+      </ModalProvider>
+    </AuthProvider>
   );
 };
 

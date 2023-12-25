@@ -1,29 +1,26 @@
-import React from "react";
+import React, { useCallback } from "react";
 import { StyleSheet, Text, View, Image, TouchableOpacity } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { COLORS, SIZES } from "../../constants/theme";
 import { ButtonComponent } from "../../components";
+import { useFocusEffect, useNavigation } from "@react-navigation/native";
 
 const LoginProfile = () => {
+  const navigation = useNavigation();
   const handleCreateAccountClick = () => {
-    // Handle the click event for "Create New Facebook Account"
-    console.log("Create New Facebook Account clicked");
-    // Add your custom logic here
+    navigation.navigate("Register");
   };
 
   const handleLoginProfileClick = () => {
-    // Handle the click event for "Log into Another Account"
-    console.log("Log into Another Account clicked");
-    // Add your custom logic here
+    navigation.navigate("login");
   };
 
   const handleFindAccountClick = () => {
-    // Handle the click event for "Find Your Account"
-    console.log("Find Your Account clicked");
-    // Add your custom logic here
+    navigation.navigate("findemail");
   };
-
+  const refreshLoginScreen = useCallback(() => {}, []);
+  useFocusEffect(refreshLoginScreen);
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.mainContent}>
@@ -64,7 +61,6 @@ const LoginProfile = () => {
             onPress={handleCreateAccountClick}
             title={"Create New Facebook Account"}
           />
-          <View style={styles.lineBlack}></View>
         </View>
       </View>
     </SafeAreaView>
@@ -116,13 +112,5 @@ const styles = StyleSheet.create({
     marginLeft: 10,
     fontSize: 16,
     color: COLORS.blue,
-  },
-  lineBlack: {
-    marginTop: 35,
-    width: 134,
-    height: 5,
-    borderRadius: SIZES.large,
-    backgroundColor: COLORS.black,
-    alignSelf: "center",
   },
 });

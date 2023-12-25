@@ -2,8 +2,12 @@ import React from "react";
 import { StyleSheet, View, Text } from "react-native";
 import { RegisterComponent } from "../../components";
 import { COLORS } from "../../constants/theme";
+import { useRoute } from "@react-navigation/native";
 
 const AccountTermsPrivacy = () => {
+  const route = useRoute();
+  const emailCreate = route.params?.email;
+  const passwordCreate = route.params?.password;
   return (
     <RegisterComponent
       title={"Finishing signing up"}
@@ -12,6 +16,8 @@ const AccountTermsPrivacy = () => {
       }
       titleBtn={"Next"}
       navigationText={"login"}
+      emailCreate={emailCreate}
+      passwordCreate={passwordCreate}
     >
       <View>
         <Text style={styles.contentText}>

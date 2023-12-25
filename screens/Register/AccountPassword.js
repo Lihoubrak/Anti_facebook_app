@@ -1,17 +1,38 @@
-import React, { useState } from "react";
-import { StyleSheet, Text, View } from "react-native";
+import React, { useCallback, useState } from "react";
+import { StyleSheet } from "react-native";
 import { InputTextComponent, RegisterComponent } from "../../components";
+import { useFocusEffect, useRoute } from "@react-navigation/native";
 
 const AccountPassword = () => {
   const [password, setPassword] = useState("");
   const [passwordFocused, setPasswordFocused] = useState(false);
-
+  const [passwordError, setPasswordError] = useState("");
+  const [isNextButtonEnabled, setIsNextButtonEnabled] = useState(false);
+  const route = useRoute();
+  const email = route.params?.email;
+  const refreshLoginScreen = useCallback(() => {
+    setPassword("");
+    setPasswordError("");
+  }, []);
+  useFocusEffect(refreshLoginScreen);
   const clearPassword = () => {
     setPassword("");
+    setPasswordError("");
   };
 
   const handlePasswordFocus = () => {
     setPasswordFocused(true);
+  };
+
+  const handlePasswordChange = (input) => {
+    setPassword(input);
+    if (input.length < 6) {
+      setPasswordError("Password must be at least 6 characters");
+      setIsNextButtonEnabled(false);
+    } else {
+      setPasswordError("");
+      setIsNextButtonEnabled(true);
+    }
   };
 
   return (
@@ -22,16 +43,22 @@ const AccountPassword = () => {
       }
       titleBtn={"Next"}
       navigationText={"terms"}
+      password={password}
+      email={email}
+      isNextButtonEnabled={!isNextButtonEnabled}
     >
       <InputTextComponent
         label={"Password"}
         value={password}
-        onChangeText={setPassword}
+        onChangeText={handlePasswordChange}
+        iconName="close-circle"
         isFocused={passwordFocused}
         clear={password !== ""}
-        clearFunction={clearPassword}
+        InputFunction={clearPassword}
         onFocus={handlePasswordFocus}
         isFlex={true}
+        secureTextEntry={true}
+        errorText={passwordError}
       />
     </RegisterComponent>
   );

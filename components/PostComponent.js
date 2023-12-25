@@ -51,7 +51,32 @@ const PostComponent = ({
         />
       </View>
       <Text style={styles.postText}>{postText}</Text>
-      <Image source={postImage} style={styles.postImage} />
+      <View style={styles.imageContainer}>
+        <Image
+          source={{
+            uri: "https://cdn.pixabay.com/photo/2015/04/23/22/00/tree-736885_1280.jpg",
+          }}
+          style={styles.postImage}
+        />
+        <Image
+          source={{
+            uri: "https://cdn.pixabay.com/photo/2015/04/23/22/00/tree-736885_1280.jpg",
+          }}
+          style={styles.postImage}
+        />
+        <Image
+          source={{
+            uri: "https://cdn.pixabay.com/photo/2015/04/23/22/00/tree-736885_1280.jpg",
+          }}
+          style={styles.postImage}
+        />
+        <Image
+          source={{
+            uri: "https://cdn.pixabay.com/photo/2015/04/23/22/00/tree-736885_1280.jpg",
+          }}
+          style={styles.postImage}
+        />
+      </View>
       <View style={styles.actions}>
         <TouchableOpacity onPress={handleLikeClick}>
           <EvilIcons name="like" size={30} color="black" />
@@ -85,11 +110,12 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     borderTopWidth: 1,
     borderTopColor: "#eee",
-    padding: 10,
+    // padding: 10,
   },
   header: {
     flexDirection: "row",
     alignItems: "center",
+    padding: 10,
   },
   profileImage: {
     width: 40,
@@ -123,20 +149,21 @@ const styles = StyleSheet.create({
     fontSize: 24,
   },
   postText: {
-    marginTop: 10,
+    // marginTop: 10,
     fontSize: 16,
+    paddingBottom: 10,
+    paddingHorizontal: 10,
   },
   postImage: {
-    marginTop: 10,
-    width: "100%",
+    width: "50%",
     height: 200,
-    borderRadius: 10,
     resizeMode: "cover",
   },
   actions: {
     flexDirection: "row",
     justifyContent: "space-between",
     paddingTop: 15,
+    paddingHorizontal: 10,
   },
   actionIcon: {
     fontSize: 24,
@@ -147,6 +174,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
     paddingTop: 10,
+    paddingBottom: 10,
+    paddingHorizontal: 10,
   },
   likeCommentIcons: {
     flexDirection: "row",
@@ -163,6 +192,12 @@ const styles = StyleSheet.create({
   commentCount: {
     marginTop: 5,
     color: "#555",
+  },
+  imageContainer: {
+    flexDirection: "row",
+    justifyContent: "center",
+    flexWrap: "wrap",
+    marginBottom: 10,
   },
 });
 

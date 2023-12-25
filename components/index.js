@@ -8,7 +8,7 @@ import PostProfileComponet from "./PostProfileComponet";
 import FriendRequestComponent from "./FriendRequestComponent";
 import ShortcutMenu from "./ShortcutMenu";
 import PostProfileSection from "./PostProfileSection";
-
+import ModalPostComponent from "./ModalPostComponent";
 export {
   ButtonComponent,
   RegisterComponent,
@@ -21,4 +21,5 @@ export {
   // shortcut menu
   ShortcutMenu,
   PostProfileSection,
+  ModalPostComponent,
 };
