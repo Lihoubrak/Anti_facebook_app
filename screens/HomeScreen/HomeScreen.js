@@ -1,4 +1,4 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import {
   View,
   Image,
@@ -11,12 +11,18 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { PostComponent, PostProfileComponet } from "../../components";
 import { ModalContext } from "../../hooks/useModalContext";
-import { useNavigation } from "@react-navigation/native";
+import { useFocusEffect, useNavigation } from "@react-navigation/native";
 const image1 = require("../../assets/images/story1.png");
 const image2 = require("../../assets/images/story2.png");
 const image3 = require("../../assets/images/story3.png");
 const image4 = require("../../assets/images/story4.png");
 import * as SecureStore from "expo-secure-store";
+import {
+  TokenRequest,
+  setupTokenRequest,
+} from "../../RequestMethod/requestMethod";
+import { Button, Modal } from "react-native-paper";
+import PostProfileComponent from "../../components/PostProfileComponet";
 
 const imageSources = [image1, image2, image3, image4];
 
@@ -48,17 +54,38 @@ const reelItemStyles = [
 ];
 
 const HomeScreen = () => {
-  const data = Array.from({ length: 20 }, (_, i) => ({ id: String(i) }));
-  const { showModal } = useContext(ModalContext);
+  const [post, setPost] = useState([]);
+  const navigation = useNavigation();
+  const { showModal, setPostId } = useContext(ModalContext);
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const fetchData = async () => {
+    try {
+      await setupTokenRequest();
+      const response = await TokenRequest.post("get_list_posts", {
+        in_campaign: "1",
+        campaign_id: "1",
+        latitude: "1.0",
+        longitude: "1.0",
+        index: "0",
+        count: "100",
+      });
+      setPost(response.data.data.post);
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    }
+  };
 
   const handleStatusUpdatePress = () => {
-    showModal();
+    navigation.navigate("modal");
   };
   return (
     <View>
       <FlatList
         style={{ backgroundColor: "#FFF" }}
-        data={data}
+        data={post}
         keyExtractor={(item) => item.id}
         renderItem={({ item, index }) => {
           if (index === 0) {
@@ -67,33 +94,34 @@ const HomeScreen = () => {
             return <Reels />;
           } else if (index === 2) {
             return <ImageIcons />;
-          } else if (index === 3) {
-            return (
-              <PostComponent
-                username="Deven Mestry"
-                tagText="is with"
-                tagUsername="Mashesh"
-                time="1h"
-                location="Cambodia"
-                postText="Old is Gold...!!"
-                postImage={require("../../assets/images/post.png")}
-                profileImage={require("../../assets/images/ProfileImage.png")}
-                likes={157}
-                commentsCount={4}
-              />
-            );
           } else {
             return (
-              <PostProfileComponet
-                username="John Doe"
-                time="2h ago"
-                location="New York, NY"
-                postText="This is a sample post text."
-                postImage={require("../../assets/images/post.png")}
-                profileImage={require("../../assets/images/ProfileImage.png")}
-                likes={42}
-                commentsCount={7}
+              <PostComponent
+                username={item.author.name}
+                tagText="is with"
+                tagUsername="Mashesh"
+                time={item.created}
+                location="Cambodia"
+                postText={item.described}
+                images={item.image}
+                videos={item.video}
+                profileImage={item.author.avatar}
+                likes={parseInt(item.feel)}
+                commentsCount={parseInt(item.comment_mark)}
+                showModal={showModal}
+                postId={item.id}
+                setPostId={setPostId}
               />
+              // <PostProfileComponent
+              //   username="JohnDoe"
+              //   time="1 hour ago"
+              //   location="New York"
+              //   postText="Here is a post text"
+              //   postImage={{ uri: "image_url" }}
+              //   profileImage={{ uri: "profile_image_url" }}
+              //   likes={100}
+              //   commentsCount={10}
+              // />
             );
           }
         }}
@@ -103,23 +131,12 @@ const HomeScreen = () => {
 };
 
 const Header = ({ onStatusUpdatePress }) => {
-  const navigation = useNavigation();
-  async function handleLogout() {
-    try {
-      await SecureStore.deleteItemAsync("loginToken");
-      navigation.navigate("loginproflie");
-    } catch (error) {
-      console.error("Error clearing token:", error);
-    }
-  }
   return (
     <View style={styles.header}>
-      <TouchableOpacity onPress={handleLogout}>
-        <Image
-          style={styles.imagelogo}
-          source={require("../../assets/images/ProfileImage.png")}
-        />
-      </TouchableOpacity>
+      <Image
+        style={styles.imagelogo}
+        source={require("../../assets/images/ProfileImage.png")}
+      />
       <TouchableOpacity
         style={styles.statusUpdate}
         onPress={onStatusUpdatePress}
@@ -283,6 +300,37 @@ const styles = StyleSheet.create({
   modalContainer: {
     backgroundColor: "red",
     flex: 1,
+  },
+  container: {
+    flex: 1,
+    backgroundColor: "#fff",
+  },
+  modalContainer: {
+    flex: 1,
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  modalContent: {
+    backgroundColor: "white",
+    padding: 20,
+    width: "80%",
+    borderRadius: 10,
+  },
+  commentInput: {
+    height: 100,
+    borderColor: "gray",
+    borderWidth: 1,
+    marginBottom: 10,
+  },
+  closeModalButton: {
+    backgroundColor: "#333",
+    padding: 10,
+    borderRadius: 10,
+  },
+  closeModalText: {
+    color: "#fff",
+    textAlign: "center",
   },
 });
 

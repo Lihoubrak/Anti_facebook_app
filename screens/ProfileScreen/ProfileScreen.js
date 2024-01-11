@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import React, { useContext, useEffect, useRef } from "react";
 import {
   View,
   Text,
@@ -19,6 +19,11 @@ import { useState } from "react";
 import friendsData from "../../data/friendsData";
 import photosData from "../../data/photoData";
 import { useNavigation } from "@react-navigation/native";
+import {
+  TokenRequest,
+  setupTokenRequest,
+} from "../../RequestMethod/requestMethod";
+import { ModalContext } from "../../hooks/useModalContext";
 
 const Tab = createMaterialTopTabNavigator();
 const screenWidth = Dimensions.get("window").width;
@@ -93,74 +98,86 @@ const Header = ({
   );
 };
 
-const PostsScreen = ({ profileImage }) => (
-  <ScrollView style={styles.detailsContainer}>
-    <View style={styles.detailItem}>
-      <Ionicons name="book-outline" size={20} color="#000" />
-      <Text style={styles.detailText}>
-        Studied at{" "}
-        <Text style={styles.boldText}>Sovanrith Technology Institute</Text>
-      </Text>
-    </View>
-    <View style={styles.detailItem}>
-      <Ionicons name="briefcase-outline" size={20} color="#000" />
-      <Text style={styles.detailText}>
-        Founder and CEO at{" "}
-        <Text style={styles.boldText}>Jing Harb .Co, Ltd</Text>
-      </Text>
-    </View>
-    <View style={styles.detailItem}>
-      <Ionicons name="home-outline" size={20} color="#000" />
-      <Text style={styles.detailText}>
-        Lives in <Text style={styles.boldText}>Hanoi</Text>
-      </Text>
-    </View>
-    <View style={styles.detailItem}>
-      <Ionicons name="location-outline" size={20} color="#000" />
-      <Text style={styles.detailText}>
-        From <Text style={styles.boldText}>Kampong Thom, Cambodia</Text>
-      </Text>
-    </View>
-    <TouchableOpacity style={styles.detailItem}>
-      <Ionicons name="ellipsis-horizontal-outline" size={20} color="#000" />
-      <Text style={styles.detailText}>See your About info</Text>
-    </TouchableOpacity>
-    <View>
-      <PostComponent
-        username="Brak Lihou"
-        time="2h"
-        postText="សួស្ដីបាទ! ខ្ញុំហួរ Zin II BC Zin 023."
-        postImage={require("../../assets/images/post2.jpg")}
-        profileImage={
-          profileImage
-            ? { uri: profileImage }
-            : require("../../assets/images/post2.jpg")
-        }
-        likes={100}
-        commentsCount={200}
-        tagText="feeling love with"
-        location="Cambodia"
-        tagUsername="Zin 023"
-      />
-      <PostComponent
-        username="Brak Lihou"
-        time="2h"
-        postText="សួស្ដីបាទ! ខ្ញុំហួរ Zin II BC Zin 023."
-        postImage={require("../../assets/images/post2.jpg")}
-        profileImage={
-          profileImage
-            ? { uri: profileImage }
-            : require("../../assets/images/post2.jpg")
-        }
-        likes={100}
-        commentsCount={200}
-        tagText="feeling sad with"
-        location="Cambodia"
-        tagUsername="Sochita"
-      />
-    </View>
-  </ScrollView>
-);
+const PostsScreen = ({ profileImage }) => {
+  const [posts, setPosts] = useState([]);
+  const { showModal, setPostId } = useContext(ModalContext);
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const fetchData = async () => {
+    try {
+      await setupTokenRequest();
+      const response = await TokenRequest.post("get_list_posts", {
+        user_id: "1090",
+        in_campaign: "1",
+        campaign_id: "1",
+        latitude: "1.0",
+        longitude: "1.0",
+        index: "0",
+        count: "100",
+      });
+      setPosts(response.data.data.post);
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    }
+  };
+
+  return (
+    <ScrollView style={styles.detailsContainer}>
+      <View style={styles.detailItem}>
+        <Ionicons name="book-outline" size={20} color="#000" />
+        <Text style={styles.detailText}>
+          Studied at{" "}
+          <Text style={styles.boldText}>Sovanrith Technology Institute</Text>
+        </Text>
+      </View>
+      <View style={styles.detailItem}>
+        <Ionicons name="briefcase-outline" size={20} color="#000" />
+        <Text style={styles.detailText}>
+          Founder and CEO at{" "}
+          <Text style={styles.boldText}>Jing Harb .Co, Ltd</Text>
+        </Text>
+      </View>
+      <View style={styles.detailItem}>
+        <Ionicons name="home-outline" size={20} color="#000" />
+        <Text style={styles.detailText}>
+          setPostId Lives in <Text style={styles.boldText}>Hanoi</Text>
+        </Text>
+      </View>
+      <View style={styles.detailItem}>
+        <Ionicons name="location-outline" size={20} color="#000" />
+        <Text style={styles.detailText}>
+          From <Text style={styles.boldText}>Kampong Thom, Cambodia</Text>
+        </Text>
+      </View>
+      <TouchableOpacity style={styles.detailItem}>
+        <Ionicons name="ellipsis-horizontal-outline" size={20} color="#000" />
+        <Text style={styles.detailText}>See your About info</Text>
+      </TouchableOpacity>
+      <View>
+        {posts.map((post, index) => (
+          <PostComponent
+            key={index}
+            username={post.author.name}
+            tagText="is with"
+            tagUsername="Mashesh"
+            time={post.created}
+            location="Cambodia"
+            postText={post.described}
+            images={post.image}
+            profileImage={post.author.avatar}
+            likes={parseInt(post.feel)}
+            commentsCount={parseInt(post.comment_mark)}
+            setPostId={setPostId}
+            showModal={showModal}
+            postId={post.id}
+          />
+        ))}
+      </View>
+    </ScrollView>
+  );
+};
 // Photo Tab
 const columns = 3;
 const { width } = Dimensions.get("window");

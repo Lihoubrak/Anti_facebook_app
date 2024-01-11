@@ -11,18 +11,25 @@ const OTPCode = ({ navigation }) => {
   const [isOtpFocused, setIsOtpFocused] = useState(false);
   const [timeRemaining, setTimeRemaining] = useState(20);
   const [otpError, setOtpError] = useState("");
-  const route = useRoute();
-  const emailFind = route.params?.emailFind;
+  const { emailFind, emailRegister, code } = useRoute().params || {};
   const intervalRef = useRef(null);
 
   useEffect(() => {
     checkEmailValidity();
-  }, [emailFind]);
+  }, [emailFind, emailRegister, code]);
+
+  useEffect(() => {
+    intervalRef.current = setInterval(() => {
+      setTimeRemaining((prevTime) => (prevTime === 0 ? 0 : prevTime - 1));
+    }, 1000);
+
+    return () => clearInterval(intervalRef.current);
+  }, []);
 
   const checkEmailValidity = async () => {
     try {
       const response = await publicRequest.post("/check_email", {
-        email: emailFind,
+        email: emailFind || emailRegister,
       });
 
       if (response.data.data.existed !== "1") {
@@ -31,7 +38,11 @@ const OTPCode = ({ navigation }) => {
           "Email not found. Please check the email or create an account."
         );
       } else {
-        fetchData();
+        if (emailFind) {
+          fetchData();
+        } else if (emailRegister) {
+          setOtpValue(code);
+        }
       }
     } catch (error) {
       console.error("Error checking email:", error);
@@ -41,26 +52,16 @@ const OTPCode = ({ navigation }) => {
   const fetchData = async () => {
     try {
       const response = await publicRequest.post("/get_verify_code", {
-        email: emailFind,
+        email: emailFind || emailRegister,
       });
-
       clearInterval(intervalRef.current);
       setTimeRemaining(0);
       setOtpValue(response.data.data.verify_code);
       setOtpError("");
     } catch (error) {
       console.error("Error fetching OTP code:", error);
-      // setOtpError("Error fetching OTP code");
     }
   };
-
-  useEffect(() => {
-    intervalRef.current = setInterval(() => {
-      setTimeRemaining((prevTime) => (prevTime === 0 ? 0 : prevTime - 1));
-    }, 1000);
-
-    return () => clearInterval(intervalRef.current);
-  }, []);
 
   const handleResendCode = () => {
     clearInterval(intervalRef.current);
@@ -74,14 +75,16 @@ const OTPCode = ({ navigation }) => {
   const handleContinue = async () => {
     try {
       const response = await publicRequest.post("/check_verify_code", {
-        email: emailFind,
+        email: emailFind ? emailFind : emailRegister,
         code_verify: otpValue,
       });
 
       if (response.data.message === "OK") {
-        navigation.navigate("createnewpassword", {
-          emailFind: emailFind,
-        });
+        if (emailFind) {
+          navigation.navigate("createnewpassword", { emailFind });
+        } else {
+          navigation.navigate("login");
+        }
       } else {
         setOtpError("Invalid OTP code");
         Alert.alert("Error", "Invalid OTP code. Please try again.");
@@ -104,11 +107,14 @@ const OTPCode = ({ navigation }) => {
   const handleOtpFocus = () => {
     setIsOtpFocused(true);
   };
+
   const refreshLoginScreen = useCallback(() => {
     setOtpError("");
     setOtpValue("");
   }, []);
+
   useFocusEffect(refreshLoginScreen);
+
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.centerContainer}>
@@ -148,7 +154,11 @@ const OTPCode = ({ navigation }) => {
         </TouchableOpacity>
         <TouchableOpacity
           style={styles.changeEmailButton}
-          onPress={() => navigation.navigate("findemail")}
+          onPress={() =>
+            emailRegister
+              ? navigation.navigate("email")
+              : navigation.navigate("findemail")
+          }
         >
           <Ionicons name="mail" style={styles.icon} />
           <Text style={styles.buttonText}>Change Email</Text>
@@ -167,6 +177,7 @@ const formatTime = (seconds) => {
     .toString()
     .padStart(2, "0")}`;
 };
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -179,7 +190,6 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 20,
     fontWeight: "bold",
-    // marginTop: 50,
   },
   email: {
     fontSize: 16,

@@ -49,7 +49,7 @@ const AccountEmail = () => {
       }
       titleBtn={"Next"}
       navigationText={"password"}
-      email={email}
+      emailRegister={email}
       isNextButtonEnabled={!isNextButtonEnabled}
     >
       <InputTextComponent

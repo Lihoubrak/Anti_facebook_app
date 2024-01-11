@@ -6,7 +6,7 @@ import { useRoute } from "@react-navigation/native";
 
 const AccountTermsPrivacy = () => {
   const route = useRoute();
-  const emailCreate = route.params?.email;
+  const emailCreate = route.params?.emailRegister;
   const passwordCreate = route.params?.password;
   return (
     <RegisterComponent
@@ -15,7 +15,7 @@ const AccountTermsPrivacy = () => {
         "By tapping Sign up, you agree to our Terms, Data Policy, and Cookies Policy"
       }
       titleBtn={"Next"}
-      navigationText={"login"}
+      navigationText={"outcode"}
       emailCreate={emailCreate}
       passwordCreate={passwordCreate}
     >

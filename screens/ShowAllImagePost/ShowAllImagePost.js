@@ -8,32 +8,48 @@ import {
   TextInput,
   TouchableOpacity,
 } from "react-native";
-import React, { useContext, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons, EvilIcons } from "@expo/vector-icons";
 import { ModalContext } from "../../hooks/useModalContext";
-const ShowAllImagePost = ({ route, navigation }) => {
-  const { itemImage } = route.params;
+import { useRoute } from "@react-navigation/native";
+const ShowAllImagePost = ({ navigation }) => {
+  const route = useRoute();
+  const { itemImage: initialImages } = route.params;
+  const [imageTexts, setImageTexts] = useState(initialImages.map(() => ""));
+  const [itemImages, setItemImages] = useState(initialImages);
   const screenWidth = Dimensions.get("window").width;
-  const [imageTexts, setImageTexts] = useState(itemImage.map(() => ""));
-  const [itemImages, setItemImages] = useState(itemImage);
+
   const handleTextInputChange = (index, text) => {
     setImageTexts((prevTexts) =>
       prevTexts.map((prevText, i) => (i === index ? text : prevText))
     );
   };
+
   const handleRemoveImage = (index) => {
     setItemImages((prevImages) => prevImages.filter((image, i) => i !== index));
     setImageTexts((prevTexts) => prevTexts.filter((text, i) => i !== index));
   };
+
   useEffect(() => {
-    setItemImages(route.params.itemImage);
-  }, [route.params.itemImage]);
+    if (route.params?.itemImage) {
+      setItemImages(route.params.itemImage);
+    }
+  }, [route.params?.itemImage]);
+
+  const handleNavigateBack = () => {
+    const updatedImagesWithText = itemImages.map((image, index) => ({
+      ...image,
+      text: imageTexts[index],
+    }));
+    navigation.navigate("modal", { updatedImagesWithText });
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.headerContainer}>
         <View style={styles.headerLeft}>
-          <TouchableOpacity onPress={() => navigation.navigate("modal")}>
+          <TouchableOpacity onPress={handleNavigateBack}>
             <Ionicons
               name="arrow-back"
               size={24}

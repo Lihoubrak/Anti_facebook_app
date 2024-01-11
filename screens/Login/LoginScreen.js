@@ -59,15 +59,14 @@ const LoginScreen = () => {
         password,
         uuid: "a12345",
       });
-
+      const loginToken = response?.data?.data.token;
+      const coins = response?.data?.data.coins;
       if (response.data.message === "OK") {
-        await SecureStore.setItemAsync(
-          "loginToken",
-          response?.data?.data.token
-        );
+        await SecureStore.setItemAsync("loginToken", loginToken);
+        await SecureStore.setItemAsync("coins", coins.toString());
         // Navigate to TabNavigator after successful login
         navigation.navigate("TabNavigator", {
-          coin: response?.data?.data.coins,
+          coin: coins,
         });
       } else {
         setErrorMessage("Invalid email or password. Please try again.");
@@ -126,8 +125,9 @@ const LoginScreen = () => {
             value={password}
             onChangeText={setPassword}
             isFocused={passwordFocused}
+            clear={password !== ""}
             onFocus={handlePasswordFocus}
-            InputFunction={togglePasswordVisibility}
+            InputFunction={clearEmail}
             iconName={showPassword ? "eye-outline" : "eye-off-outline"}
             secureTextEntry={!showPassword}
           />

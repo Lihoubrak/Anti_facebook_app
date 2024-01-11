@@ -9,6 +9,7 @@ import {
 import { SafeAreaView, SafeAreaProvider } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
+import * as SecureStore from "expo-secure-store";
 
 const initialMenuItems = [
   { icon: "ios-people", name: "Groups" },
@@ -63,18 +64,36 @@ const MenuScreen = () => {
     : initialMenuItems;
 
   const handlePress = (name) => {
+    async function handleLogout() {
+      try {
+        await SecureStore.deleteItemAsync("loginToken");
+        navigation.navigate("loginproflie");
+      } catch (error) {
+        console.error("Error clearing token:", error);
+      }
+    }
     switch (name) {
       case "Help":
         break;
       case "Settings":
         break;
       case "Logout":
+        handleLogout();
         break;
       default:
         navigation.navigate(name);
     }
   };
+  const handleLogout = async () => {
+    try {
+      await SecureStore.deleteItemAsync("loginToken");
 
+      // Navigate to the login screen
+      navigation.navigate("loginproflie");
+    } catch (error) {
+      console.error("Error clearing token:", error);
+    }
+  };
   const renderFooter = () => (
     <View style={styles.footerContainer}>
       <TouchableOpacity style={styles.seeMoreButton} onPress={handleSeeMore}>

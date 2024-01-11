@@ -1,7 +1,7 @@
 import React, { useCallback, useState } from "react";
 import { StyleSheet } from "react-native";
 import { InputTextComponent, RegisterComponent } from "../../components";
-import { useFocusEffect } from "@react-navigation/native";
+import { useFocusEffect, useRoute } from "@react-navigation/native";
 
 const FindEmail = () => {
   const [email, setEmail] = useState("");

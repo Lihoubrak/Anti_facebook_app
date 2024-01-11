@@ -26,6 +26,7 @@ import ShowAllImagePost from "./ShowAllImagePost/ShowAllImagePost";
 import AccountEmail from "./Register/AccountEmail";
 export {
   SplashScreen,
+  HomeScreen,
   LoginProfile,
   Register,
   AccountBirthDay,
@@ -39,7 +40,6 @@ export {
   FindPhone,
   OTPCode,
   CreateNewPassword,
-  HomeScreen,
   WatchScreen,
   FriendScreen,
   NotificationsScreen,

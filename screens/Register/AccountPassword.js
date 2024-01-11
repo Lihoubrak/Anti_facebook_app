@@ -9,7 +9,7 @@ const AccountPassword = () => {
   const [passwordError, setPasswordError] = useState("");
   const [isNextButtonEnabled, setIsNextButtonEnabled] = useState(false);
   const route = useRoute();
-  const email = route.params?.email;
+  const emailRegister = route.params?.emailRegister;
   const refreshLoginScreen = useCallback(() => {
     setPassword("");
     setPasswordError("");
@@ -44,7 +44,7 @@ const AccountPassword = () => {
       titleBtn={"Next"}
       navigationText={"terms"}
       password={password}
-      email={email}
+      emailRegister={emailRegister}
       isNextButtonEnabled={!isNextButtonEnabled}
     >
       <InputTextComponent

@@ -13,19 +13,152 @@ import { View, Text, TouchableOpacity, Modal, StyleSheet } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { getFocusedRouteNameFromRoute } from "@react-navigation/native";
 import { ModalContext } from "../hooks/useModalContext";
-import { ModalPostComponent } from "../components";
+import { CommentModal, ModalPostComponent } from "../components";
 import * as SecureStore from "expo-secure-store";
-import { AuthContext } from "../hooks/AuthContext";
 import { FontAwesome5 } from "@expo/vector-icons";
+import { TokenRequest } from "../RequestMethod/requestMethod";
+import { ActivityIndicator } from "react-native-paper";
+const profileImage = require("../assets/images/ProfileImage.png");
 const Tab = createMaterialTopTabNavigator();
 const TabNavigator = ({ route, navigation }) => {
   const routeName = getFocusedRouteNameFromRoute(route) || "Home";
   const isHomeScreen = routeName === "Home";
+  const [coin, setCoin] = useState(null);
+  const [comments, setComments] = useState([]);
+  const [newComment, setNewComment] = useState("");
+  const { isModalVisible, hideModal, postId } = useContext(ModalContext);
+  const [isReplying, setIsReplying] = useState(false);
+  const [replyToComment, setReplyToComment] = useState(null);
+
   const handleIconClick = () => {
     navigation.navigate("message");
   };
-  const { isModalVisible, setModalVisible } = useContext(ModalContext);
-  const coin = route.params.coin;
+  SecureStore.getItemAsync("coins")
+    .then((storedCoinsString) => {
+      if (storedCoinsString) {
+        const coins = parseInt(storedCoinsString, 10);
+        setCoin(coins);
+      } else {
+        console.log("No coins found in SecureStore");
+      }
+    })
+    .catch((error) => {
+      console.error("Error fetching coins:", error);
+    });
+  useEffect(() => {
+    const fetchComments = async () => {
+      try {
+        // Check if postId is available
+        if (!postId) {
+          console.log("postId is null or undefined");
+          return;
+        }
+
+        const response = await TokenRequest.post("/get_mark_comment", {
+          id: postId,
+          index: 0,
+          count: 10,
+        });
+        if (response.data && response.data.data) {
+          const fetchedComments = response.data.data.map((comment) => ({
+            id: comment.id,
+            profileImage:
+              comment.poster.avatar && typeof comment.poster.avatar === "string"
+                ? { uri: comment.poster.avatar }
+                : null,
+            username: comment.poster.name,
+            text: comment.mark_content,
+            time: comment.created,
+            replies: comment.comments,
+          }));
+
+          setComments(fetchedComments);
+        }
+      } catch (error) {
+        console.error(
+          "Error fetching comments:",
+          error.response ? error.response.data : error
+        );
+      }
+    };
+    if (postId) {
+      fetchComments();
+    }
+  }, [postId]);
+
+  const handlePostComment = async () => {
+    try {
+      const response = await TokenRequest.post("/set_mark_comment", {
+        id: postId,
+        content: newComment,
+        index: "0",
+        count: "10",
+        type: "0",
+      });
+      // Extract the array of new comments from the response
+      const newCommentsData = response.data.data;
+      // Construct an array of new comment objects
+      const newComments = newCommentsData.map((commentData) => ({
+        id: commentData.id,
+        profileImage: { uri: commentData.poster.avatar },
+        username: commentData.poster.name,
+        text: commentData.mark_content,
+        time: commentData.created,
+        replies: commentData.comments, // Assuming this is the structure for replies
+      }));
+
+      // Add the new comments to the existing comments
+      setComments((prevComments) => [...prevComments, ...newComments]);
+
+      setNewComment(""); // Clear the input field
+    } catch (error) {
+      console.error("Error posting comment:", error);
+    }
+  };
+
+  const handleReplyComment = async (comment) => {
+    setIsReplying(true);
+    setReplyToComment(comment);
+  };
+  const handleReplyPostComment = async () => {
+    try {
+      const response = await TokenRequest.post("/set_mark_comment", {
+        id: postId,
+        content: newComment,
+        index: "0",
+        count: "10",
+        mark_id: replyToComment.id,
+        type: "1",
+      });
+
+      const newCommentsData = response.data.data;
+
+      // Construct an array of new replied comment objects
+      const repliedComments = newCommentsData.map((commentData) => ({
+        id: commentData.id,
+        profileImage: { uri: commentData.poster.avatar },
+        username: commentData.poster.name,
+        text: commentData.mark_content,
+        time: commentData.created,
+        replies: commentData.comments,
+      }));
+
+      // Update the replied comments in the local state
+      setComments((prevComments) =>
+        prevComments.map((prevComment) =>
+          prevComment.id === replyToComment.id
+            ? { ...prevComment, replies: repliedComments }
+            : prevComment
+        )
+      );
+
+      setNewComment("");
+      setIsReplying(false);
+    } catch (error) {
+      console.error("Error posting comment:", error);
+    }
+  };
+
   return (
     <SafeAreaView
       style={{
@@ -34,7 +167,7 @@ const TabNavigator = ({ route, navigation }) => {
       }}
     >
       <View style={styles.headerContainer}>
-        {isHomeScreen && (
+        {!isHomeScreen && (
           <View style={styles.header}>
             <Text style={styles.headerText}>Facebook</Text>
             <View
@@ -161,7 +294,21 @@ const TabNavigator = ({ route, navigation }) => {
           })}
         />
       </Tab.Navigator>
-      <ModalPostComponent isModalVisible={isModalVisible} />
+      <CommentModal
+        comments={comments}
+        newComment={newComment}
+        setNewComment={setNewComment}
+        handlePostComment={handlePostComment}
+        isModalVisible={isModalVisible}
+        hideModal={hideModal}
+        postId={postId}
+        handleReplyComment={handleReplyComment}
+        isReplying={isReplying}
+        replyToComment={replyToComment}
+        setIsReplying={setIsReplying}
+        setReplyToComment={setReplyToComment}
+        handleReplyPostComment={handleReplyPostComment}
+      />
     </SafeAreaView>
   );
 };

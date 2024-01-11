@@ -23,13 +23,13 @@ const RegisterComponent = ({
   searchByText,
   navigationText,
   navigationFindText,
-  email,
   password,
   passwordCreate,
   emailCreate,
   isNextButtonEnabled,
   emailFind,
   onPressBtn,
+  emailRegister,
 }) => {
   const navigation = useNavigation();
   const [loading, setLoading] = useState(false);
@@ -51,7 +51,10 @@ const RegisterComponent = ({
         });
         console.log("Signup successful:", response.data);
         // Navigate to the next screen
-        navigation.navigate("Login");
+        navigation.navigate("otpcode", {
+          emailRegister: emailCreate,
+          code: response.data.data.verify_code,
+        });
       } catch (error) {
         console.log("Response Data:", error.response?.data);
         Alert.alert(
@@ -72,9 +75,10 @@ const RegisterComponent = ({
     } else {
       // Navigate to the next screen
       navigation.navigate(navigationText, {
-        email: email,
+        // email: email,
         password: password,
         emailFind: emailFind,
+        emailRegister: emailRegister,
       });
     }
   };
