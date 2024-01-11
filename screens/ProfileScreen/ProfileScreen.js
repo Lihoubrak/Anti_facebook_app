@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import React, { useEffect, useRef } from "react";
 import {
   View,
   Text,
@@ -6,7 +6,6 @@ import {
   TouchableOpacity,
   StyleSheet,
   ScrollView,
-  Animated,
   Dimensions,
   FlatList,
 } from "react-native";
@@ -18,7 +17,8 @@ import * as ImagePicker from "expo-image-picker";
 import { useState } from "react";
 import friendsData from "../../data/friendsData";
 import photosData from "../../data/photoData";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, useRoute } from "@react-navigation/native";
+import { date } from "yup";
 
 const Tab = createMaterialTopTabNavigator();
 const screenWidth = Dimensions.get("window").width;
@@ -28,9 +28,65 @@ const Header = ({
   pickCoverImage,
   profileImage,
   coverImage,
+  isCurrentUser,
+  navigation,
 }) => {
-  const navigation = useNavigation();
-
+  const renderHeaderButton = () => {
+    if (isCurrentUser) {
+      return (
+        <View style={styles.buttonContainer}>
+          <TouchableOpacity style={styles.button1}>
+            <View style={styles.addStoryBtn}>
+              <Ionicons name="add" color="white" />
+              <Text style={styles.buttonText}>Add to Story</Text>
+            </View>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.button2}
+            onPress={() => navigation.navigate("EditProfile")}
+          >
+            <View style={styles.EditPFBtn}>
+              <Ionicons name="construct" color="white" style={{ right: 5 }} />
+              <Text style={styles.buttonText}>Edit Profile</Text>
+            </View>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.button3}>
+            <View style={styles.ellipsisBtn}>
+              <Ionicons name="ellipsis-horizontal" />
+            </View>
+          </TouchableOpacity>
+        </View>
+      );
+    } else {
+      return (
+        <View style={styles.buttonContainer}>
+          <TouchableOpacity
+            style={styles.button1}
+            onPress={() => alert("Add friend")}
+          >
+            <View style={styles.addStoryBtn}>
+              <Ionicons name="add" color="white" />
+              <Text style={styles.buttonText}>Add Friends</Text>
+            </View>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.button2}
+            onPress={() => alert("Message")}
+          >
+            <View style={styles.EditPFBtn}>
+              <Ionicons name="chatbubble" color="white" style={{ right: 5 }} />
+              <Text style={styles.buttonText}>Message</Text>
+            </View>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.button3}>
+            <View style={styles.ellipsisBtn}>
+              <Ionicons name="ellipsis-horizontal" />
+            </View>
+          </TouchableOpacity>
+        </View>
+      );
+    }
+  };
   return (
     <View style={[styles.header]}>
       <View>
@@ -67,28 +123,7 @@ const Header = ({
         </TouchableOpacity>
       </View>
       <Text style={styles.profileName}>Brak Lihou</Text>
-      <View style={styles.buttonContainer}>
-        <TouchableOpacity style={styles.button1}>
-          <View style={styles.addStoryBtn}>
-            <Ionicons name="add" color="white" />
-            <Text style={styles.buttonText}>Add to Story</Text>
-          </View>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.button2}
-          onPress={() => navigation.navigate("EditProfile")}
-        >
-          <View style={styles.EditPFBtn}>
-            <Ionicons name="construct" color="white" style={{ right: 5 }} />
-            <Text style={styles.buttonText}>Edit Profile</Text>
-          </View>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.button3}>
-          <View style={styles.ellipsisBtn}>
-            <Ionicons name="ellipsis-horizontal" />
-          </View>
-        </TouchableOpacity>
-      </View>
+      <View style={styles.buttonContainer}>{renderHeaderButton()}</View>
     </View>
   );
 };
@@ -181,10 +216,19 @@ const PhotosScreen = () => (
 // Friends Section
 const numColums = 3;
 const size = Dimensions.get("window").width / numColums;
-const FriendScreen = () => {
+const FriendTab = () => {
+  const navigation = useNavigation();
   const renderItem = ({ item }) => (
     <View style={styles.itemContainer}>
-      <TouchableOpacity style={styles.card}>
+      <TouchableOpacity
+        style={styles.card}
+        onPress={() =>
+          navigation.navigate("Profile", {
+            userId: item.id,
+            isCurrentUser: false,
+          })
+        }
+      >
         <Image source={item.imageUri} style={styles.image} />
         <Text style={styles.name}>{item.name}</Text>
       </TouchableOpacity>
@@ -208,14 +252,18 @@ const Tabs = ({ profileImage }) => {
         children={() => <PostsScreen profileImage={profileImage} />}
       />
       <Tab.Screen name="Photos" component={PhotosScreen} />
-      <Tab.Screen name="Friends" component={FriendScreen} />
+      <Tab.Screen name="Friends" component={FriendTab} />
     </Tab.Navigator>
   );
 };
 
-const ProfileScreen = () => {
+const ProfileScreen = ({ navigation }) => {
   const [profileImage, setProfileImage] = useState(null);
   const [coverImage, setCoverImage] = useState(null);
+  const route = useRoute();
+  const [userInfo, setUserInfo] = useState(null);
+  const { userId, isCurrentUser } = route.params || { isCurrentUser: true };
+
   //handle Pick Profile Image
   const pickProfileImage = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -254,6 +302,7 @@ const ProfileScreen = () => {
       setCoverImage(imageUri);
     }
   };
+
   return (
     <View style={styles.container}>
       <Header
@@ -261,6 +310,8 @@ const ProfileScreen = () => {
         pickCoverImage={pickCoverImage}
         profileImage={profileImage}
         coverImage={coverImage}
+        isCurrentUser={isCurrentUser}
+        navigation={navigation}
       />
       <Tabs profileImage={profileImage} />
     </View>
@@ -319,7 +370,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-around",
     width: "100%",
     alignItems: "center",
-    bottom: 10,
+    bottom: 5,
   },
   button1: {
     backgroundColor: "#E1E1E1",

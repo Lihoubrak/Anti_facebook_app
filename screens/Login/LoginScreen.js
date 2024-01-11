@@ -11,6 +11,8 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { COLORS, SIZES } from "../../constants/theme";
 import { ButtonComponent, InputTextComponent } from "../../components";
+import axios from "axios";
+import { ActivityIndicator } from "react-native-paper";
 
 const LoginScreen = ({ navigation }) => {
   const [email, setEmail] = useState("");
@@ -18,7 +20,14 @@ const LoginScreen = ({ navigation }) => {
   const [emailFocused, setEmailFocused] = useState(false);
   const [passwordFocused, setPasswordFocused] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [uuid, setUuid] = useState("iphone11");
 
+  const handleLogin = async () => {
+    setIsLoading(true); // Start loading
+
+    // something moreeeee.....
+  };
   const clearEmail = () => {
     setEmail("");
   };
@@ -89,7 +98,11 @@ const LoginScreen = ({ navigation }) => {
             iconName={showPassword ? "eye-outline" : "eye-off-outline"}
             secureTextEntry={!showPassword}
           />
-          <ButtonComponent title={"Log In"} />
+          {isLoading ? (
+            <ActivityIndicator size="large" color="#0000ff" />
+          ) : (
+            <ButtonComponent title={"Log In"} onPress={handleLogin} />
+          )}
 
           <TouchableOpacity onPress={() => navigation.navigate("findphone")}>
             <Text style={styles.forgotPasswordText}>Forgot Password?</Text>

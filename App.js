@@ -12,6 +12,9 @@ import {
   MessageScreen,
   NewMessage,
 } from "./screens";
+import { Provider } from "react-redux";
+import { PersistGate } from "redux-persist/integration/react";
+import { store, persistor } from "./redux/store";
 
 const App = () => {
   const [fontsLoaded] = useFonts({
@@ -40,44 +43,56 @@ const App = () => {
 
   const Stack = createStackNavigator();
   return (
-    <NavigationContainer>
-      <Stack.Navigator
-        initialRouteName={userAuthenticated ? "TabNavigator" : "AuthNavigator"}
-        screenOptions={{ headerShown: false }}
-      >
-        {userAuthenticated ? (
-          <Stack.Screen name="TabNavigator" component={TabNavigator} />
-        ) : (
-          <Stack.Screen name="AuthNavigator" component={AuthNavigator} />
-        )}
+    <Provider store={store}>
+      <PersistGate loading={null} persistor={persistor}>
+        <NavigationContainer>
+          <Stack.Navigator
+            initialRouteName={
+              userAuthenticated ? "TabNavigator" : "AuthNavigator"
+            }
+            screenOptions={{ headerShown: false }}
+          >
+            {userAuthenticated ? (
+              <Stack.Screen name="TabNavigator" component={TabNavigator} />
+            ) : (
+              <Stack.Screen name="AuthNavigator" component={AuthNavigator} />
+            )}
 
-        <Stack.Screen
-          name="EditProfile"
-          component={EditProfileScreen}
-          options={{ headerShown: true, headerBackTitle: "Back" }}
-        />
-        <Stack.Screen
-          name="message"
-          component={MessageScreen}
-          options={{ headerShown: false }}
-        />
-        <Stack.Screen
-          name="newMessage"
-          component={NewMessage}
-          options={{ headerShown: false }}
-        />
-        <Stack.Screen
-          name="chat"
-          component={MessageChat}
-          options={{ headerShown: false }}
-        />
-        <Stack.Screen
-          name="chatproflie"
-          component={MessageProfile}
-          options={{ headerShown: false }}
-        />
-      </Stack.Navigator>
-    </NavigationContainer>
+            <Stack.Screen
+              name="HomePage"
+              component={TabNavigator}
+              initialParams={{ screen: "HomePage" }}
+            />
+
+            <Stack.Screen
+              name="EditProfile"
+              component={EditProfileScreen}
+              options={{ headerShown: true, headerBackTitle: "Back" }}
+            />
+            <Stack.Screen
+              name="message"
+              component={MessageScreen}
+              options={{ headerShown: false }}
+            />
+            <Stack.Screen
+              name="newMessage"
+              component={NewMessage}
+              options={{ headerShown: false }}
+            />
+            <Stack.Screen
+              name="chat"
+              component={MessageChat}
+              options={{ headerShown: false }}
+            />
+            <Stack.Screen
+              name="chatproflie"
+              component={MessageProfile}
+              options={{ headerShown: false }}
+            />
+          </Stack.Navigator>
+        </NavigationContainer>
+      </PersistGate>
+    </Provider>
   );
 };
 

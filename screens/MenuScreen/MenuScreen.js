@@ -9,6 +9,7 @@ import {
 import { SafeAreaView, SafeAreaProvider } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
+import axios from "axios";
 
 const initialMenuItems = [
   { icon: "ios-people", name: "Groups" },
@@ -49,6 +50,9 @@ const MenuItem = ({ icon, name }) => {
   );
 };
 
+const Separator = () => {
+  return <View style={styles.separator} />;
+};
 const MenuScreen = () => {
   const [menuItems, setMenuItems] = useState(initialMenuItems);
   const [seeMore, setSeeMore] = useState(false);
@@ -62,7 +66,7 @@ const MenuScreen = () => {
     ? [...initialMenuItems, ...additionalMenuItems]
     : initialMenuItems;
 
-  const handlePress = (name) => {
+  const handlePress = async (name) => {
     switch (name) {
       case "Help":
         break;
@@ -82,6 +86,7 @@ const MenuScreen = () => {
           {seeMore ? "See Less" : "See More"}
         </Text>
       </TouchableOpacity>
+      <Separator />
       <TouchableOpacity
         style={styles.footerButton}
         onPress={() => handlePress("Help")}
@@ -198,7 +203,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     width: "95%",
     height: 50,
-
+    top: 10,
     marginTop: 10,
   },
   footerButtonText: {
@@ -206,6 +211,12 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "500",
     left: 10,
+  },
+  separator: {
+    height: 1,
+    width: "100%",
+    backgroundColor: "#5F0F40",
+    top: 10,
   },
 });
 
