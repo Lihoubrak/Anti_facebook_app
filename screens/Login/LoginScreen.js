@@ -68,6 +68,7 @@ const LoginScreen = () => {
         const userId = response?.data?.data.id;
         await SecureStore.setItemAsync("loginToken", loginToken);
         await SecureStore.setItemAsync("coins", coins);
+        await SecureStore.setItemAsync("id", userId.toString());
         // Retrieve existing account information
         const storedAccountInfoString = await SecureStore.getItemAsync(
           "accountInfo"
@@ -97,8 +98,6 @@ const LoginScreen = () => {
           );
         }
 
-        await SecureStore.setItemAsync("coins", coins.toString());
-        await SecureStore.setItemAsync("id", userId.toString());
         // Navigate to TabNavigator after successful login
         navigation.navigate("TabNavigator", {
           coin: coins,
