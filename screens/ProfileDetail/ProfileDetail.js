@@ -728,6 +728,11 @@ const styles = StyleSheet.create({
   },
   buttonClose: {
     backgroundColor: "#2196F3",
+    padding: 10,
+    borderRadius: 5,
+    elevation: 2,
+    marginTop: 10,
+    width: 200,
   },
   closebtn: {
     top: 10,
@@ -745,6 +750,7 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     elevation: 2,
     marginTop: 10,
+    width: 200,
   },
 });
 
