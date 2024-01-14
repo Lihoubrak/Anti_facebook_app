@@ -6,9 +6,9 @@ import {
   TouchableOpacity,
   StyleSheet,
   ScrollView,
-  Animated,
   Dimensions,
   FlatList,
+  RefreshControl,
 } from "react-native";
 
 import { Ionicons } from "@expo/vector-icons";
@@ -21,6 +21,7 @@ import photosData from "../../data/photoData";
 import { useNavigation } from "@react-navigation/native";
 import { TokenRequest, setupTokenRequest } from "../../requestMethod";
 import { ModalContext } from "../../hooks/useModalContext";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as SecureStore from "expo-secure-store";
 import base64 from "base-64";
 import { useFocusEffect } from "@react-navigation/native";
@@ -29,79 +30,17 @@ import { checkIfPostLiked } from "../../utils/checkIfPostLiked";
 const Tab = createMaterialTopTabNavigator();
 const screenWidth = Dimensions.get("window").width;
 
-const Header = ({
-  pickProfileImage,
-  pickCoverImage,
-  profileImage,
-  coverImage,
-}) => {
-  const navigation = useNavigation();
-
-  return (
-    <View style={[styles.header]}>
-      <View>
-        <Image
-          style={[styles.coverPhoto, { width: screenWidth }]}
-          source={
-            coverImage
-              ? { uri: coverImage }
-              : require("../../assets/images/post2.jpg")
-          }
-        />
-        <TouchableOpacity
-          style={styles.cameraIconCover}
-          onPress={pickCoverImage}
-        >
-          <Ionicons name="camera" size={24} color="white" />
-        </TouchableOpacity>
-      </View>
-
-      <View>
-        <Image
-          style={styles.profilePhoto}
-          source={
-            profileImage
-              ? { uri: profileImage }
-              : require("../../assets/images/post2.jpg")
-          }
-        />
-        <TouchableOpacity
-          style={styles.cameraIconProfile}
-          onPress={pickProfileImage}
-        >
-          <Ionicons name="camera" size={16} color="white" />
-        </TouchableOpacity>
-      </View>
-      <Text style={styles.profileName}>Brak Lihou</Text>
-      <View style={styles.buttonContainer}>
-        <TouchableOpacity style={styles.button1}>
-          <View style={styles.addStoryBtn}>
-            <Ionicons name="add" color="white" />
-            <Text style={styles.buttonText}>Add to Story</Text>
-          </View>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.button2}
-          onPress={() => navigation.navigate("EditProfile")}
-        >
-          <View style={styles.EditPFBtn}>
-            <Ionicons name="construct" color="white" style={{ right: 5 }} />
-            <Text style={styles.buttonText}>Edit Profile</Text>
-          </View>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.button3}>
-          <View style={styles.ellipsisBtn}>
-            <Ionicons name="ellipsis-horizontal" />
-          </View>
-        </TouchableOpacity>
-      </View>
-    </View>
-  );
-};
-
 const PostsScreen = ({ profileImage }) => {
   const [posts, setPosts] = useState([]);
+  const [city, setCity] = useState("");
+  const [address, setAddress] = useState("");
+  const [country, setCountry] = useState("");
+  const [description, setDescription] = useState("");
+  const [link, setLink] = useState("");
   const { showModal, setPostId } = useContext(ModalContext);
+  const [refreshing, setRefreshing] = useState(false);
+  const navigation = useNavigation();
+
   const [postIdEdit, setPostIdEdit] = useState("");
   const [edit, setEdit] = useState(false);
   const [userId, setUserId] = useState("");
@@ -160,6 +99,7 @@ const PostsScreen = ({ profileImage }) => {
     if (userTokenId) {
       fetchData();
       checkIfLiked();
+      fetchUserAddress();
     }
   }, [userTokenId]);
   const fetchUserTokenId = async () => {
@@ -188,6 +128,12 @@ const PostsScreen = ({ profileImage }) => {
   };
   const fetchData = async () => {
     try {
+      const userId = await SecureStore.getItemAsync("id"); // Retrieve user_id from storage
+      if (!userId) {
+        console.error("User ID not found");
+        return;
+      }
+      await setupTokenRequest();
       const response = await TokenRequest.post("get_list_posts", {
         user_id: userTokenId,
         in_campaign: "1",
@@ -207,12 +153,38 @@ const PostsScreen = ({ profileImage }) => {
     setPostIdEdit(postId);
     setEdit(!edit);
   };
+  // fetch user info(city, address, country,....)
+  const fetchUserAddress = async (user_id) => {
+    try {
+      await setupTokenRequest();
+      const response = await TokenRequest.post("get_user_info", {
+        user_id: user_id,
+      });
+      setCity(response.data.data.city);
+      setCountry(response.data.data.country);
+      setAddress(response.data.data.address);
+      setDescription(response.data.data.description);
+      setLink(response.data.data.link);
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    }
+  };
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await fetchData();
+    await fetchUserAddress();
+    setRefreshing(false);
+  };
+
   return (
     <View style={styles.detailsContainer}>
       <View>
         <FlatList
           data={posts}
           keyExtractor={(post, index) => index.toString()}
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+          }
           ListHeaderComponent={
             <>
               <View style={styles.detailItem}>
@@ -315,23 +287,91 @@ const PhotosScreen = () => (
 // Friends Section
 const numColums = 3;
 const size = Dimensions.get("window").width / numColums;
+
 const FriendScreen = () => {
+  const [friendCount, setFriendCount] = useState(0);
+  const [friends, setFriends] = useState([]);
+  const [refreshing, setRefreshing] = useState(false);
+
+  useEffect(() => {
+    fetchFriends();
+    fetchFriendCount();
+  }, []);
+  const fetchFriends = async () => {
+    try {
+      await setupTokenRequest();
+      const userId = await SecureStore.getItemAsync("id"); // Retrieve user_id from storage
+      if (!userId) {
+        console.error("User ID not found");
+        return;
+      }
+      const response = await TokenRequest.post("get_user_friends", {
+        index: "0",
+        count: "10",
+        user_id: userId,
+      });
+      if (response.data.code === "1000") {
+        setFriends(response.data.data.friends);
+        setFriendCount(response.data.data.total);
+      }
+    } catch (error) {
+      console.error("Error fetching friends:", error);
+    }
+  };
+  // fetch the number of friends
+  const fetchFriendCount = async () => {
+    try {
+      const userId = await SecureStore.getItemAsync("id");
+      if (!userId) {
+        console.error("User ID not found");
+        return;
+      }
+
+      await setupTokenRequest();
+      const response = await TokenRequest.post("get_user_friends", {
+        index: "0",
+        count: "10",
+        user_id: userId,
+      });
+      if (response.data.code === "1000") {
+        setFriendCount(response.data.data.total);
+      }
+    } catch (error) {
+      console.error("Error fetching friend count:", error);
+    }
+  };
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await fetchFriends();
+    await fetchFriendCount();
+    setRefreshing(false);
+  };
+
   const renderItem = ({ item }) => (
     <View style={styles.itemContainer}>
       <TouchableOpacity style={styles.card}>
-        <Image source={item.imageUri} style={styles.image} />
-        <Text style={styles.name}>{item.name}</Text>
+        <Image source={{ uri: item.avatar }} style={styles.image} />
+        <Text style={styles.name}>{item.username}</Text>
       </TouchableOpacity>
     </View>
   );
   // render list of friends
   return (
-    <FlatList
-      data={friendsData}
-      renderItem={renderItem}
-      keyExtractor={(item) => item.id}
-      numColumns={numColums}
-    />
+    <View style={styles.container1}>
+      <Text style={{ fontWeight: "600", fontSize: 16, left: 5 }}>
+        Your Total Friend: {friendCount}
+      </Text>
+      <FlatList
+        data={friends}
+        renderItem={renderItem}
+        keyExtractor={(item) => item.id.toString()}
+        numColumns={numColums}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
+      />
+    </View>
   );
 };
 const Tabs = ({ profileImage }) => {
@@ -347,9 +387,44 @@ const Tabs = ({ profileImage }) => {
   );
 };
 
-const ProfileScreen = () => {
+const ProfileScreen = ({ route }) => {
   const [profileImage, setProfileImage] = useState(null);
   const [coverImage, setCoverImage] = useState(null);
+  const [Name, setNewName] = useState("");
+  // const [isCurrentUserProfile, setIsCurrentUserProfile] = useState(true);
+
+  const navigation = useNavigation();
+
+  const loadProfileName = async () => {
+    const storedName = await SecureStore.getItemAsync("username");
+    if (storedName) {
+      setNewName(storedName);
+    }
+  };
+  const loadCoverImage = async () => {
+    const imageUri = await SecureStore.getItemAsync("coverPhoto");
+    if (imageUri) {
+      setCoverImage(imageUri);
+    }
+  };
+  const loadProfileImage = async () => {
+    const imageUri = await AsyncStorage.getItem("profileImage");
+    if (imageUri) {
+      setProfileImage(imageUri);
+    }
+  };
+  useEffect(() => {
+    const unsub = navigation.addListener("focus", async () => {
+      loadProfileImage();
+      loadCoverImage();
+      loadProfileName();
+
+      // const profileID = route.params?.profileID;
+      // const userId = await SecureStore.getItemAsync("id");
+      // setIsCurrentUserProfile(userId == profileID);
+    });
+    return unsub;
+  }, [navigation]);
   //handle Pick Profile Image
   const pickProfileImage = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -369,6 +444,7 @@ const ProfileScreen = () => {
       setProfileImage(imageUri);
     }
   };
+
   // handle Pick cover Image
   const pickCoverImage = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -388,6 +464,119 @@ const ProfileScreen = () => {
       setCoverImage(imageUri);
     }
   };
+
+  const Header = ({
+    pickProfileImage,
+    pickCoverImage,
+    profileImage,
+    coverImage,
+    // isCurrentUserProfile,
+  }) => {
+    const navigation = useNavigation();
+    const [Name, setName] = useState("");
+    const [coverPic, setCoverPic] = useState("");
+    const [profilePic, setProfilePic] = useState("");
+
+    const updateProfileImage = (newUri) => {
+      setProfileImage(newUri);
+    };
+
+    useEffect(() => {
+      getUserInfo();
+    }, []);
+    const getUserInfo = async (user_id) => {
+      try {
+        await setupTokenRequest();
+        const response = await TokenRequest.post("get_user_info", {
+          user_id: user_id,
+        });
+        setName(response.data.data.username);
+        setCoverPic(response.data.data.cover_image);
+        setProfilePic(response.data.data.avatar);
+        // console.log(response.data);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    return (
+      <View style={[styles.header]}>
+        <View>
+          <Image
+            style={[styles.coverPhoto, { width: screenWidth }]}
+            source={
+              coverPic
+                ? { uri: coverPic }
+                : require("../../assets/images/post2.jpg")
+            }
+          />
+          <TouchableOpacity
+            style={styles.cameraIconCover}
+            onPress={pickCoverImage}
+          >
+            <Ionicons name="camera" size={24} color="white" />
+          </TouchableOpacity>
+        </View>
+
+        <View>
+          <Image
+            style={styles.profilePhoto}
+            source={
+              profilePic
+                ? { uri: profilePic }
+                : require("../../assets/images/coverPic.jpg")
+            }
+          />
+          <TouchableOpacity
+            style={styles.cameraIconProfile}
+            onPress={pickProfileImage}
+          >
+            <Ionicons name="camera" size={16} color="white" />
+          </TouchableOpacity>
+        </View>
+        <Text style={styles.profileName}>{Name}</Text>
+        <View style={styles.buttonContainer}>
+          {/* {isCurrentUserProfile ? (
+            <> */}
+          <TouchableOpacity style={styles.button1}>
+            <View style={styles.addStoryBtn}>
+              <Ionicons name="add" color="white" />
+              <Text style={styles.buttonText}>Add to Story</Text>
+            </View>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.button2}
+            onPress={() =>
+              navigation.navigate("EditProfile", {
+                updateProfileImage,
+              })
+            }
+          >
+            <View style={styles.EditPFBtn}>
+              <Ionicons name="construct" color="white" style={{ right: 5 }} />
+              <Text style={styles.buttonText}>Edit Profile</Text>
+            </View>
+          </TouchableOpacity>
+          {/* </> */}
+          {/* ) : (
+            <> */}
+          {/* <TouchableOpacity style={styles.button1}>
+            <Text style={styles.buttonText}>Add Friend</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.button2}>
+            <Text style={styles.buttonText}>Message</Text>
+          </TouchableOpacity> */}
+          {/* </> */}
+          {/* )} */}
+          {/* <TouchableOpacity style={styles.button3}>
+            <View style={styles.ellipsisBtn}>
+              <Ionicons name="ellipsis-horizontal" />
+            </View>
+          </TouchableOpacity> */}
+        </View>
+      </View>
+    );
+  };
   return (
     <View style={styles.container}>
       <Header
@@ -395,6 +584,7 @@ const ProfileScreen = () => {
         pickCoverImage={pickCoverImage}
         profileImage={profileImage}
         coverImage={coverImage}
+        // isCurrentUserProfile={isCurrentUserProfile}
       />
       <Tabs profileImage={profileImage} />
     </View>
@@ -403,6 +593,16 @@ const ProfileScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  container1: {
+    flex: 1,
+    justifyContent: "center",
+    top: 10,
+  },
+  centered: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
   },
   header: {
     width: screenWidth,
@@ -526,7 +726,8 @@ const styles = StyleSheet.create({
   itemContainer: {
     width: size,
     height: size + 20,
-    padding: 2,
+    padding: 1,
+    top: 10,
   },
   card: {
     flex: 1,

@@ -12,11 +12,11 @@ import { useNavigation } from "@react-navigation/native";
 import * as SecureStore from "expo-secure-store";
 
 const initialMenuItems = [
-  { icon: "ios-people", name: "Groups" },
+  { icon: "document", name: "Block" },
   { icon: "ios-person", name: "Friends" },
   { icon: "clipboard", name: "Feeds" },
   { icon: "calendar", name: "Events" },
-  { icon: "clipboard", name: "Feeds" },
+  { icon: "globe", name: "Market" },
   { icon: "game-controller", name: "Gaming" },
   { icon: "bookmark", name: "Saved" },
   { icon: "ios-videocam", name: "Video" },
@@ -32,7 +32,10 @@ const MenuItem = ({ icon, name }) => {
 
   const onPressHandler = () => {
     if (name === "Friends") {
-      navigation.navigate("Friends");
+      navigation.navigate("YourFriend");
+    }
+    if (name === "Block") {
+      navigation.navigate("Block");
     }
     // ==========
     if (name === "Video") {
@@ -121,6 +124,22 @@ const MenuScreen = () => {
       <SafeAreaView style={styles.container}>
         <View style={styles.header}>
           <Text style={styles.headerText}>Menu</Text>
+          <TouchableOpacity
+            style={styles.searchBtn}
+            onPress={() => navigation.navigate("SearchSomething")}
+          >
+            <Ionicons
+              name="search"
+              color="#FF9800"
+              size={28}
+              style={{ left: 5 }}
+            />
+            <View style={styles.textSearch}>
+              <Text style={{ fontSize: 15, color: "white", fontWeight: "500" }}>
+                Search something...
+              </Text>
+            </View>
+          </TouchableOpacity>
         </View>
         <View style={styles.shortcut}>
           <Text style={styles.shortcutText}>All Shortcut</Text>
@@ -146,14 +165,30 @@ const MenuScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#fff",
+    backgroundColor: "#DCF2F1",
   },
   header: {
+    flexDirection: "row",
+    justifyContent: "space-between",
     padding: 10,
+    backgroundColor: "#265073",
+  },
+  searchBtn: {
+    flexDirection: "row",
+    backgroundColor: "#5F8670",
+    width: 190,
+    borderWidth: 1,
+    borderColor: "#92C7CF",
+    borderRadius: 10,
+  },
+  textSearch: {
+    justifyContent: "center",
+    left: 10,
   },
   headerText: {
     fontSize: 28,
     fontWeight: "600",
+    color: "white",
   },
   shortcut: {
     left: 10,
@@ -161,7 +196,7 @@ const styles = StyleSheet.create({
   shortcutText: {
     fontSize: 20,
     fontWeight: "500",
-    color: "#A8AAB3",
+    color: "#5F6F52",
   },
   menuContainer: {
     alignItems: "center",

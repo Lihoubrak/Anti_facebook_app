@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useContext, useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -6,115 +6,172 @@ import {
   FlatList,
   TouchableOpacity,
   ScrollView,
+  RefreshControl,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { FriendRequestComponent } from "../../components";
+import {
+  TokenRequest,
+  setupTokenRequest,
+} from "../../RequestMethod/requestMethod";
+import moment from "moment";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as SecureStore from "expo-secure-store";
+import { useNavigation } from "@react-navigation/native";
 
 const FriendScreen = () => {
-  const friendRequests = [
-    {
-      id: 1,
-      name: "Kiran Pawat",
-      mutualFriends: 1,
-      age: "9w",
-    },
-    {
-      id: 2,
-      name: "John Doe",
-      mutualFriends: 2,
-      age: "2w",
-    },
-    {
-      id: 3,
-      name: "Alice Johnson",
-      mutualFriends: 0,
-      age: "4w",
-    },
-    {
-      id: 4,
-      name: "Bob Smith",
-      mutualFriends: 3,
-      age: "1w",
-    },
-    {
-      id: 5,
-      name: "Emma Wilson",
-      mutualFriends: 2,
-      age: "5w",
-    },
-    {
-      id: 6,
-      name: "David Brown",
-      mutualFriends: 1,
-      age: "6w",
-    },
-    {
-      id: 7,
-      name: "Sophia Miller",
-      mutualFriends: 4,
-      age: "3w",
-    },
-    {
-      id: 8,
-      name: "William Lee",
-      mutualFriends: 2,
-      age: "7w",
-    },
-    {
-      id: 9,
-      name: "Olivia Davis",
-      mutualFriends: 3,
-      age: "2w",
-    },
-    {
-      id: 10,
-      name: "James Wilson",
-      mutualFriends: 1,
-      age: "8w",
-    },
-  ];
+  const [friendRequests, setFriendRequests] = useState([]);
+  const [friendCount, setFriendCount] = useState(0);
+  const [friendRequestCount, setFriendRequestCount] = useState(0);
+  const [refreshing, setRefreshing] = useState(false);
+  const navigation = useNavigation();
+
+  useEffect(() => {
+    fetchFriendRequests();
+    fetchFriendCount();
+  }, []);
+  const fetchFriendRequests = async () => {
+    try {
+      await setupTokenRequest();
+      const response = await TokenRequest.post("get_requested_friends", {
+        index: "0",
+        count: "10",
+      });
+      console.log(response.data);
+      if (response.data.code === "1000") {
+        setFriendRequests(response.data.data.requests);
+        setFriendRequestCount(response.data.data.total);
+      }
+    } catch (error) {
+      console.error("Error fetching friend requests:", error);
+    }
+  };
+
+  // fetch the number of friends
+  const fetchFriendCount = async () => {
+    try {
+      const userId = await SecureStore.getItemAsync("id");
+      if (!userId) {
+        console.error("User ID not found");
+        return;
+      }
+
+      await setupTokenRequest();
+      const response = await TokenRequest.post("get_user_friends", {
+        index: "0",
+        count: "10",
+        user_id: userId,
+      });
+      if (response.data.code === "1000") {
+        setFriendCount(response.data.data.total);
+      }
+    } catch (error) {
+      console.error("Error fetching friend count:", error);
+    }
+  };
+
+  // delete friend request
+  const deleteFriendRequest = async (id) => {
+    try {
+      await setupTokenRequest();
+      const response = await TokenRequest.post("del_request_friend", {
+        user_id: id,
+      });
+      if (response.data.code === "1000") {
+        console.log("Friend request deleted successfully.");
+        // Filter out the deleted request from the state
+        setFriendRequests((currentRequests) =>
+          currentRequests.filter((request) => request.id !== id)
+        );
+      } else {
+        console.log("Failed to delete friend request:", response.data.message);
+      }
+    } catch (error) {
+      console.error("Error deleting friend request:", error);
+    }
+  };
+
+  // accept friends
+  const acceptFriendRequest = async (id) => {
+    try {
+      await setupTokenRequest();
+      const response = await TokenRequest.post("set_accept_friend", {
+        user_id: id,
+        is_accept: "1",
+      });
+      console.log(response.data);
+      if (response.data.code === "1000") {
+        console.log("Friend request accepted successfully.");
+        // Remove the accepted request from the state
+        setFriendRequests((currentRequests) =>
+          currentRequests.filter((request) => request.id !== id)
+        );
+      }
+    } catch (error) {
+      console.error("Error accepting friend request:", error);
+    }
+  };
+
+  // refresh
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await fetchFriendRequests();
+    await fetchFriendCount();
+    setRefreshing(false);
+  };
 
   return (
-    <ScrollView showsHorizontalScrollIndicator={false} style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.headerText}>Friends</Text>
-        <Ionicons name="search" style={styles.searchIcon} />
-      </View>
-      <View style={styles.section}>
-        <TouchableOpacity>
-          <Text style={styles.sectionTitle}>Suggestions</Text>
-        </TouchableOpacity>
-        <TouchableOpacity>
-          <Text style={styles.sectionSubtitle}>Your friend</Text>
-        </TouchableOpacity>
-      </View>
-      <View style={styles.yourFriendSection}>
-        <View style={styles.friendCountContainer}>
-          <Text style={styles.friendTitle}>Your friend</Text>
-          <Text style={styles.friendCount}>440</Text>
-        </View>
-        <Text style={styles.seeAllText}>See all</Text>
-      </View>
-
-      <FlatList
-        scrollEnabled={false}
-        data={friendRequests}
-        keyExtractor={(item) => item.id.toString()}
-        renderItem={({ item }) => (
+    <FlatList
+      ListHeaderComponent={
+        <>
+          {/* <ScrollView showsHorizontalScrollIndicator={false} style={styles.container}> */}
+          <View style={styles.header}>
+            <Text style={styles.headerText}>Friends</Text>
+            {/* <Ionicons name="search" style={styles.searchIcon} /> */}
+          </View>
+          <View style={styles.section}>
+            <TouchableOpacity
+              style={styles.sectionTitle}
+              onPress={() => navigation.navigate("Suggest")}
+            >
+              <Text style={styles.sectionTitle}>Suggestions</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.sectionTitle}
+              onPress={() => navigation.navigate("YourFriend")}
+            >
+              <Text style={styles.sectionSubtitle}>Your friend</Text>
+            </TouchableOpacity>
+          </View>
+          <View style={styles.yourFriendSection}>
+            <View style={styles.friendCountContainer}>
+              <Text style={styles.friendTitle}>New Friend Request:</Text>
+              <Text style={styles.friendCount}>{friendRequestCount}</Text>
+            </View>
+            {/* <Text style={styles.seeAllText}>See all</Text> */}
+          </View>
+        </>
+      }
+      data={friendRequests}
+      keyExtractor={(item) => item.id.toString()}
+      renderItem={({ item }) => {
+        const timeAgo = moment(item.created).fromNow();
+        return (
           <FriendRequestComponent
-            name={item.name}
-            mutualFriends={item.mutualFriends}
-            age={item.age}
-            onConfirm={() => {
-              console.log(`Confirmed friend request for ${item.name}`);
-            }}
-            onDelete={() => {
-              console.log(`Deleted friend request for ${item.name}`);
-            }}
+            name={item.username}
+            mutualFriends={item.same_friends}
+            age={timeAgo}
+            avatar={item.avatar}
+            onConfirm={() => acceptFriendRequest(item.id)}
+            onDelete={() => deleteFriendRequest(item.id)}
           />
-        )}
-      />
-    </ScrollView>
+        );
+      }}
+      refreshControl={
+        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+      }
+    />
+    // </ScrollView>
   );
 };
 
@@ -128,7 +185,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 16,
+    padding: 8,
   },
   headerText: {
     fontSize: 28,
@@ -141,19 +198,22 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     marginBottom: 16,
+    padding: 10,
   },
+
   sectionTitle: {
     fontSize: 16,
     fontWeight: "bold",
     backgroundColor: "#1877f2",
-    padding: 8,
+    padding: 4,
     color: "white",
     borderRadius: 4,
   },
   sectionSubtitle: {
     fontSize: 16,
+    fontWeight: "bold",
     backgroundColor: "#1877f2",
-    padding: 8,
+    padding: 4,
     color: "white",
     borderRadius: 4,
   },
@@ -162,8 +222,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     borderTopWidth: 1,
     borderTopColor: "#ccc",
-
-    paddingTop: 10,
+    padding: 10,
     paddingBottom: 10,
   },
   friendCountContainer: {

@@ -23,8 +23,12 @@ import {
 } from "./screens";
 import { ModalPostComponent } from "./components";
 import EditProfileScreen from "./screens/EditProfile/EditProfileScreen";
-import { AuthProvider } from "./hooks/AuthContext";
-import { CoinContext, CoinProvider } from "./hooks/useCoinContext";
+import SearchScreen from "./screens/Search/Search";
+import SuggestionsScreen from "./screens/SuggestionScreen/SuggestionScreen";
+import YourFriendScreen from "./screens/YourFriend/YourFriend";
+import Block from "./screens/Block/Block";
+import SearchSomethingScreen from "./screens/SearchSomething/SearchSomething";
+import { AuthContext, AuthProvider } from "./hooks/AuthContext";
 
 const App = () => {
   // Load fonts
@@ -70,134 +74,94 @@ const App = () => {
 
   const Stack = createStackNavigator();
   return (
-    <CoinProvider>
-      <AuthProvider>
-        <ModalProvider>
-          <NavigationContainer>
-            <Stack.Navigator
-              initialRouteName={
-                userAuthencated ? "TabNavigator" : "AuthNavigator"
-              }
-              screenOptions={{ headerShown: false }}
-            >
-              <Stack.Screen name="TabNavigator" component={TabNavigator} />
-              <Stack.Screen name="AuthNavigator" component={AuthNavigator} />
-              <Stack.Screen
-                name="loginproflie"
-                component={LoginProfile}
-                options={{ headerShown: false }}
-              />
-              <Stack.Screen
-                name="EditProfile"
-                component={EditProfileScreen}
-                options={{ headerShown: true, headerBackTitle: "Back" }}
-              />
-              <Stack.Screen
-                name="message"
-                component={MessageScreen}
-                options={{ headerShown: false }}
-              />
-              <Stack.Screen
-                name="newMessage"
-                component={NewMessage}
-                options={{ headerShown: false }}
-              />
-              <Stack.Screen
-                name="chat"
-                component={MessageChat}
-                options={{ headerShown: false }}
-              />
-              <Stack.Screen
-                name="chatproflie"
-                component={MessageProfile}
-                options={{ headerShown: false }}
-              />
-              <Stack.Screen
-                name="showall"
-                component={ShowAllImagePost}
-                options={{ headerShown: false }}
-              />
-              <Stack.Screen
-                name="modal"
-                component={ModalPostComponent}
-                options={{ headerShown: false }}
-              />
-              <Stack.Screen
-                name="login"
-                component={LoginScreen}
-                options={{ headerShown: false }}
-              />
-              <Stack.Screen
-                name="Register"
-                component={Register}
-                options={{ headerShown: false }}
-              />
-              <Stack.Screen
-                name="PostDetailScreen"
-                component={PostDetailScreen}
-                options={{
-                  headerShown: false,
-                  headerTitleAlign: "center",
-                }}
-              />
-              <Stack.Screen
-                name="ProfileDetail"
-                component={ProfileDetail}
-                options={{
-                  headerShown: true,
-                  headerTitleAlign: "center",
-                }}
-              />
-
-              <Stack.Screen
-                name="findphone"
-                component={FindPhone}
-                options={{
-                  headerShown: true,
-                  headerBackTitleVisible: false,
-                  headerTitleAlign: "center",
-                  headerTitle: "Find Phone",
-                  headerStyle: {
-                    backgroundColor: "#fff",
-                    // shadowColor: "#000",
-                    // shadowOffset: { width: 0, height: 2 },
-                    // shadowOpacity: 0.2,
-                    shadowRadius: 2,
-                    borderBottomWidth: 0.5,
-                  },
-                  headerTitleStyle: {
-                    color: "#000",
-                    fontSize: 18,
-                  },
-                  headerTintColor: "#000", // Set icon and back button color to black
-                }}
-              />
-              <Stack.Screen
-                name="findemail"
-                component={FindEmail}
-                options={{
-                  headerShown: true,
-                  headerBackTitleVisible: false,
-                  headerTitleAlign: "center",
-                  headerTitle: "Find Email",
-                  headerStyle: {
-                    backgroundColor: "#fff",
-
-                    shadowRadius: 2,
-                    borderBottomWidth: 0.5,
-                  },
-                  headerTitleStyle: {
-                    color: "#000",
-                    fontSize: 18,
-                  },
-                  headerTintColor: "#000",
-                }}
-              />
-            </Stack.Navigator>
-          </NavigationContainer>
-        </ModalProvider>
-      </AuthProvider>
-    </CoinProvider>
+    <AuthProvider>
+      <ModalProvider>
+        <NavigationContainer>
+          <Stack.Navigator
+            initialRouteName={
+              userAuthencated ? "TabNavigator" : "AuthNavigator"
+            }
+            screenOptions={{ headerShown: false }}
+          >
+            <Stack.Screen name="TabNavigator" component={TabNavigator} />
+            <Stack.Screen name="AuthNavigator" component={AuthNavigator} />
+            <Stack.Screen
+              name="loginproflie"
+              component={LoginProfile}
+              options={{ headerShown: false }}
+            />
+            <Stack.Screen
+              name="EditProfile"
+              component={EditProfileScreen}
+              options={{ headerShown: true, headerBackTitle: "Back" }}
+            />
+            <Stack.Screen
+              name="message"
+              component={MessageScreen}
+              options={{ headerShown: false }}
+            />
+            <Stack.Screen
+              name="newMessage"
+              component={NewMessage}
+              options={{ headerShown: false }}
+            />
+            <Stack.Screen
+              name="chat"
+              component={MessageChat}
+              options={{ headerShown: false }}
+            />
+            <Stack.Screen
+              name="chatproflie"
+              component={MessageProfile}
+              options={{ headerShown: false }}
+            />
+            <Stack.Screen
+              name="showall"
+              component={ShowAllImagePost}
+              options={{ headerShown: false }}
+            />
+            <Stack.Screen
+              name="modal"
+              component={ModalPostComponent}
+              options={{ headerShown: false }}
+            />
+            <Stack.Screen
+              name="login"
+              component={LoginScreen}
+              options={{ headerShown: false }}
+            />
+            <Stack.Screen
+              name="Register"
+              component={Register}
+              options={{ headerShown: false }}
+            />
+            <Stack.Screen
+              name="findphone"
+              component={FindPhone}
+              options={{
+                headerShown: true,
+                headerBackTitleVisible: false,
+                headerTitleAlign: "center",
+                headerTitle: "Find Phone",
+                headerStyle: {
+                  backgroundColor: "#fff",
+                  // shadowColor: "#000",
+                  // shadowOffset: { width: 0, height: 2 },
+                  // shadowOpacity: 0.2,
+                  shadowRadius: 2,
+                  borderBottomWidth: 0.5,
+                },
+                headerTitleStyle: {
+                  color: "#000",
+                  fontSize: 18,
+                },
+                headerTintColor: "#000", // Set icon and back button color to black
+              }}
+            />
+          </Stack.Navigator>
+        </NavigationContainer>
+      </ModalProvider>
+    </AuthProvider>
   );
 };
 

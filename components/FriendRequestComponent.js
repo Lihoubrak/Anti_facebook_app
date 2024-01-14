@@ -1,19 +1,28 @@
 import React from "react";
-import { View, Text, Image, StyleSheet, TouchableOpacity } from "react-native";
-
+import {
+  View,
+  Text,
+  Image,
+  StyleSheet,
+  TouchableOpacity,
+  Alert,
+} from "react-native";
+import {
+  TokenRequest,
+  setupTokenRequest,
+} from "../RequestMethod/requestMethod";
+import * as SecureStore from "expo-secure-store";
 const FriendRequestComponent = ({
   name,
   mutualFriends,
   age,
+  avatar,
   onConfirm,
   onDelete,
 }) => {
   return (
     <View style={styles.friendCard}>
-      <Image
-        source={require("../assets/images/ProfileImage.png")}
-        style={styles.profileImage}
-      />
+      <Image source={{ uri: avatar }} style={styles.profileImage} />
       <View style={styles.friendInfo}>
         <View style={styles.friendInfoHeader}>
           <View>
@@ -44,6 +53,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     flexDirection: "row",
     alignItems: "center",
+    padding: 8,
   },
   profileImage: {
     width: 90,
@@ -81,7 +91,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#1877f2",
     justifyContent: "center",
     alignItems: "center",
-    paddingVertical: 5, // Combine paddingTop and paddingBottom into paddingVertical
+    paddingVertical: 5,
     paddingHorizontal: 20,
   },
 
@@ -95,7 +105,7 @@ const styles = StyleSheet.create({
     borderColor: "#e4e6eb",
     justifyContent: "center",
     alignItems: "center",
-    paddingVertical: 5, // Combine paddingTop and paddingBottom into paddingVertical
+    paddingVertical: 5,
     paddingHorizontal: 20,
   },
   deleteButtonText: {

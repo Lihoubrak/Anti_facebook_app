@@ -17,6 +17,7 @@ import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import * as SecureStore from "expo-secure-store";
 import { AuthContext } from "../../hooks/AuthContext";
 import { Keyboard } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 const LoginScreen = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -60,11 +61,11 @@ const LoginScreen = () => {
         password,
         uuid: "a12345",
       });
-
       if (response.data.message === "OK") {
         const loginToken = response?.data?.data.token;
         const coins = response?.data?.data.coins;
         const userInfo = response?.data?.data;
+        const userId = response?.data?.data.id;
         await SecureStore.setItemAsync("loginToken", loginToken);
         await SecureStore.setItemAsync("coins", coins);
         // Retrieve existing account information
@@ -96,6 +97,8 @@ const LoginScreen = () => {
           );
         }
 
+        await SecureStore.setItemAsync("coins", coins.toString());
+        await SecureStore.setItemAsync("id", userId.toString());
         // Navigate to TabNavigator after successful login
         navigation.navigate("TabNavigator", {
           coin: coins,

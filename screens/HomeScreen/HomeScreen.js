@@ -269,20 +269,28 @@ const HomeScreen = () => {
     </View>
   );
 };
-
-const Header = ({ onStatusUpdatePress, username, avatar }) => (
-  <View style={styles.header}>
-    <Image style={styles.imagelogo} source={{ uri: avatar }} />
-    <TouchableOpacity style={styles.statusUpdate} onPress={onStatusUpdatePress}>
-      <Text style={styles.statusText}>
-        {`What's on your mind, ${username}?`}
-      </Text>
-    </TouchableOpacity>
-    <TouchableOpacity style={styles.searchButton}>
-      <Ionicons name="search" size={25} color="#686868" />
-    </TouchableOpacity>
-  </View>
-);
+const Header = ({ onStatusUpdatePress, username, avatar }) => {
+  const navigation = useNavigation();
+  return (
+    <View style={styles.header}>
+      <Image style={styles.imagelogo} source={{ uri: avatar }} />
+      <TouchableOpacity
+        style={styles.statusUpdate}
+        onPress={onStatusUpdatePress}
+      >
+        <Text style={styles.statusText}>
+          {`What's on your mind, ${username}?`}
+        </Text>
+      </TouchableOpacity>
+      <TouchableOpacity
+        onPress={() => navigation.navigate("Search")}
+        style={styles.searchButton}
+      >
+        <Ionicons name="search" size={25} color="#686868" />
+      </TouchableOpacity>
+    </View>
+  );
+};
 
 const Reels = () => (
   <View style={styles.reelContainer}>
@@ -306,7 +314,6 @@ const Reels = () => (
     ))}
   </View>
 );
-
 const ImageIcons = () => (
   <View style={styles.imageIconContainer}>
     <FlatList
