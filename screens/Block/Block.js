@@ -9,11 +9,8 @@ import {
   SafeAreaView,
   RefreshControl,
 } from "react-native";
-import {
-  TokenRequest,
-  setupTokenRequest,
-} from "../../RequestMethod/requestMethod";
 import * as SecureStore from "expo-secure-store";
+import { TokenRequest, setupTokenRequest } from "../../requestMethod";
 
 const Block = () => {
   const [blockfriends, setBlockFriends] = useState([]);

@@ -74,7 +74,6 @@ const PostsScreen = ({ profileImage }) => {
         subject: reportSubject,
         details: reportDetails,
       });
-      console.log("Post reported successfully:", response.data);
       setEdit(false);
       // Clear the report subject and details after reporting
       setReportSubject("");
@@ -188,32 +187,40 @@ const PostsScreen = ({ profileImage }) => {
           ListHeaderComponent={
             <>
               <View style={styles.detailItem}>
-                <Ionicons name="book-outline" size={20} color="#000" />
+                <Ionicons
+                  name="chatbox-ellipses-outline"
+                  size={20}
+                  color="#000"
+                />
                 <Text style={styles.detailText}>
-                  Studied at{" "}
-                  <Text style={styles.boldText}>
-                    Sovanrith Technology Institute
-                  </Text>
-                </Text>
-              </View>
-              <View style={styles.detailItem}>
-                <Ionicons name="briefcase-outline" size={20} color="#000" />
-                <Text style={styles.detailText}>
-                  Founder and CEO at{" "}
-                  <Text style={styles.boldText}>Jing Harb .Co, Ltd</Text>
-                </Text>
-              </View>
-              <View style={styles.detailItem}>
-                <Ionicons name="home-outline" size={20} color="#000" />
-                <Text style={styles.detailText}>
-                  Lives in <Text style={styles.boldText}>Hanoi</Text>
+                  Description <Text style={styles.boldText}>{description}</Text>
                 </Text>
               </View>
               <View style={styles.detailItem}>
                 <Ionicons name="location-outline" size={20} color="#000" />
                 <Text style={styles.detailText}>
+                  Lives in{" "}
+                  <Text style={styles.boldText}>
+                    {city ? city : "no city yet"}
+                  </Text>
+                </Text>
+              </View>
+              <View style={styles.detailItem}>
+                <Ionicons name="home-outline" size={20} color="#000" />
+                <Text style={styles.detailText}>
                   From{" "}
-                  <Text style={styles.boldText}>Kampong Thom, Cambodia</Text>
+                  <Text style={styles.boldText}>
+                    {country ? country : "not yet has coutry"}
+                  </Text>
+                </Text>
+              </View>
+              <View style={styles.detailItem}>
+                <Ionicons name="map-outline" size={20} color="#000" />
+                <Text style={styles.detailText}>
+                  Address{" "}
+                  <Text style={styles.boldText}>
+                    {address ? address : "not yet has adress"}
+                  </Text>
                 </Text>
               </View>
               <TouchableOpacity style={styles.detailItem}>
@@ -292,7 +299,7 @@ const FriendScreen = () => {
   const [friendCount, setFriendCount] = useState(0);
   const [friends, setFriends] = useState([]);
   const [refreshing, setRefreshing] = useState(false);
-
+  const navigation = useNavigation();
   useEffect(() => {
     fetchFriends();
     fetchFriendCount();
@@ -350,9 +357,16 @@ const FriendScreen = () => {
 
   const renderItem = ({ item }) => (
     <View style={styles.itemContainer}>
-      <TouchableOpacity style={styles.card}>
+      <TouchableOpacity
+        style={styles.card}
+        onPress={() =>
+          navigation.navigate("ProfileDetail", { UserIDInfo: item.id })
+        }
+      >
         <Image source={{ uri: item.avatar }} style={styles.image} />
-        <Text style={styles.name}>{item.username}</Text>
+        <Text numberOfLines={1} ellipsizeMode="tail" style={styles.name}>
+          {item.username}
+        </Text>
       </TouchableOpacity>
     </View>
   );

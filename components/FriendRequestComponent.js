@@ -7,10 +7,6 @@ import {
   TouchableOpacity,
   Alert,
 } from "react-native";
-import {
-  TokenRequest,
-  setupTokenRequest,
-} from "../RequestMethod/requestMethod";
 import * as SecureStore from "expo-secure-store";
 const FriendRequestComponent = ({
   name,

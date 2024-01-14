@@ -31,10 +31,17 @@ import { checkIfPostLiked } from "../../utils/checkIfPostLiked";
 
 const Header = ({ UserInof, friend, userTokenId, setModalVisible }) => {
   const navigation = useNavigation();
+  const [TextRequest, setTextRequest] = useState("");
   const isFriend = friend.some(
     (friendItem) => String(friendItem.id) === String(userTokenId)
   );
-
+  useEffect(() => {
+    if (!isFriend) {
+      setTextRequest("Waiting Confirm");
+    } else {
+      setTextRequest("Add Friend");
+    }
+  }, [UserInof, isFriend]);
   const addFriend = async (user_id) => {
     try {
       await setupTokenRequest();
@@ -43,7 +50,7 @@ const Header = ({ UserInof, friend, userTokenId, setModalVisible }) => {
       });
 
       if (response.data && response.data.message === "OK") {
-        console.log(response.data.data.requested_friends);
+        setTextRequest("Waiting Confirm");
       } else {
         console.error("Failed to send friend request:", response.data);
       }
@@ -123,7 +130,7 @@ const Header = ({ UserInof, friend, userTokenId, setModalVisible }) => {
             ) : (
               <>
                 <Ionicons name="person-add-outline" size={20} color="white" />
-                <Text style={styles.buttonText}>Add Friend</Text>
+                <Text style={styles.buttonText}>{TextRequest}</Text>
               </>
             )}
           </View>
@@ -238,35 +245,48 @@ const PostsScreen = ({ UserInof }) => {
           ListHeaderComponent={
             <>
               <View style={styles.detailItem}>
-                <Ionicons name="book-outline" size={20} color="#000" />
+                <Ionicons
+                  name="chatbox-ellipses-outline"
+                  size={20}
+                  color="#000"
+                />
                 <Text style={styles.detailText}>
-                  Studied at{" "}
+                  Description{" "}
                   <Text style={styles.boldText}>
-                    Sovanrith Technology Institute
+                    {UserInof?.description
+                      ? UserInof?.description
+                      : "no description yet"}
                   </Text>
-                </Text>
-              </View>
-              <View style={styles.detailItem}>
-                <Ionicons name="briefcase-outline" size={20} color="#000" />
-                <Text style={styles.detailText}>
-                  Founder and CEO at{" "}
-                  <Text style={styles.boldText}>Jing Harb .Co, Ltd</Text>
-                </Text>
-              </View>
-              <View style={styles.detailItem}>
-                <Ionicons name="home-outline" size={20} color="#000" />
-                <Text style={styles.detailText}>
-                  Lives in{" "}
-                  <Text style={styles.boldText}>{UserInof?.address}</Text>
                 </Text>
               </View>
               <View style={styles.detailItem}>
                 <Ionicons name="location-outline" size={20} color="#000" />
                 <Text style={styles.detailText}>
+                  Lives in{" "}
+                  <Text style={styles.boldText}>
+                    {UserInof?.city ? UserInof?.city : "no city yet"}
+                  </Text>
+                </Text>
+              </View>
+              <View style={styles.detailItem}>
+                <Ionicons name="home-outline" size={20} color="#000" />
+                <Text style={styles.detailText}>
                   From{" "}
                   <Text style={styles.boldText}>
-                    {" "}
-                    {UserInof?.city}, {UserInof?.country}
+                    {UserInof?.country
+                      ? UserInof?.country
+                      : "not yet has coutry"}
+                  </Text>
+                </Text>
+              </View>
+              <View style={styles.detailItem}>
+                <Ionicons name="map-outline" size={20} color="#000" />
+                <Text style={styles.detailText}>
+                  Address{" "}
+                  <Text style={styles.boldText}>
+                    {UserInof?.address
+                      ? UserInof?.address
+                      : "not yet has adress"}
                   </Text>
                 </Text>
               </View>

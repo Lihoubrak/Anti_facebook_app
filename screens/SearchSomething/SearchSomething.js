@@ -11,12 +11,10 @@ import {
   Dimensions,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import {
-  TokenRequest,
-  setupTokenRequest,
-} from "../../RequestMethod/requestMethod";
+
 import * as SecureStore from "expo-secure-store";
 import moment from "moment";
+import { TokenRequest, setupTokenRequest } from "../../requestMethod";
 
 const { width } = Dimensions.get("window");
 const imageWidth = (width - 15) / 2;
@@ -114,9 +112,7 @@ const SearchSomethingScreen = () => {
             <Text style={styles.description}>{description}</Text>
           </View>
         </View>
-        <View style={styles.imageContainer}>
-          {renderImages(images)}
-        </View>
+        <View style={styles.imageContainer}>{renderImages(images)}</View>
         <View style={styles.footer}>
           <View style={styles.reactionContainer}>
             <Ionicons name="heart-outline" size={24} color="gray" />

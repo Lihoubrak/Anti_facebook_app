@@ -11,12 +11,9 @@ import {
   RefreshControl,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import {
-  TokenRequest,
-  setupTokenRequest,
-} from "../../RequestMethod/requestMethod";
 import moment from "moment";
 import { useNavigation } from "@react-navigation/native";
+import { TokenRequest, setupTokenRequest } from "../../requestMethod";
 
 const NotificationScreen = () => {
   const [searchActive, setSearchActive] = useState(false);

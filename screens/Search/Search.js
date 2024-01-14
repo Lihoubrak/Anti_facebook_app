@@ -9,10 +9,7 @@ import {
   TouchableOpacity,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import {
-  TokenRequest,
-  setupTokenRequest,
-} from "../../RequestMethod/requestMethod";
+import { TokenRequest, setupTokenRequest } from "../../requestMethod";
 
 const SearchScreen = () => {
   const [searchQuery, setSearchQuery] = useState("");

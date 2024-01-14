@@ -13,13 +13,8 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
-import {
-  TokenRequest,
-  setupTokenRequest,
-} from "../../RequestMethod/requestMethod";
-import { useNavigation } from "@react-navigation/native";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as SecureStore from "expo-secure-store";
+import { TokenRequest, setupTokenRequest } from "../../requestMethod";
 
 const EditProfileScreen = ({ route, navigation }) => {
   const [profileImage, setProfileImage] = useState(null);

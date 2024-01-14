@@ -34,6 +34,7 @@ const PostComponent = ({
   userId,
   fetchData,
   liked,
+  userTokenId,
 }) => {
   const { setCoin } = useContext(CoinContext);
   const [reactionType, setReactionType] = useState(null);
@@ -50,12 +51,10 @@ const PostComponent = ({
 
   const loadLikedStatus = async () => {
     try {
-      // Load liked status from SecureStore
       const storedLikedStatus = await SecureStore.getItemAsync(
         `liked_${postId}`
       );
 
-      // If liked status is found in SecureStore, update the state
       if (storedLikedStatus) {
         setReactionType(parseInt(storedLikedStatus, 10));
       }
@@ -133,8 +132,10 @@ const PostComponent = ({
     // Handle share click
   };
   const handleToProfile = async () => {
-    if (userId) {
+    if (userId != userTokenId) {
       navigation.navigate("ProfileDetail", { UserIDInfo: userId });
+    } else {
+      navigation.navigate("Profile");
     }
   };
   const video = React.useRef(null);
