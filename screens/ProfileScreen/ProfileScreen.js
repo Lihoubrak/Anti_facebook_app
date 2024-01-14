@@ -13,18 +13,19 @@ import {
 
 import { Ionicons } from "@expo/vector-icons";
 import { createMaterialTopTabNavigator } from "@react-navigation/material-top-tabs";
-import { PostComponent } from "../../components";
+import { ModalEditAndReport, PostComponent } from "../../components";
 import * as ImagePicker from "expo-image-picker";
 import { useState } from "react";
 import friendsData from "../../data/friendsData";
 import photosData from "../../data/photoData";
 import { useNavigation } from "@react-navigation/native";
-import {
-  TokenRequest,
-  setupTokenRequest,
-} from "../../RequestMethod/requestMethod";
+import { TokenRequest, setupTokenRequest } from "../../requestMethod";
 import { ModalContext } from "../../hooks/useModalContext";
-
+import * as SecureStore from "expo-secure-store";
+import base64 from "base-64";
+import { useFocusEffect } from "@react-navigation/native";
+import { useRoute } from "@react-navigation/native";
+import { checkIfPostLiked } from "../../utils/checkIfPostLiked";
 const Tab = createMaterialTopTabNavigator();
 const screenWidth = Dimensions.get("window").width;
 
@@ -101,15 +102,94 @@ const Header = ({
 const PostsScreen = ({ profileImage }) => {
   const [posts, setPosts] = useState([]);
   const { showModal, setPostId } = useContext(ModalContext);
-  useEffect(() => {
-    fetchData();
-  }, []);
+  const [postIdEdit, setPostIdEdit] = useState("");
+  const [edit, setEdit] = useState(false);
+  const [userId, setUserId] = useState("");
+  const [reportSubject, setReportSubject] = useState("");
+  const [reportDetails, setReportDetails] = useState("");
+  const [userTokenId, setUserTokenId] = useState(null);
+  const [like, setLike] = useState(false);
 
-  const fetchData = async () => {
+  const route = useRoute();
+  const onDelete = async (postId) => {
     try {
       await setupTokenRequest();
+      const response = await TokenRequest.post("/delete_post", {
+        id: postId,
+      });
+      // Check if the deletion was successful based on the response data
+      if (response.data && response.data.message === "OK") {
+        setEdit(false);
+        fetchData();
+      }
+    } catch (error) {
+      console.error("Error deleting post:", error);
+    }
+  };
+
+  const onReport = async (postId) => {
+    try {
+      await setupTokenRequest();
+      const response = await TokenRequest.post("/report_post", {
+        id: postId,
+        subject: reportSubject,
+        details: reportDetails,
+      });
+      console.log("Post reported successfully:", response.data);
+      setEdit(false);
+      // Clear the report subject and details after reporting
+      setReportSubject("");
+      setReportDetails("");
+    } catch (error) {
+      console.error("Error reporting post:", error);
+    }
+  };
+  useFocusEffect(
+    React.useCallback(() => {
+      fetchUserTokenId();
+      checkIfLiked();
+    }, [])
+  );
+  const checkIfLiked = async () => {
+    if (postIdEdit && userId) {
+      const liked = await checkIfPostLiked(postIdEdit, userId);
+      setLike(liked);
+    }
+  };
+  useEffect(() => {
+    if (userTokenId) {
+      fetchData();
+      checkIfLiked();
+    }
+  }, [userTokenId]);
+  const fetchUserTokenId = async () => {
+    try {
+      const token = await SecureStore.getItemAsync("loginToken");
+
+      if (!token) {
+        console.error("Token not found.");
+        return;
+      }
+
+      const trimmedToken = token.trim();
+      const decodedToken = JSON.parse(
+        base64.decode(trimmedToken.split(".")[1])
+      );
+
+      if (!decodedToken || !decodedToken.id) {
+        console.error("Invalid or missing user ID in the decoded token.");
+        return;
+      }
+
+      setUserTokenId(decodedToken.id);
+    } catch (error) {
+      console.error("Error fetching user ID from token:", error);
+    }
+  };
+  const fetchData = async () => {
+    try {
       const response = await TokenRequest.post("get_list_posts", {
-        user_id: "1090",
+        user_id: userTokenId,
         in_campaign: "1",
         campaign_id: "1",
         latitude: "1.0",
@@ -122,60 +202,97 @@ const PostsScreen = ({ profileImage }) => {
       console.error("Error fetching data:", error);
     }
   };
-
+  const handleEditAndReport = (postId, userId) => {
+    setUserId(userId);
+    setPostIdEdit(postId);
+    setEdit(!edit);
+  };
   return (
-    <ScrollView style={styles.detailsContainer}>
-      <View style={styles.detailItem}>
-        <Ionicons name="book-outline" size={20} color="#000" />
-        <Text style={styles.detailText}>
-          Studied at{" "}
-          <Text style={styles.boldText}>Sovanrith Technology Institute</Text>
-        </Text>
-      </View>
-      <View style={styles.detailItem}>
-        <Ionicons name="briefcase-outline" size={20} color="#000" />
-        <Text style={styles.detailText}>
-          Founder and CEO at{" "}
-          <Text style={styles.boldText}>Jing Harb .Co, Ltd</Text>
-        </Text>
-      </View>
-      <View style={styles.detailItem}>
-        <Ionicons name="home-outline" size={20} color="#000" />
-        <Text style={styles.detailText}>
-          setPostId Lives in <Text style={styles.boldText}>Hanoi</Text>
-        </Text>
-      </View>
-      <View style={styles.detailItem}>
-        <Ionicons name="location-outline" size={20} color="#000" />
-        <Text style={styles.detailText}>
-          From <Text style={styles.boldText}>Kampong Thom, Cambodia</Text>
-        </Text>
-      </View>
-      <TouchableOpacity style={styles.detailItem}>
-        <Ionicons name="ellipsis-horizontal-outline" size={20} color="#000" />
-        <Text style={styles.detailText}>See your About info</Text>
-      </TouchableOpacity>
+    <View style={styles.detailsContainer}>
       <View>
-        {posts.map((post, index) => (
-          <PostComponent
-            key={index}
-            username={post.author.name}
-            tagText="is with"
-            tagUsername="Mashesh"
-            time={post.created}
-            location="Cambodia"
-            postText={post.described}
-            images={post.image}
-            profileImage={post.author.avatar}
-            likes={parseInt(post.feel)}
-            commentsCount={parseInt(post.comment_mark)}
-            setPostId={setPostId}
-            showModal={showModal}
-            postId={post.id}
-          />
-        ))}
+        <FlatList
+          data={posts}
+          keyExtractor={(post, index) => index.toString()}
+          ListHeaderComponent={
+            <>
+              <View style={styles.detailItem}>
+                <Ionicons name="book-outline" size={20} color="#000" />
+                <Text style={styles.detailText}>
+                  Studied at{" "}
+                  <Text style={styles.boldText}>
+                    Sovanrith Technology Institute
+                  </Text>
+                </Text>
+              </View>
+              <View style={styles.detailItem}>
+                <Ionicons name="briefcase-outline" size={20} color="#000" />
+                <Text style={styles.detailText}>
+                  Founder and CEO at{" "}
+                  <Text style={styles.boldText}>Jing Harb .Co, Ltd</Text>
+                </Text>
+              </View>
+              <View style={styles.detailItem}>
+                <Ionicons name="home-outline" size={20} color="#000" />
+                <Text style={styles.detailText}>
+                  Lives in <Text style={styles.boldText}>Hanoi</Text>
+                </Text>
+              </View>
+              <View style={styles.detailItem}>
+                <Ionicons name="location-outline" size={20} color="#000" />
+                <Text style={styles.detailText}>
+                  From{" "}
+                  <Text style={styles.boldText}>Kampong Thom, Cambodia</Text>
+                </Text>
+              </View>
+              <TouchableOpacity style={styles.detailItem}>
+                <Ionicons
+                  name="ellipsis-horizontal-outline"
+                  size={20}
+                  color="#000"
+                />
+                <Text style={styles.detailText}>See your About info</Text>
+              </TouchableOpacity>
+            </>
+          }
+          renderItem={({ item, index }) => (
+            <PostComponent
+              key={index}
+              username={item.author.name}
+              tagText="is with"
+              tagUsername="Mashesh"
+              time={item.created}
+              location="Cambodia"
+              postText={item.described}
+              images={item.image}
+              videos={item.video}
+              profileImage={item.author.avatar}
+              likes={parseInt(item.feel)}
+              commentsCount={parseInt(item.comment_mark)}
+              setPostId={setPostId}
+              showModal={showModal}
+              postId={item.id}
+              userId={item.author.id}
+              handleEditAndReport={handleEditAndReport}
+              fetchData={fetchData}
+              liked={like}
+            />
+          )}
+        />
+        <ModalEditAndReport
+          editModalVisible={edit}
+          setEdit={setEdit}
+          onDelete={() => onDelete(postIdEdit)}
+          onReport={() => onReport(postIdEdit)}
+          reportSubject={reportSubject}
+          setReportSubject={setReportSubject}
+          reportDetails={reportDetails}
+          setReportDetails={setReportDetails}
+          postId={postIdEdit}
+          edit={edit}
+          userId={userId}
+        />
       </View>
-    </ScrollView>
+    </View>
   );
 };
 // Photo Tab

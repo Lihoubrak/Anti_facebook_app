@@ -32,6 +32,4 @@ async function setupTokenRequest() {
     console.error("Error setting up TokenRequest:", error);
   }
 }
-setupTokenRequest();
-
 export { publicRequest, TokenRequest, setupTokenRequest };

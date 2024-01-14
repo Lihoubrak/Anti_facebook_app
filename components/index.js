@@ -10,6 +10,7 @@ import ShortcutMenu from "./ShortcutMenu";
 import PostProfileSection from "./PostProfileSection";
 import ModalPostComponent from "./ModalPostComponent";
 import CommentModal from "./CommentModal";
+import ModalEditAndReport from "./ModalEditAndReport";
 export {
   ButtonComponent,
   RegisterComponent,
@@ -24,4 +25,5 @@ export {
   PostProfileSection,
   ModalPostComponent,
   CommentModal,
+  ModalEditAndReport,
 };

@@ -1,26 +1,84 @@
-import React, { useCallback } from "react";
-import { StyleSheet, Text, View, Image, TouchableOpacity } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import React, { useEffect, useState } from "react";
+import {
+  View,
+  Image,
+  Text,
+  TouchableOpacity,
+  FlatList,
+  StyleSheet,
+} from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { COLORS, SIZES } from "../../constants/theme";
+import { useNavigation } from "@react-navigation/native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { ButtonComponent } from "../../components";
-import { useFocusEffect, useNavigation } from "@react-navigation/native";
+import { COLORS, SIZES } from "../../constants/theme";
+import * as SecureStore from "expo-secure-store";
+import EmailPasswordInput from "./EmailPasswordInput";
 
 const LoginProfile = () => {
   const navigation = useNavigation();
+  const [accountInfo, setAccountInfo] = useState(null);
+  const [showLoginScreen, setShowLoginScreen] = useState(false);
+  const [selectedUser, setSelectedUser] = useState(null);
+
   const handleCreateAccountClick = () => {
     navigation.navigate("Register");
+  };
+
+  const handleFindAccountClick = () => {
+    navigation.navigate("findemail");
   };
 
   const handleLoginProfileClick = () => {
     navigation.navigate("login");
   };
 
-  const handleFindAccountClick = () => {
-    navigation.navigate("findemail");
+  const renderAccountItem = ({ item }) => (
+    <TouchableOpacity onPress={() => handleUserClick(item)}>
+      <View style={styles.userContainer}>
+        <View style={styles.imageContainer}>
+          <Image
+            style={styles.profileImage}
+            source={{ uri: item.userInfo.avatar }}
+          />
+          <Text style={styles.username}>{item.userInfo.username}</Text>
+        </View>
+        <Ionicons name="md-ellipsis-vertical" size={24} color="black" />
+      </View>
+    </TouchableOpacity>
+  );
+
+  const handleUserClick = (user) => {
+    setSelectedUser(user);
+    setShowLoginScreen(true);
   };
-  const refreshLoginScreen = useCallback(() => {}, []);
-  useFocusEffect(refreshLoginScreen);
+
+  useEffect(() => {
+    const handleAccountSwitch = async () => {
+      try {
+        const storedAccountInfoString = await SecureStore.getItemAsync(
+          "accountInfo"
+        );
+
+        if (!storedAccountInfoString) {
+          return;
+        }
+
+        const parsedAccountInfo = JSON.parse(storedAccountInfoString);
+
+        if (!parsedAccountInfo) {
+          return;
+        }
+
+        setAccountInfo(parsedAccountInfo);
+      } catch (error) {
+        console.error("Error retrieving account information:", error);
+      }
+    };
+
+    handleAccountSwitch();
+  }, []);
+
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.mainContent}>
@@ -29,16 +87,27 @@ const LoginProfile = () => {
           source={require("../../assets/images/Logo.png")}
         />
         <View>
-          <View style={styles.userContainer}>
-            <View style={styles.imageContainer}>
-              <Image
-                style={styles.profileImage}
-                source={require("../../assets/images/ProfileImage.png")}
-              />
-              <Text style={styles.username}>Sanjay Shendy</Text>
-            </View>
-            <Ionicons name="md-ellipsis-vertical" size={24} color="black" />
-          </View>
+          {accountInfo ? (
+            <FlatList
+              data={accountInfo}
+              keyExtractor={(item) => item.email}
+              renderItem={renderAccountItem}
+            />
+          ) : (
+            <TouchableOpacity>
+              <View style={styles.userContainer}>
+                <View style={styles.imageContainer}>
+                  <Image
+                    style={styles.profileImage}
+                    source={require("../../assets/images/ProfileImage.png")}
+                  />
+                  <Text style={styles.username}>Sanjay Shendy</Text>
+                </View>
+                <Ionicons name="md-ellipsis-vertical" size={24} color="black" />
+              </View>
+            </TouchableOpacity>
+          )}
+
           <View style={styles.accountOptions}>
             <TouchableOpacity
               onPress={handleLoginProfileClick}
@@ -47,6 +116,7 @@ const LoginProfile = () => {
               <Ionicons name="md-log-in" size={24} color="blue" />
               <Text style={styles.optionText}>Log into Another Account</Text>
             </TouchableOpacity>
+
             <TouchableOpacity
               onPress={handleFindAccountClick}
               style={styles.optionItem}
@@ -63,11 +133,14 @@ const LoginProfile = () => {
           />
         </View>
       </View>
+      <EmailPasswordInput
+        onClose={() => setShowLoginScreen(false)}
+        onOpen={showLoginScreen}
+        selectedUser={selectedUser}
+      />
     </SafeAreaView>
   );
 };
-
-export default LoginProfile;
 
 const styles = StyleSheet.create({
   container: {
@@ -113,4 +186,24 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: COLORS.blue,
   },
+  loadingContainer: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "rgba(255, 255, 255, 0.7)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+  },
+  modalContent: {
+    backgroundColor: COLORS.lightWhite,
+    padding: 20,
+    borderRadius: SIZES.medium,
+    width: "80%",
+  },
 });
+
+export default LoginProfile;

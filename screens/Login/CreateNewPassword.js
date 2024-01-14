@@ -2,7 +2,7 @@ import { StyleSheet, View, ActivityIndicator } from "react-native";
 import React, { useState } from "react";
 import { InputTextComponent, RegisterComponent } from "../../components";
 import { Alert } from "react-native";
-import { publicRequest } from "../../RequestMethod/requestMethod";
+import { publicRequest } from "../../requestMethod";
 
 const CreateNewPassword = ({ route, navigation }) => {
   const [password, setPassword] = useState("");

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import {
   Image,
   SafeAreaView,
@@ -8,18 +8,30 @@ import {
   View,
   Modal,
   ScrollView,
+  FlatList,
+  RefreshControl,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { EvilIcons } from "@expo/vector-icons";
+import { TokenRequest, setupTokenRequest } from "../../requestMethod";
+import { ModalEditAndReport, PostComponent } from "../../components";
+import { ModalContext } from "../../hooks/useModalContext";
+import { checkIfPostLiked } from "../../utils/checkIfPostLiked";
+import { useFocusEffect } from "@react-navigation/native";
 
 const WatchScreen = () => {
   const [activeTab, setActiveTab] = useState("ForYou");
-  const [filteredCards, setFilteredCards] = useState([]);
-  const [modalVisible, setModalVisible] = useState(false);
-  const [selectedProfile, setSelectedProfile] = useState(null);
-  const [followStatus, setFollowStatus] = useState({});
+  const [videos, setVideos] = useState([]);
+  const [postIdEdit, setPostIdEdit] = useState("");
+  const [edit, setEdit] = useState(false);
+  const [userId, setUserId] = useState("");
+  const [user, setUser] = useState("");
+  const [reportSubject, setReportSubject] = useState("");
+  const [reportDetails, setReportDetails] = useState("");
+  const { showModal, setPostId } = useContext(ModalContext);
+  const [refreshing, setRefreshing] = useState(false);
+  const [like, setLike] = useState(false);
 
-  // render tabs function
   const renderTab = (tabName) => (
     <TouchableOpacity
       key={tabName}
@@ -40,65 +52,6 @@ const WatchScreen = () => {
       </Text>
     </TouchableOpacity>
   );
-
-  const VideoCard = ({ card }) => {
-    return (
-      <View style={styles.card}>
-        <View style={styles.postHeader}>
-          <Image source={card.profileImg} style={styles.profileImg} />
-          <View style={styles.postInfo}>
-            <Text style={styles.profileName}>{card.name}</Text>
-            <View style={styles.postTimeContainer}>
-              <Ionicons name="earth" size={12} color="black" />
-              <Text style={styles.postTime}>{card.time}</Text>
-            </View>
-          </View>
-          <TouchableOpacity
-            style={styles.followButton}
-            onPress={() => handleFollowToggle(card.name)}
-          >
-            <Text style={styles.followButtonText}>
-              {" "}
-              {followStatus[card.name] ? "Following" : "Follow"}
-            </Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.optionsButton}
-            onPress={() => openModal(card.name)}
-          >
-            <Ionicons name="ellipsis-horizontal" size={20} color="black" />
-          </TouchableOpacity>
-        </View>
-        <Image style={styles.thumbnail} source={{ uri: card.thumbnail }} />
-        <View style={styles.liveBadgeContainer}>
-          {activeTab === "Live" && (
-            <View style={styles.liveBadge}>
-              <Text style={styles.liveText}>LIVE</Text>
-            </View>
-          )}
-          <Text style={styles.viewerCount}>{card.view} watching</Text>
-        </View>
-        <Text style={styles.title}>{card.title}</Text>
-        <View style={styles.socialRow}>
-          <TouchableOpacity style={styles.socialButton}>
-            <Ionicons name="heart-outline" size={24} color="black" />
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.socialButton}>
-            <Ionicons name="chatbox-outline" size={24} color="black" />
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.socialButton}>
-            <Ionicons name="share-outline" size={24} color="black" />
-          </TouchableOpacity>
-        </View>
-        <View style={styles.engagementStats}>
-          <Text style={styles.engagementText}>{card.likes} likes</Text>
-          <Text style={styles.engagementText}>{card.comments} Comments</Text>
-          <Text style={styles.engagementText}>{card.shares} Shares</Text>
-        </View>
-      </View>
-    );
-  };
-
   const videoData = {
     ForYou: [
       {
@@ -127,7 +80,6 @@ const WatchScreen = () => {
         profileImg: require("../../assets/images/fitness.jpg"),
         time: "2h ago",
       },
-      // ... more videos for ForYou
     ],
     Live: [
       {
@@ -225,88 +177,165 @@ const WatchScreen = () => {
       },
     ],
   };
+  const handleEditAndReport = (postId, userId) => {
+    setUserId(userId);
+    setPostIdEdit(postId);
+    setEdit(!edit);
+  };
+  useFocusEffect(
+    React.useCallback(() => {
+      fetchData();
+      checkIfLiked();
+    }, [])
+  );
+  const onRefresh = async () => {
+    setRefreshing(true);
+    try {
+      await checkIfLiked();
+      await fetchData();
+    } catch (error) {
+      console.error("Error refreshing data:", error);
+    } finally {
+      setRefreshing(false);
+    }
+  };
+  const checkIfLiked = async () => {
+    if (postIdEdit && userId) {
+      const liked = await checkIfPostLiked(postIdEdit, userId);
+      setLike(liked);
+    }
+  };
+  const onDelete = async (postId) => {
+    try {
+      await setupTokenRequest();
+      const response = await TokenRequest.post("/delete_post", {
+        id: postId,
+      });
+
+      if (response.data && response.data.message === "OK") {
+        setEdit(false);
+        fetchData();
+      }
+    } catch (error) {
+      console.error("Error deleting post:", error);
+    }
+  };
+
+  const onReport = async (postId) => {
+    try {
+      await setupTokenRequest();
+      const response = await TokenRequest.post("/report_post", {
+        id: postId,
+        subject: reportSubject,
+        details: reportDetails,
+      });
+
+      console.log("Post reported successfully:", response.data);
+      setEdit(false);
+
+      setReportSubject("");
+      setReportDetails("");
+    } catch (error) {
+      console.error("Error reporting post:", error);
+    }
+  };
+  const onBlock = async (userId) => {
+    if (userId) {
+      try {
+        const response = await TokenRequest.post("/set_block", {
+          user_id: userId,
+        });
+        if (response.data && response.data.message === "OK") {
+          console.log(response.data);
+          setEdit(false);
+          fetchData();
+        }
+      } catch (error) {
+        console.error("Error blocking user:", error);
+      }
+    }
+  };
+  const fetchData = async () => {
+    try {
+      const response = await TokenRequest.post("/get_list_videos", {
+        in_campaign: "1",
+        campaign_id: "1",
+        latitude: "1.0",
+        longitude: "1.0",
+        index: "0",
+        count: "10",
+      });
+
+      if (response.data.code === "1000") {
+        setVideos(response.data.data.post);
+      } else {
+        console.error("API request failed");
+      }
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    }
+  };
   useEffect(() => {
-    // Filter cards based on the active tab
-    setFilteredCards(videoData[activeTab]);
-  }, [activeTab]);
-
-  // handle follow toggle
-  const handleFollowToggle = (profileName) => {
-    const currentStatus = followStatus[profileName] || false;
-    setFollowStatus({ ...followStatus, [profileName]: !currentStatus });
-    setModalVisible(false); // Close the modal after toggling follow/unfollow
-  };
-
-  // handle open modal
-  const openModal = (profileName) => {
-    setSelectedProfile(profileName);
-    setModalVisible(true);
-  };
-
-  // Function to handle video deletion
-  const deleteVideo = (profileName) => {
-    setFilteredCards((prevCards) =>
-      prevCards.filter((card) => card.name !== profileName)
-    );
-    setModalVisible(false);
-  };
+    fetchData();
+  }, []);
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* header text */}
       <View style={styles.headerText}>
         <Text style={{ fontSize: 25, fontWeight: 600 }}>Videos</Text>
       </View>
-      {/* render tabs */}
       <View style={styles.tabs}>
         {Object.keys(videoData).map((tabName) => renderTab(tabName))}
       </View>
-      {/* content card */}
-      <ScrollView style={styles.feed}>
-        {filteredCards.map((card) => (
-          <VideoCard key={card.id} card={card} />
-        ))}
-      </ScrollView>
-      {/* modal following and unfollow */}
-      <Modal
-        animationType="slide"
-        transparent={true}
-        visible={modalVisible}
-        onRequestClose={() => setModalVisible(false)}
-      >
-        <View style={styles.centeredView}>
-          <View style={styles.modalView}>
-            {/* Follow/Unfollow Text */}
-            <Text style={styles.modalText}>
-              {followStatus[selectedProfile] ? "Unfollow" : "Follow"}{" "}
-              {selectedProfile}
-            </Text>
-            <TouchableOpacity
-              style={[styles.button, styles.buttonClose]}
-              onPress={() => handleFollowToggle(selectedProfile)}
-            >
-              <Text style={styles.textStyle}>
-                {followStatus[selectedProfile] ? "Unfollow" : "Follow"}{" "}
-                {selectedProfile}
-              </Text>
-            </TouchableOpacity>
-            {/* Delete Video Button */}
-            <TouchableOpacity
-              style={[styles.button, styles.buttonDelete]}
-              onPress={() => deleteVideo(selectedProfile)}
-            >
-              <Text style={styles.textStyle}>Delete this video</Text>
-            </TouchableOpacity>
-            {/* Close Button */}
-            <TouchableOpacity
-              style={[styles.button, styles.buttonClose, styles.closebtn]}
-              onPress={() => setModalVisible(false)}
-            >
-              <Text style={styles.textStyle}>Close</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
+      <FlatList
+        style={styles.feed}
+        data={videos}
+        keyExtractor={(item) => item.id.toString()}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            colors={["#486be5"]}
+          />
+        }
+        renderItem={({ item }) => (
+          <PostComponent
+            username={item.author.name}
+            tagText="is with"
+            tagUsername="Mashesh"
+            time={item.created}
+            location="Cambodia"
+            postText={item.described}
+            // images={item.image}
+            videos={item.video}
+            profileImage={item.author.avatar}
+            likes={parseInt(item.feel)}
+            commentsCount={parseInt(item.comment_mark)}
+            showModal={showModal}
+            postId={item.id}
+            setPostId={setPostId}
+            userId={item.author.id}
+            handleEditAndReport={handleEditAndReport}
+            fetchData={fetchData}
+            liked={like}
+          />
+        )}
+      />
+      {/* Modal */}
+      <ModalEditAndReport
+        editModalVisible={edit}
+        setEdit={setEdit}
+        onDelete={() => onDelete(postIdEdit)}
+        onReport={() => onReport(postIdEdit)}
+        onBlock={() => onBlock(userId)}
+        reportSubject={reportSubject}
+        setReportSubject={setReportSubject}
+        reportDetails={reportDetails}
+        setReportDetails={setReportDetails}
+        postId={postIdEdit}
+        edit={edit}
+        userId={userId}
+      />
     </SafeAreaView>
   );
 };

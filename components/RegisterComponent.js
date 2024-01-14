@@ -10,7 +10,7 @@ import React, { useState } from "react";
 import { COLORS } from "../constants/theme";
 import ButtonComponent from "./ButtonComponent";
 import { useNavigation } from "@react-navigation/native";
-import { publicRequest } from "../RequestMethod/requestMethod";
+import { publicRequest } from "../requestMethod";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Alert } from "react-native";
 

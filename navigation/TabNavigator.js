@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useCallback, useContext, useEffect, useState } from "react";
 import { Ionicons } from "@expo/vector-icons";
 import { createMaterialTopTabNavigator } from "@react-navigation/material-top-tabs";
 import {
@@ -16,146 +16,109 @@ import { ModalContext } from "../hooks/useModalContext";
 import { CommentModal, ModalPostComponent } from "../components";
 import * as SecureStore from "expo-secure-store";
 import { FontAwesome5 } from "@expo/vector-icons";
-import { TokenRequest } from "../RequestMethod/requestMethod";
+import { TokenRequest } from "../requestMethod";
 import { ActivityIndicator } from "react-native-paper";
+import { CoinContext } from "../hooks/useCoinContext";
+import { useFocusEffect } from "@react-navigation/native";
 const profileImage = require("../assets/images/ProfileImage.png");
 const Tab = createMaterialTopTabNavigator();
 const TabNavigator = ({ route, navigation }) => {
   const routeName = getFocusedRouteNameFromRoute(route) || "Home";
   const isHomeScreen = routeName === "Home";
-  const [coin, setCoin] = useState(null);
   const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState("");
   const { isModalVisible, hideModal, postId } = useContext(ModalContext);
   const [isReplying, setIsReplying] = useState(false);
   const [replyToComment, setReplyToComment] = useState(null);
-
+  const [markId, setMarkId] = useState("");
+  const { coin } = useContext(CoinContext);
   const handleIconClick = () => {
     navigation.navigate("message");
   };
-  SecureStore.getItemAsync("coins")
-    .then((storedCoinsString) => {
-      if (storedCoinsString) {
-        const coins = parseInt(storedCoinsString, 10);
-        setCoin(coins);
-      } else {
-        console.log("No coins found in SecureStore");
+  const fetchComments = async () => {
+    try {
+      // Check if postId is available
+      if (!postId) {
+        console.log("postId is null or undefined");
+        return;
       }
-    })
-    .catch((error) => {
-      console.error("Error fetching coins:", error);
-    });
+
+      const response = await TokenRequest.post("/get_mark_comment", {
+        id: postId,
+        index: 0,
+        count: 10,
+      });
+      if (response.data && response.data.data) {
+        const fetchedComments = response.data.data.map((comment) => ({
+          id: comment.id,
+          profileImage:
+            comment.poster.avatar && typeof comment.poster.avatar === "string"
+              ? { uri: comment.poster.avatar }
+              : null,
+          username: comment.poster.name,
+          text: comment.mark_content,
+          time: comment.created,
+          replies: comment.comments,
+        }));
+
+        setComments(fetchedComments);
+      }
+    } catch (error) {
+      console.error(
+        "Error fetching comments:",
+        error.response ? error.response.data : error
+      );
+    }
+  };
   useEffect(() => {
-    const fetchComments = async () => {
-      try {
-        // Check if postId is available
-        if (!postId) {
-          console.log("postId is null or undefined");
-          return;
-        }
-
-        const response = await TokenRequest.post("/get_mark_comment", {
-          id: postId,
-          index: 0,
-          count: 10,
-        });
-        if (response.data && response.data.data) {
-          const fetchedComments = response.data.data.map((comment) => ({
-            id: comment.id,
-            profileImage:
-              comment.poster.avatar && typeof comment.poster.avatar === "string"
-                ? { uri: comment.poster.avatar }
-                : null,
-            username: comment.poster.name,
-            text: comment.mark_content,
-            time: comment.created,
-            replies: comment.comments,
-          }));
-
-          setComments(fetchedComments);
-        }
-      } catch (error) {
-        console.error(
-          "Error fetching comments:",
-          error.response ? error.response.data : error
-        );
-      }
-    };
     if (postId) {
       fetchComments();
     }
   }, [postId]);
 
   const handlePostComment = async () => {
-    try {
-      const response = await TokenRequest.post("/set_mark_comment", {
-        id: postId,
-        content: newComment,
-        index: "0",
-        count: "10",
-        type: "0",
-      });
-      // Extract the array of new comments from the response
-      const newCommentsData = response.data.data;
-      // Construct an array of new comment objects
-      const newComments = newCommentsData.map((commentData) => ({
-        id: commentData.id,
-        profileImage: { uri: commentData.poster.avatar },
-        username: commentData.poster.name,
-        text: commentData.mark_content,
-        time: commentData.created,
-        replies: commentData.comments, // Assuming this is the structure for replies
-      }));
-
-      // Add the new comments to the existing comments
-      setComments((prevComments) => [...prevComments, ...newComments]);
-
-      setNewComment(""); // Clear the input field
-    } catch (error) {
-      console.error("Error posting comment:", error);
+    if (postId) {
+      try {
+        const response = await TokenRequest.post("/set_mark_comment", {
+          id: postId,
+          content: newComment,
+          index: "0",
+          count: "10",
+          type: "0",
+        });
+        setMarkId(response.data.data.id);
+        fetchComments();
+        setNewComment("");
+      } catch (error) {
+        console.error("Error posting comment:", error);
+      }
     }
   };
 
   const handleReplyComment = async (comment) => {
     setIsReplying(true);
     setReplyToComment(comment);
+    setMarkId(comment.id);
   };
   const handleReplyPostComment = async () => {
-    try {
-      const response = await TokenRequest.post("/set_mark_comment", {
-        id: postId,
-        content: newComment,
-        index: "0",
-        count: "10",
-        mark_id: replyToComment.id,
-        type: "1",
-      });
+    if (postId && markId) {
+      try {
+        const response = await TokenRequest.post("/set_mark_comment", {
+          id: postId,
+          content: newComment,
+          index: "0",
+          count: "10",
+          mark_id: markId,
+          type: "1",
+        });
 
-      const newCommentsData = response.data.data;
-
-      // Construct an array of new replied comment objects
-      const repliedComments = newCommentsData.map((commentData) => ({
-        id: commentData.id,
-        profileImage: { uri: commentData.poster.avatar },
-        username: commentData.poster.name,
-        text: commentData.mark_content,
-        time: commentData.created,
-        replies: commentData.comments,
-      }));
-
-      // Update the replied comments in the local state
-      setComments((prevComments) =>
-        prevComments.map((prevComment) =>
-          prevComment.id === replyToComment.id
-            ? { ...prevComment, replies: repliedComments }
-            : prevComment
-        )
-      );
-
-      setNewComment("");
-      setIsReplying(false);
-    } catch (error) {
-      console.error("Error posting comment:", error);
+        fetchComments();
+        setNewComment("");
+        setMarkId("");
+      } catch (error) {
+        console.error("Error posting comment:", error);
+        console.error("Error posting comment:", error.response.data);
+      }
     }
   };
 
@@ -167,7 +130,7 @@ const TabNavigator = ({ route, navigation }) => {
       }}
     >
       <View style={styles.headerContainer}>
-        {!isHomeScreen && (
+        {isHomeScreen && !isModalVisible && (
           <View style={styles.header}>
             <Text style={styles.headerText}>Facebook</Text>
             <View

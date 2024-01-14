@@ -146,6 +146,24 @@ const CommentModal = ({
           keyExtractor={(item, index) => index.toString()}
           renderItem={renderCommentItem}
           style={styles.flatList}
+          ListHeaderComponent={() => (
+            <View
+              style={{
+                alignItems: "center",
+                flexDirection: "row",
+                padding: 10,
+                borderBottomWidth: 1,
+                borderBottomColor: "#ddd",
+              }}
+            >
+              <TouchableOpacity onPress={hideModal}>
+                <Ionicons name="arrow-back" size={24} color="#333" />
+              </TouchableOpacity>
+              <View style={styles.modalHeader}>
+                <Text style={styles.modalHeaderText}>Comments</Text>
+              </View>
+            </View>
+          )}
         />
 
         {isReplying && replyToComment && (
@@ -196,6 +214,17 @@ const styles = StyleSheet.create({
   },
   flatList: {
     marginBottom: 60,
+  },
+  modalHeader: {
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+
+    width: "100%",
+  },
+  modalHeaderText: {
+    fontSize: 18,
+    fontWeight: "bold",
   },
   newCommentInputContainer: {
     flexDirection: "row",

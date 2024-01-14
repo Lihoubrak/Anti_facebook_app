@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 import {
   Modal,
   StyleSheet,
@@ -13,84 +13,218 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons, EvilIcons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
 import { useNavigation, useRoute } from "@react-navigation/native";
-import {
-  TokenRequest,
-  setupTokenRequest,
-} from "../RequestMethod/requestMethod";
+import { TokenRequest } from "../requestMethod";
+import { Video, ResizeMode } from "expo-av";
+import { useFocusEffect } from "@react-navigation/native";
+import { CoinContext } from "../hooks/useCoinContext";
+
 const ModalPostComponent = () => {
   const [selectedImages, setSelectedImages] = useState([]);
+  const [selectedVideo, setSelectedVideo] = useState(null);
   const [showAllImages, setShowAllImages] = useState(false);
+  const [status, setStatus] = useState({});
+  const video = useRef(null);
   const [text, setText] = useState("");
   const navigation = useNavigation();
   const route = useRoute();
+
+  const [postDetails, setPostDetails] = useState(route.params?.postDetails);
+  const [userWithNewPost, setUserWithNewPost] = useState(route.params?.user);
+  const [isPostUpdate, setIsPostUpdate] = useState(
+    route.params?.isPostUpdate || false
+  );
+  const [isNewPost, setIsNewPost] = useState(route.params?.isNewPost || false);
+  const { setCoin } = useContext(CoinContext);
+  useFocusEffect(
+    React.useCallback(() => {
+      setIsNewPost(route.params?.isNewPost || false);
+      setIsPostUpdate(route.params?.isPostUpdate || false);
+      setPostDetails(route.params?.postDetails);
+      setUserWithNewPost(route.params?.user);
+    }, [])
+  );
+  useEffect(() => {
+    setText(postDetails?.described || "");
+
+    if (postDetails) {
+      const imagesWithIdAndUri = postDetails.image.map(({ id, url }) => ({
+        id,
+        uri: url,
+      }));
+      setSelectedImages(imagesWithIdAndUri || []);
+    }
+
+    if (postDetails?.video && postDetails.video.url) {
+      const videoUri = postDetails.video.url;
+      setSelectedVideo({ uri: videoUri });
+    }
+  }, []);
+
   const handlePost = async () => {
     try {
-      // Prepare the form data for the request
       const formData = new FormData();
       formData.append("described", text);
+
       selectedImages.forEach((image, index) => {
-        formData.append(`image${index}`, {
+        formData.append(`image`, {
           uri: image.uri,
           type: "image/jpeg",
           name: `image_${index}.jpg`,
         });
       });
-      await setupTokenRequest();
-      const response = await TokenRequest.post("/add_post", formData);
-      if (response.status === 200) {
+
+      if (selectedVideo) {
+        formData.append("video", {
+          uri: selectedVideo.uri,
+          type: "video/mp4",
+          name: "demo.mp4",
+        });
+      }
+
+      const response = await TokenRequest.post("/add_post", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
+      if (response.data.message === "OK") {
         console.log("Post successful");
+        setCoin(response.data.data.coins);
         navigation.navigate("Home");
-      } else {
-        console.error("Post failed");
       }
     } catch (error) {
       console.error("Error posting:", error);
-      console.log(error.response?.data);
     }
+  };
+
+  const handleUpdate = async () => {
+    try {
+      const formData = new FormData();
+      formData.append("id", String(postDetails.id));
+      formData.append("described", text);
+
+      // Check for images to delete
+      const imagesToDeleteIds = postDetails.image
+        .filter(
+          (image) =>
+            !selectedImages.find(
+              (selectedImage) => selectedImage.uri === image.url
+            )
+        )
+        .map((image) => image.id);
+
+      if (imagesToDeleteIds.length > 0) {
+        formData.append("image_del", imagesToDeleteIds.join(","));
+      }
+
+      // Handle the case when the video is replaced with an image
+      if (selectedVideo && !selectedVideo.id) {
+        // Append the new video
+        formData.append("video", {
+          uri: selectedVideo.uri,
+          type: "video/mp4",
+          name: "demo.mp4",
+        });
+
+        // Append the new image
+        selectedImages.forEach((image, index) => {
+          formData.append(`image`, {
+            uri: image.uri,
+            type: "image/jpeg",
+            name: `image_${index}.jpg`,
+          });
+        });
+      } else {
+        // Handle the case when the video is not replaced with an image
+        selectedImages.forEach((image, index) => {
+          // Check if the image is already present in formData
+          const isImageAlreadyAdded = postDetails.image.some(
+            (existingImage) => existingImage.url === image.uri
+          );
+
+          if (!isImageAlreadyAdded) {
+            // Append the image to formData only if it's not already present
+            formData.append(`image`, {
+              uri: image.uri,
+              type: "image/jpeg",
+              name: `image_${index}.jpg`,
+            });
+          }
+        });
+      }
+      const response = await TokenRequest.post("/edit_post", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
+      if (response.data.message === "OK") {
+        console.log("Post update successful");
+        setCoin(response.data.data.coins);
+
+        navigation.navigate("Home");
+      }
+    } catch (error) {
+      console.error("Error updating post:", error.response?.data || error);
+    }
+  };
+
+  const removeVideo = () => {
+    setSelectedVideo(null);
   };
   const pickImage = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      mediaTypes: ImagePicker.MediaTypeOptions.All,
       aspect: [4, 3],
       quality: 1,
       allowsMultipleSelection: true,
     });
 
     if (!result.canceled) {
-      setSelectedImages([...selectedImages, ...result.assets]);
+      const images = result.assets.filter((media) => media.type === "image");
+      const video = result.assets.find((media) => media.type === "video");
+
+      setSelectedImages([...selectedImages, ...images]);
+      setSelectedVideo(video || null);
     }
   };
+  const renderMediaItem = ({ item }) => {
+    const containerStyle = {
+      width: selectedImages.length === 1 ? "100%" : "50%",
+      marginBottom: 10,
+    };
+    return (
+      <TouchableOpacity
+        onPress={() => {
+          navigation.navigate("showall", {
+            itemImage: selectedImages,
+            isPostUpdate: true,
+            isNewPost: true,
+          });
+        }}
+        style={containerStyle}
+      >
+        <Image source={{ uri: item.uri }} style={styles.postMedia} />
+      </TouchableOpacity>
+    );
+  };
 
-  const renderImageItem = ({ item }) => (
-    <TouchableOpacity
-      onPress={() =>
-        navigation.navigate("showall", {
-          itemImage: selectedImages,
-        })
-      }
-      style={{ width: "50%", marginBottom: 10 }}
-    >
-      <Image source={{ uri: item.uri }} style={styles.postImage} />
-    </TouchableOpacity>
-  );
   const remainingImagesCount = selectedImages.length - (showAllImages ? 0 : 4);
   const handleBack = () => {
     navigation.navigate("Home");
   };
+
   useEffect(() => {
-    // Check if there are updated images and texts from the ShowAllImagePost screen
     if (route.params?.updatedImagesWithText) {
       const updatedImagesWithText = route.params.updatedImagesWithText;
-
-      // Extract the images and texts separately
       const updatedImages = updatedImagesWithText.map((item) => ({
         uri: item.uri,
         width: item.width,
         height: item.height,
       }));
-      //text each image
       const updatedTexts = updatedImagesWithText.map((item) => item.text);
       setSelectedImages(updatedImages);
+      // setText(updatedTexts.join("\n"));
     }
   }, [route.params?.updatedImagesWithText]);
 
@@ -100,28 +234,55 @@ const ModalPostComponent = () => {
         <TouchableOpacity onPress={handleBack}>
           <Ionicons name="arrow-back" size={24} color="#333" />
         </TouchableOpacity>
-        <Text style={styles.modalHeaderText}>Create Post</Text>
-        <TouchableOpacity onPress={handlePost} style={styles.postButton}>
-          <Text style={{ color: "#1877f2" }}>Post</Text>
-        </TouchableOpacity>
+        {isNewPost && <Text style={styles.modalHeaderText}>Create Post</Text>}
+        {isPostUpdate && <Text style={styles.modalHeaderText}>Edit Post</Text>}
+
+        {isNewPost && (
+          <TouchableOpacity onPress={handlePost} style={styles.postButton}>
+            <Text style={{ color: "#1877f2" }}>Post</Text>
+          </TouchableOpacity>
+        )}
+        {isPostUpdate && (
+          <TouchableOpacity onPress={handleUpdate} style={styles.postButton}>
+            <Text style={{ color: "#1877f2" }}>Update</Text>
+          </TouchableOpacity>
+        )}
       </View>
 
       {/* Modal content */}
       <View style={styles.modalContent}>
         <View style={{ paddingVertical: 10, paddingHorizontal: 15 }}>
           <View style={styles.userInfoContainer}>
-            <Image
-              source={require("../assets/images/story4.png")}
-              style={styles.profileImage}
-            />
-            <View>
-              <Text style={styles.userName}>Lihou Brak</Text>
-              <View style={styles.locationContainer}>
-                <Ionicons name="earth-outline" size={15} color="black" />
-                <EvilIcons name="location" size={20} color="black" />
-                <Text style={styles.locationText}>Cambodia</Text>
+            {postDetails ? (
+              <Image
+                source={{ uri: postDetails.author.avatar }}
+                style={styles.profileImage}
+              />
+            ) : (
+              <Image
+                source={{ uri: userWithNewPost?.avatar }}
+                style={styles.profileImage}
+              />
+            )}
+            {postDetails ? (
+              <View>
+                <Text style={styles.userName}>{postDetails.author.name}</Text>
+                <View style={styles.locationContainer}>
+                  <Ionicons name="earth-outline" size={15} color="black" />
+                  <EvilIcons name="location" size={20} color="black" />
+                  <Text style={styles.locationText}>Cambodia</Text>
+                </View>
               </View>
-            </View>
+            ) : (
+              <View>
+                <Text style={styles.userName}>{userWithNewPost?.username}</Text>
+                <View style={styles.locationContainer}>
+                  <Ionicons name="earth-outline" size={15} color="black" />
+                  <EvilIcons name="location" size={20} color="black" />
+                  <Text style={styles.locationText}>Cambodia</Text>
+                </View>
+              </View>
+            )}
           </View>
         </View>
         <TextInput
@@ -131,21 +292,47 @@ const ModalPostComponent = () => {
           value={text}
           onChangeText={(newText) => setText(newText)}
         />
-        <View style={styles.imageContainer}>
-          <FlatList
-            data={selectedImages.slice(0, 4).reverse()}
-            renderItem={renderImageItem}
-            keyExtractor={(item) => item.uri}
-            numColumns={2}
-          />
-          {selectedImages.length > 4 &&
-            remainingImagesCount > 0 &&
-            !showAllImages && (
-              <Text style={styles.remainingImagesText}>
-                +{remainingImagesCount}
-              </Text>
+
+        {selectedVideo ? (
+          <>
+            <Video
+              ref={video}
+              style={styles.postMedia}
+              source={{ uri: selectedVideo.uri }}
+              useNativeControls
+              resizeMode={ResizeMode.CONTAIN}
+              isLooping
+              onPlaybackStatusUpdate={(status) => setStatus(status)}
+            />
+            {postDetails && (
+              <View style={styles.videoControls}>
+                <TouchableOpacity
+                  onPress={removeVideo}
+                  style={styles.removeVideoButton}
+                >
+                  <EvilIcons name="trash" size={24} color="red" />
+                </TouchableOpacity>
+              </View>
             )}
-        </View>
+          </>
+        ) : (
+          <View style={styles.imageContainer}>
+            <FlatList
+              data={selectedImages.slice(0, 4).reverse()}
+              renderItem={renderMediaItem}
+              keyExtractor={(item, index) => index.toString()}
+              numColumns={2}
+            />
+
+            {selectedImages.length > 4 &&
+              remainingImagesCount > 0 &&
+              !showAllImages && (
+                <Text style={styles.remainingImagesText}>
+                  +{remainingImagesCount}
+                </Text>
+              )}
+          </View>
+        )}
       </View>
 
       {/* Action buttons */}
@@ -217,8 +404,6 @@ const styles = StyleSheet.create({
   },
   postInput: {
     borderColor: "#ddd",
-    // borderWidth: 1,
-    // borderRadius: 5,
     padding: 10,
     fontSize: 16,
   },
@@ -241,7 +426,7 @@ const styles = StyleSheet.create({
     flexWrap: "wrap",
     marginBottom: 10,
   },
-  postImage: {
+  postMedia: {
     height: 200,
     resizeMode: "cover",
   },
@@ -253,18 +438,17 @@ const styles = StyleSheet.create({
     right: 80,
     bottom: 80,
   },
-  allImagesContainer: {
-    marginBottom: 10,
+  videoControls: {
+    marginTop: 10,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  toggleButton: {
     alignItems: "center",
   },
-
-  captionInput: {
-    borderColor: "#ddd",
-    borderWidth: 1,
-    borderRadius: 5,
+  removeVideoButton: {
+    alignItems: "center",
     marginTop: 10,
-    padding: 10,
-    width: "100%",
   },
 });
 

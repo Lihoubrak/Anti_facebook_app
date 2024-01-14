@@ -12,7 +12,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { COLORS, SIZES } from "../../constants/theme";
 import { ButtonComponent, InputTextComponent } from "../../components";
-import { publicRequest } from "../../RequestMethod/requestMethod";
+import { publicRequest } from "../../requestMethod";
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import * as SecureStore from "expo-secure-store";
 import { AuthContext } from "../../hooks/AuthContext";
@@ -25,6 +25,7 @@ const LoginScreen = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [loading, setLoading] = useState(false);
+
   const navigation = useNavigation();
   const clearEmail = () => {
     setEmail("");
@@ -50,7 +51,7 @@ const LoginScreen = () => {
     setErrorMessage("");
   }, []);
   useFocusEffect(refreshLoginScreen);
-  handleLogin = async () => {
+  const handleLogin = async () => {
     setLoading(true);
     Keyboard.dismiss();
     try {
@@ -59,11 +60,42 @@ const LoginScreen = () => {
         password,
         uuid: "a12345",
       });
-      const loginToken = response?.data?.data.token;
-      const coins = response?.data?.data.coins;
+
       if (response.data.message === "OK") {
+        const loginToken = response?.data?.data.token;
+        const coins = response?.data?.data.coins;
+        const userInfo = response?.data?.data;
         await SecureStore.setItemAsync("loginToken", loginToken);
-        await SecureStore.setItemAsync("coins", coins.toString());
+        await SecureStore.setItemAsync("coins", coins);
+        // Retrieve existing account information
+        const storedAccountInfoString = await SecureStore.getItemAsync(
+          "accountInfo"
+        );
+
+        let storedAccountInfo = [];
+        if (storedAccountInfoString) {
+          try {
+            storedAccountInfo = JSON.parse(storedAccountInfoString);
+          } catch (error) {
+            console.error("Error parsing account info:", error);
+          }
+        }
+
+        // Check if the new account ID already exists in the array
+        const isNewAccount = storedAccountInfo.some(
+          (account) => String(account.userInfo.id) === String(userInfo.id)
+        );
+
+        if (!isNewAccount) {
+          // Add the new account information to the array along with email
+          storedAccountInfo.push({ userInfo, email });
+          // Store the updated array along with email
+          await SecureStore.setItemAsync(
+            "accountInfo",
+            JSON.stringify(storedAccountInfo)
+          );
+        }
+
         // Navigate to TabNavigator after successful login
         navigation.navigate("TabNavigator", {
           coin: coins,
@@ -75,9 +107,10 @@ const LoginScreen = () => {
       console.error("Login error:", error);
       setErrorMessage("Invalid email or password. Please try again.");
     } finally {
-      setLoading(false); // Set loading to false in the finally block
+      setLoading(false);
     }
   };
+
   return (
     <SafeAreaView style={styles.container}>
       <Image
@@ -127,7 +160,7 @@ const LoginScreen = () => {
             isFocused={passwordFocused}
             clear={password !== ""}
             onFocus={handlePasswordFocus}
-            InputFunction={clearEmail}
+            InputFunction={setShowPassword}
             iconName={showPassword ? "eye-outline" : "eye-off-outline"}
             secureTextEntry={!showPassword}
           />

@@ -20,7 +20,8 @@
     "@react-navigation/native-stack": "^6.9.13",
     "@react-navigation/stack": "^6.3.17",
     "axios": "^1.4.0",
-    "expo": "^49.0.21",
+    "base-64": "^1.0.0",
+    "expo": "^49.0.0",
     "expo-av": "~13.4.1",
     "expo-blur": "~12.4.1",
     "expo-camera": "~13.4.4",
@@ -33,8 +34,10 @@
     "expo-splash-screen": "~0.20.5",
     "expo-status-bar": "~1.6.0",
     "formik": "^2.4.3",
+    "jwt-decode": "^4.0.0",
     "link": "^2.1.0",
     "react": "18.2.0",
+    "react-dom": "18.2.0",
     "react-native": "0.72.6",
     "react-native-bouncy-checkbox": "^3.0.7",
     "react-native-collapsible-tab-view": "^6.2.1",
@@ -50,6 +53,7 @@
     "react-native-stock-star-rating": "^1.0.6",
     "react-native-tab-view": "^3.5.2",
     "react-native-vector-icons": "^10.0.0",
+    "react-native-web": "~0.19.6",
     "yup": "^1.2.0"
   },
   "devDependencies": {

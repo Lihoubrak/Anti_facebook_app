@@ -24,6 +24,8 @@ import MessageChat from "./MessageChat/MessageChat";
 import MessageProfile from "./MessageProfile/MessageProfile";
 import ShowAllImagePost from "./ShowAllImagePost/ShowAllImagePost";
 import AccountEmail from "./Register/AccountEmail";
+import PostDetailScreen from "./PostDetailScreen/PostDetailScreen";
+import ProfileDetail from "./ProfileDetail/ProfileDetail";
 export {
   SplashScreen,
   HomeScreen,
@@ -51,4 +53,6 @@ export {
   MessageChat,
   MessageProfile,
   ShowAllImagePost,
+  PostDetailScreen,
+  ProfileDetail,
 };

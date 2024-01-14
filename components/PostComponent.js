@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import {
   Image,
   StyleSheet,
@@ -9,8 +9,11 @@ import {
 } from "react-native";
 import { Ionicons, EvilIcons } from "@expo/vector-icons";
 import { ResizeMode, Video } from "expo-av";
-import { Button } from "react-native";
-import { Modal, TextInput } from "react-native-paper";
+import { TokenRequest, setupTokenRequest } from "../requestMethod";
+import { useNavigation } from "@react-navigation/native";
+import { CoinContext } from "../hooks/useCoinContext";
+import playSound from "../sounds/playSound";
+import * as SecureStore from "expo-secure-store";
 
 const PostComponent = ({
   username,
@@ -27,15 +30,100 @@ const PostComponent = ({
   showModal,
   postId,
   setPostId,
+  handleEditAndReport,
+  userId,
+  fetchData,
+  liked,
 }) => {
-  const handleMessageClick = () => {
-    // Handle message click
+  const { setCoin } = useContext(CoinContext);
+  const [reactionType, setReactionType] = useState(null);
+
+  useEffect(() => {
+    // Load liked status from SecureStore on component mount
+    loadLikedStatus();
+  }, []);
+
+  useEffect(() => {
+    // Update liked status when the 'liked' prop changes
+    setReactionType(liked ? 1 : null);
+  }, [liked]);
+
+  const loadLikedStatus = async () => {
+    try {
+      // Load liked status from SecureStore
+      const storedLikedStatus = await SecureStore.getItemAsync(
+        `liked_${postId}`
+      );
+
+      // If liked status is found in SecureStore, update the state
+      if (storedLikedStatus) {
+        setReactionType(parseInt(storedLikedStatus, 10));
+      }
+    } catch (error) {
+      console.error("Error loading liked status:", error);
+    }
   };
 
-  const handleLikeClick = () => {
-    // Handle like click
+  const handleRemoveLike = async () => {
+    try {
+      const response = await TokenRequest.post("/delete_feel", {
+        id: postId,
+      });
+
+      // Set the reaction type to null as the user has removed the like
+      setReactionType(null);
+
+      // Save updated liked status to SecureStore
+      saveLikedStatus(null);
+      fetchData();
+    } catch (error) {
+      console.error("Error removing like:", error);
+    }
   };
 
+  const saveLikedStatus = async (type) => {
+    try {
+      // Save liked status to SecureStore
+      await SecureStore.setItemAsync(
+        `liked_${postId}`,
+        type ? type.toString() : ""
+      );
+    } catch (error) {
+      console.error("Error saving liked status:", error);
+    }
+  };
+  const handleLikeClick = async () => {
+    if (reactionType === 1) {
+      // If the user has already liked the post, remove the like
+      await handleRemoveLike();
+      playSound();
+    } else {
+      // If the user hasn't liked the post, add the like and play music
+      await handleReactionClick(1);
+      playSound();
+    }
+  };
+  const handleReactionClick = async (type) => {
+    if (postId) {
+      try {
+        const response = await TokenRequest.post("/feel", {
+          id: postId,
+          type,
+        });
+
+        // Set the reaction type to the provided type
+        setReactionType(type);
+
+        // Save updated liked status to AsyncStorage
+        saveLikedStatus(type);
+
+        setCoin(response.data.coins);
+        fetchData();
+      } catch (error) {
+        console.error("Error handling reaction:", error);
+      }
+    }
+  };
   const handleCommentClick = () => {
     showModal();
     setPostId(postId);
@@ -44,7 +132,13 @@ const PostComponent = ({
   const handleShareClick = () => {
     // Handle share click
   };
+  const handleToProfile = async () => {
+    if (userId) {
+      navigation.navigate("ProfileDetail", { UserIDInfo: userId });
+    }
+  };
   const video = React.useRef(null);
+  const navigation = useNavigation();
   const [status, setStatus] = React.useState({});
 
   const remainingImagesCount =
@@ -71,13 +165,21 @@ const PostComponent = ({
 
   // Convert milliseconds to minutes
   const timeDifferenceMinutes = Math.floor(timeDifferenceMs / (1000 * 60));
-  const handleImageClick = (index) => {
-    // Handle image click, you can add your logic here
-    console.log(`Clicked on image at index ${index}`);
+  const handleImageClick = async (postId) => {
+    try {
+      const response = await TokenRequest.post("/get_post", {
+        id: postId.toString(),
+      });
+      const postDetails = response.data.data;
+      navigation.navigate("PostDetailScreen", { postDetails });
+    } catch (error) {
+      console.error("Error fetching post details:", error);
+    }
   };
+
   const renderImageItem = ({ item, index }) => (
     <TouchableOpacity
-      onPress={() => handleImageClick(index)}
+      onPress={() => handleImageClick(postId)}
       style={{
         width: images?.length > 1 ? "50%" : "100%",
       }}
@@ -89,14 +191,16 @@ const PostComponent = ({
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Image
-          source={
-            profileImage && typeof profileImage === "string"
-              ? { uri: profileImage }
-              : null
-          }
-          style={styles.profileImage}
-        />
+        <TouchableOpacity onPress={handleToProfile}>
+          <Image
+            source={
+              profileImage && typeof profileImage === "string"
+                ? { uri: profileImage }
+                : null
+            }
+            style={styles.profileImage}
+          />
+        </TouchableOpacity>
         <View style={styles.headerText}>
           <Text style={styles.username}>
             {username} <Text style={{ fontWeight: "normal" }}>{tagText} </Text>
@@ -115,17 +219,19 @@ const PostComponent = ({
             <Text style={styles.locationText}>{location}</Text>
           </View>
         </View>
-        <Ionicons
-          name="ellipsis-vertical"
-          style={styles.moreIcon}
-          color="#333"
-        />
+        <TouchableOpacity onPress={() => handleEditAndReport(postId, userId)}>
+          <Ionicons
+            name="ellipsis-vertical"
+            style={styles.moreIcon}
+            color="#333"
+          />
+        </TouchableOpacity>
       </View>
       <Text style={styles.postText}>{postText}</Text>
-      {images && images.length > 0 && (
+      {images && images.length > 0 ? (
         <View style={styles.imageContainer}>
           <FlatList
-            data={images.slice(0, 4)}
+            data={images.slice(0, 4).reverse()}
             renderItem={renderImageItem}
             keyExtractor={(item, index) => index.toString()}
             numColumns={2}
@@ -136,21 +242,21 @@ const PostComponent = ({
             </Text>
           )}
         </View>
-      )}
-      {videos && (
-        <View style={styles.imageContainer}>
-          <Video
-            ref={video}
-            style={{ width: "100%", height: 200 }}
-            source={{
-              uri: videos.url,
-            }}
-            useNativeControls
-            resizeMode={ResizeMode.CONTAIN}
-            isLooping
-            onPlaybackStatusUpdate={(status) => setStatus(() => status)}
-          />
-          {/* <View style={styles.buttons}>
+      ) : (
+        videos && (
+          <View style={styles.imageContainer}>
+            <Video
+              ref={video}
+              style={{ width: "100%", height: 200 }}
+              source={{
+                uri: videos.url,
+              }}
+              useNativeControls
+              resizeMode={ResizeMode.CONTAIN}
+              isLooping
+              onPlaybackStatusUpdate={(status) => setStatus(() => status)}
+            />
+            {/* <View style={styles.buttons}>
             <Button
               title={status.isPlaying ? "Pause" : "Play"}
               onPress={() =>
@@ -160,12 +266,25 @@ const PostComponent = ({
               }
             />
           </View> */}
-        </View>
+          </View>
+        )
       )}
+
       <View style={styles.actions}>
         <TouchableOpacity onPress={handleLikeClick}>
-          <EvilIcons name="like" size={30} color="black" />
+          <EvilIcons
+            name="like"
+            size={30}
+            color={reactionType === 1 ? "blue" : "black"}
+          />
         </TouchableOpacity>
+        {/* <TouchableOpacity onPress={handleDisappointClick}>
+          <Ionicons
+            name="sad-outline"
+            size={25}
+            color={reactionType === 0 ? "red" : "black"}
+          />
+        </TouchableOpacity> */}
         <TouchableOpacity onPress={handleCommentClick}>
           <EvilIcons name="comment" size={30} color="black" />
         </TouchableOpacity>
@@ -175,12 +294,8 @@ const PostComponent = ({
       </View>
       <View style={styles.likesComments}>
         <View style={styles.likeCommentIcons}>
-          <TouchableOpacity onPress={handleLikeClick}>
-            <EvilIcons name="like" size={20} color="black" />
-          </TouchableOpacity>
-          <TouchableOpacity onPress={handleCommentClick}>
-            <EvilIcons name="comment" size={20} color="black" />
-          </TouchableOpacity>
+          <EvilIcons name="like" size={20} color="black" />
+          <Ionicons name="sad-outline" size={15} color="black" />
           <Text style={styles.likeText}>{likes} Likes</Text>
         </View>
         <Text style={styles.commentCount}>{commentsCount} Comments</Text>
@@ -275,6 +390,7 @@ const styles = StyleSheet.create({
   },
   likeText: {
     color: "#555",
+    marginLeft: 2,
   },
   commentCount: {
     marginTop: 5,

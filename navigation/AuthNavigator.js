@@ -185,7 +185,7 @@ const AuthNavigator = () => {
         component={FindPhone}
         options={{ headerShown: false }}
       /> */}
-      <Stack.Screen
+      {/* <Stack.Screen
         name="findemail"
         component={FindEmail}
         options={{
@@ -223,7 +223,7 @@ const AuthNavigator = () => {
           },
           headerTintColor: "#000", // Set icon and back button color to black
         }}
-      />
+      /> */}
       {/* <Stack.Screen
         name="loginproflie"
         component={LoginProfile}

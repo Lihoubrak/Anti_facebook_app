@@ -8,9 +8,6 @@ const AccountEmail = () => {
   const [emailFocused, setEmailFocused] = useState(false);
   const [emailError, setEmailError] = useState("");
   const [isNextButtonEnabled, setIsNextButtonEnabled] = useState(false);
-  const route = useRoute();
-  const loginProfle = route.params?.loginProfle;
-  console.log(loginProfle);
   const refreshLoginScreen = useCallback(() => {
     setEmail("");
     setEmailError("");

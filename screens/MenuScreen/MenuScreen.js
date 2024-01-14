@@ -67,6 +67,7 @@ const MenuScreen = () => {
     async function handleLogout() {
       try {
         await SecureStore.deleteItemAsync("loginToken");
+        // await SecureStore.deleteItemAsync("accountInfo");
         navigation.navigate("loginproflie");
       } catch (error) {
         console.error("Error clearing token:", error);
@@ -82,16 +83,6 @@ const MenuScreen = () => {
         break;
       default:
         navigation.navigate(name);
-    }
-  };
-  const handleLogout = async () => {
-    try {
-      await SecureStore.deleteItemAsync("loginToken");
-
-      // Navigate to the login screen
-      navigation.navigate("loginproflie");
-    } catch (error) {
-      console.error("Error clearing token:", error);
     }
   };
   const renderFooter = () => (

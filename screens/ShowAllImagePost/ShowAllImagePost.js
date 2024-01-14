@@ -1,3 +1,4 @@
+import React, { useEffect, useState } from "react";
 import {
   StyleSheet,
   Text,
@@ -8,28 +9,16 @@ import {
   TextInput,
   TouchableOpacity,
 } from "react-native";
-import React, { useEffect, useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons, EvilIcons } from "@expo/vector-icons";
-import { ModalContext } from "../../hooks/useModalContext";
 import { useRoute } from "@react-navigation/native";
+
 const ShowAllImagePost = ({ navigation }) => {
   const route = useRoute();
-  const { itemImage: initialImages } = route.params;
+  const { itemImage: initialImages, isPostUpdate, isNewPost } = route.params;
   const [imageTexts, setImageTexts] = useState(initialImages.map(() => ""));
   const [itemImages, setItemImages] = useState(initialImages);
   const screenWidth = Dimensions.get("window").width;
-
-  const handleTextInputChange = (index, text) => {
-    setImageTexts((prevTexts) =>
-      prevTexts.map((prevText, i) => (i === index ? text : prevText))
-    );
-  };
-
-  const handleRemoveImage = (index) => {
-    setItemImages((prevImages) => prevImages.filter((image, i) => i !== index));
-    setImageTexts((prevTexts) => prevTexts.filter((text, i) => i !== index));
-  };
 
   useEffect(() => {
     if (route.params?.itemImage) {
@@ -37,12 +26,24 @@ const ShowAllImagePost = ({ navigation }) => {
     }
   }, [route.params?.itemImage]);
 
+  const handleTextInputChange = (index, text) => {
+    setImageTexts((prevTexts) =>
+      prevTexts.map((prevText, i) => (i === index ? text : prevText))
+    );
+  };
+  const handleDeleteImage = (index) => {
+    setItemImages((prevImages) => prevImages.filter((image, i) => i !== index));
+    setImageTexts((prevTexts) => prevTexts.filter((text, i) => i !== index));
+  };
+
   const handleNavigateBack = () => {
     const updatedImagesWithText = itemImages.map((image, index) => ({
       ...image,
       text: imageTexts[index],
     }));
-    navigation.navigate("modal", { updatedImagesWithText });
+    navigation.navigate("modal", {
+      updatedImagesWithText,
+    });
   };
 
   return (
@@ -63,18 +64,17 @@ const ShowAllImagePost = ({ navigation }) => {
       </View>
       <FlatList
         showsHorizontalScrollIndicator={false}
-        data={itemImages} // Render using the updated image list
+        data={itemImages}
+        keyExtractor={(item, index) => item.uri}
         renderItem={({ item, index }) => (
-          <View
-            style={{ paddingHorizontal: 10, alignItems: "center" }}
-            key={index}
-          >
+          <View style={{ paddingHorizontal: 10, alignItems: "center" }}>
             <Image
               source={{ uri: item.uri }}
               style={{
                 width: screenWidth,
                 minHeight: 300,
-                aspectRatio: item.width / item.height,
+                aspectRatio:
+                  item.width && item.height ? item.width / item.height : 1,
               }}
             />
             <TextInput
@@ -83,8 +83,9 @@ const ShowAllImagePost = ({ navigation }) => {
               value={imageTexts[index]}
               onChangeText={(text) => handleTextInputChange(index, text)}
             />
-            <TouchableOpacity onPress={() => handleRemoveImage(index)}>
-              <EvilIcons name="close" size={24} color="red" />
+
+            <TouchableOpacity onPress={() => handleDeleteImage(index)}>
+              <EvilIcons name="trash" size={24} color="red" />
             </TouchableOpacity>
           </View>
         )}
@@ -92,6 +93,7 @@ const ShowAllImagePost = ({ navigation }) => {
     </SafeAreaView>
   );
 };
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -103,9 +105,6 @@ const styles = StyleSheet.create({
     textAlign: "center",
     marginVertical: 16,
   },
-  scrollViewContainer: {
-    alignItems: "center",
-  },
   textInput: {
     padding: 10,
     marginVertical: 10,
@@ -116,18 +115,13 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    padding: 15,
+    // padding: 15,
     borderBottomColor: "#ddd",
     borderBottomWidth: 0.5,
   },
-
   headerLeft: {
     flexDirection: "row",
-  },
-  headerText: {
-    fontSize: 18,
-    fontWeight: "bold",
-    marginBottom: 5,
+    alignItems: "center",
   },
 });
 

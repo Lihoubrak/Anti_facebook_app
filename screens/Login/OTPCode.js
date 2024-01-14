@@ -3,7 +3,7 @@ import { StyleSheet, Text, View, TouchableOpacity, Alert } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { useFocusEffect, useRoute } from "@react-navigation/native";
-import { publicRequest } from "../../RequestMethod/requestMethod";
+import { publicRequest } from "../../requestMethod";
 import { ButtonComponent, InputTextComponent } from "../../components";
 
 const OTPCode = ({ navigation }) => {
