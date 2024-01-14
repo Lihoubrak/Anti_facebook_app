@@ -6,7 +6,7 @@ import { COLORS, SIZES } from "../../constants/theme";
 
 const Register = ({ navigation }) => {
   const handleNextClick = () => {
-    navigation.navigate("name");
+    navigation.navigate("email");
   };
   return (
     <SafeAreaView style={styles.container}>

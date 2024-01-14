@@ -1,51 +1,38 @@
-import React, { useState } from "react";
-import { StyleSheet, Text, View } from "react-native";
+import React, { useCallback, useState } from "react";
+import { StyleSheet } from "react-native";
 import { InputTextComponent, RegisterComponent } from "../../components";
-import { API_URL } from "../../api/config";
-import ApiService from "../../api/APIService";
-import {
-  setToken,
-  setEmail,
-  setLogin,
-  setUsername,
-} from "../../redux/actions/userAction";
-import { useSelector, useDispatch } from "react-redux";
+import { useFocusEffect, useRoute } from "@react-navigation/native";
 
-const AccountPassword = ({ route }) => {
+const AccountPassword = () => {
   const [password, setPassword] = useState("");
   const [passwordFocused, setPasswordFocused] = useState(false);
-  const dispatch = useDispatch();
-
-  const addToken = (new_token) => dispatch(setToken({ new_token }));
-  const addEmail = (new_email) => dispatch(setEmail({ new_email }));
-  const addUsername = (new_username) => dispatch(setUsername({ new_username }));
-  const addLogin = (isLogin) => dispatch(setLogin({ isLogin }));
-
-  const name = route.params?.name;
-  const email = route.params?.email;
-
-  const postToLoginAPI = (navigation) => {
-    ApiService.post(API_URL + "signup", {
-      email: email,
-      password: password,
-      // username: name,
-    }).then(function (response) {
-      addToken(response.data.token);
-      addEmail(response.data.data.email);
-      // addUsername(response.data.data.username);
-      addLogin("true");
-      navigation.reset({
-        index: 0,
-        routes: [{ name: "Home" }],
-      });
-    });
-  };
+  const [passwordError, setPasswordError] = useState("");
+  const [isNextButtonEnabled, setIsNextButtonEnabled] = useState(false);
+  const route = useRoute();
+  const emailRegister = route.params?.emailRegister;
+  const refreshLoginScreen = useCallback(() => {
+    setPassword("");
+    setPasswordError("");
+  }, []);
+  useFocusEffect(refreshLoginScreen);
   const clearPassword = () => {
     setPassword("");
+    setPasswordError("");
   };
 
   const handlePasswordFocus = () => {
     setPasswordFocused(true);
+  };
+
+  const handlePasswordChange = (input) => {
+    setPassword(input);
+    if (input.length < 6) {
+      setPasswordError("Password must be at least 6 characters");
+      setIsNextButtonEnabled(false);
+    } else {
+      setPasswordError("");
+      setIsNextButtonEnabled(true);
+    }
   };
 
   return (
@@ -56,16 +43,22 @@ const AccountPassword = ({ route }) => {
       }
       titleBtn={"Next"}
       navigationText={"terms"}
+      password={password}
+      emailRegister={emailRegister}
+      isNextButtonEnabled={!isNextButtonEnabled}
     >
       <InputTextComponent
         label={"Password"}
         value={password}
-        onChangeText={setPassword}
+        onChangeText={handlePasswordChange}
+        iconName="close-circle"
         isFocused={passwordFocused}
         clear={password !== ""}
-        clearFunction={clearPassword}
+        InputFunction={clearPassword}
         onFocus={handlePasswordFocus}
         isFlex={true}
+        secureTextEntry={true}
+        errorText={passwordError}
       />
     </RegisterComponent>
   );

@@ -3,12 +3,14 @@ import { StyleSheet } from "react-native";
 import { InputTextComponent, RegisterComponent } from "../../components";
 import { useFocusEffect, useRoute } from "@react-navigation/native";
 
-const FindEmail = () => {
+const AccountEmail = () => {
   const [email, setEmail] = useState("");
-  const [isEmailFocused, setIsEmailFocused] = useState(false);
-  const [isValidEmail, setIsValidEmail] = useState(true);
+  const [emailFocused, setEmailFocused] = useState(false);
   const [emailError, setEmailError] = useState("");
   const [isNextButtonEnabled, setIsNextButtonEnabled] = useState(false);
+  const route = useRoute();
+  const loginProfle = route.params?.loginProfle;
+  console.log(loginProfle);
   const refreshLoginScreen = useCallback(() => {
     setEmail("");
     setEmailError("");
@@ -16,8 +18,16 @@ const FindEmail = () => {
   useFocusEffect(refreshLoginScreen);
   const clearEmail = () => {
     setEmail("");
-    setIsValidEmail(true);
     setEmailError("");
+  };
+
+  const handleEmailFocus = () => {
+    setEmailFocused(true);
+  };
+
+  const validateEmail = (input) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(input);
   };
 
   const handleEmailChange = (input) => {
@@ -31,37 +41,28 @@ const FindEmail = () => {
     }
   };
 
-  const validateEmail = (email) => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(email);
-  };
-
-  const handleEmailFocus = () => {
-    setIsEmailFocused(true);
-  };
-
   return (
     <RegisterComponent
-      title={"Enter your email address"}
-      titleBtn={"Find Your Account"}
-      isFindAccount={true}
-      searchByText={"Search by number instead"}
-      navigationFindText={"findphone"}
-      navigationText={"otpcode"}
-      emailFind={email}
+      title={"Enter your email"}
+      subtitle={
+        "Enter your email address where you can be reached. No one else will see this on your profile."
+      }
+      titleBtn={"Next"}
+      navigationText={"password"}
+      emailRegister={email}
       isNextButtonEnabled={!isNextButtonEnabled}
     >
       <InputTextComponent
-        label="Email"
+        label={"Email address"}
         value={email}
         onChangeText={handleEmailChange}
-        isFocused={isEmailFocused}
-        clear={email.length > 0}
+        isFocused={emailFocused}
+        clear={email !== ""}
         iconName="close-circle"
         InputFunction={clearEmail}
         onFocus={handleEmailFocus}
         isFlex={true}
-        secureTextEntry={false}
+        keyboardType={"email-address"}
         errorText={emailError}
       />
     </RegisterComponent>
@@ -70,4 +71,4 @@ const FindEmail = () => {
 
 const styles = StyleSheet.create({});
 
-export default FindEmail;
+export default AccountEmail;

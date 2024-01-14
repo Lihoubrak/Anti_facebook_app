@@ -9,14 +9,14 @@ import {
 import { SafeAreaView, SafeAreaProvider } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
-import axios from "axios";
+import * as SecureStore from "expo-secure-store";
 
 const initialMenuItems = [
-  { icon: "ios-people", name: "Groups" },
+  { icon: "document", name: "Block" },
   { icon: "ios-person", name: "Friends" },
   { icon: "clipboard", name: "Feeds" },
   { icon: "calendar", name: "Events" },
-  { icon: "clipboard", name: "Feeds" },
+  { icon: "globe", name: "Market" },
   { icon: "game-controller", name: "Gaming" },
   { icon: "bookmark", name: "Saved" },
   { icon: "ios-videocam", name: "Video" },
@@ -32,7 +32,10 @@ const MenuItem = ({ icon, name }) => {
 
   const onPressHandler = () => {
     if (name === "Friends") {
-      navigation.navigate("Friends");
+      navigation.navigate("YourFriend");
+    }
+    if (name === "Block") {
+      navigation.navigate("Block");
     }
     // ==========
     if (name === "Video") {
@@ -50,9 +53,6 @@ const MenuItem = ({ icon, name }) => {
   );
 };
 
-const Separator = () => {
-  return <View style={styles.separator} />;
-};
 const MenuScreen = () => {
   const [menuItems, setMenuItems] = useState(initialMenuItems);
   const [seeMore, setSeeMore] = useState(false);
@@ -66,19 +66,37 @@ const MenuScreen = () => {
     ? [...initialMenuItems, ...additionalMenuItems]
     : initialMenuItems;
 
-  const handlePress = async (name) => {
+  const handlePress = (name) => {
+    async function handleLogout() {
+      try {
+        await SecureStore.deleteItemAsync("loginToken");
+        navigation.navigate("loginproflie");
+      } catch (error) {
+        console.error("Error clearing token:", error);
+      }
+    }
     switch (name) {
       case "Help":
         break;
       case "Settings":
         break;
       case "Logout":
+        handleLogout();
         break;
       default:
         navigation.navigate(name);
     }
   };
+  const handleLogout = async () => {
+    try {
+      await SecureStore.deleteItemAsync("loginToken");
 
+      // Navigate to the login screen
+      navigation.navigate("loginproflie");
+    } catch (error) {
+      console.error("Error clearing token:", error);
+    }
+  };
   const renderFooter = () => (
     <View style={styles.footerContainer}>
       <TouchableOpacity style={styles.seeMoreButton} onPress={handleSeeMore}>
@@ -86,7 +104,6 @@ const MenuScreen = () => {
           {seeMore ? "See Less" : "See More"}
         </Text>
       </TouchableOpacity>
-      <Separator />
       <TouchableOpacity
         style={styles.footerButton}
         onPress={() => handlePress("Help")}
@@ -116,6 +133,22 @@ const MenuScreen = () => {
       <SafeAreaView style={styles.container}>
         <View style={styles.header}>
           <Text style={styles.headerText}>Menu</Text>
+          <TouchableOpacity
+            style={styles.searchBtn}
+            onPress={() => navigation.navigate("SearchSomething")}
+          >
+            <Ionicons
+              name="search"
+              color="#FF9800"
+              size={28}
+              style={{ left: 5 }}
+            />
+            <View style={styles.textSearch}>
+              <Text style={{ fontSize: 15, color: "white", fontWeight: "500" }}>
+                Search something...
+              </Text>
+            </View>
+          </TouchableOpacity>
         </View>
         <View style={styles.shortcut}>
           <Text style={styles.shortcutText}>All Shortcut</Text>
@@ -141,14 +174,30 @@ const MenuScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#fff",
+    backgroundColor: "#DCF2F1",
   },
   header: {
+    flexDirection: "row",
+    justifyContent: "space-between",
     padding: 10,
+    backgroundColor: "#265073",
+  },
+  searchBtn: {
+    flexDirection: "row",
+    backgroundColor: "#5F8670",
+    width: 190,
+    borderWidth: 1,
+    borderColor: "#92C7CF",
+    borderRadius: 10,
+  },
+  textSearch: {
+    justifyContent: "center",
+    left: 10,
   },
   headerText: {
     fontSize: 28,
     fontWeight: "600",
+    color: "white",
   },
   shortcut: {
     left: 10,
@@ -156,7 +205,7 @@ const styles = StyleSheet.create({
   shortcutText: {
     fontSize: 20,
     fontWeight: "500",
-    color: "#A8AAB3",
+    color: "#5F6F52",
   },
   menuContainer: {
     alignItems: "center",
@@ -203,7 +252,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     width: "95%",
     height: 50,
-    top: 10,
+
     marginTop: 10,
   },
   footerButtonText: {
@@ -211,12 +260,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "500",
     left: 10,
-  },
-  separator: {
-    height: 1,
-    width: "100%",
-    backgroundColor: "#5F0F40",
-    top: 10,
   },
 });
 

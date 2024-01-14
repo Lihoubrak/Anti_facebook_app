@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useCallback, useContext, useEffect, useState } from "react";
 import {
   StyleSheet,
   View,
@@ -7,45 +7,80 @@ import {
   TouchableOpacity,
   KeyboardAvoidingView,
   Platform,
+  ActivityIndicator,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { COLORS, SIZES } from "../../constants/theme";
 import { ButtonComponent, InputTextComponent } from "../../components";
-import axios from "axios";
-import { ActivityIndicator } from "react-native-paper";
-
-const LoginScreen = ({ navigation }) => {
+import { publicRequest } from "../../RequestMethod/requestMethod";
+import { useFocusEffect, useNavigation } from "@react-navigation/native";
+import * as SecureStore from "expo-secure-store";
+import { AuthContext } from "../../hooks/AuthContext";
+import { Keyboard } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+const LoginScreen = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [emailFocused, setEmailFocused] = useState(false);
   const [passwordFocused, setPasswordFocused] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [uuid, setUuid] = useState("iphone11");
-
-  const handleLogin = async () => {
-    setIsLoading(true); // Start loading
-
-    // something moreeeee.....
-  };
+  const [errorMessage, setErrorMessage] = useState("");
+  const [loading, setLoading] = useState(false);
+  const navigation = useNavigation();
   const clearEmail = () => {
     setEmail("");
   };
-
   const handleEmailFocus = () => {
     setEmailFocused(true);
     setPasswordFocused(false);
+    setErrorMessage("");
   };
 
   const handlePasswordFocus = () => {
     setPasswordFocused(true);
     setEmailFocused(false);
+    setErrorMessage("");
   };
 
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
   };
-
+  const refreshLoginScreen = useCallback(() => {
+    setEmail("");
+    setPassword("");
+    setErrorMessage("");
+  }, []);
+  useFocusEffect(refreshLoginScreen);
+  handleLogin = async () => {
+    setLoading(true);
+    Keyboard.dismiss();
+    try {
+      const response = await publicRequest.post("/login", {
+        email,
+        password,
+        uuid: "a12345",
+      });
+      const loginToken = response?.data?.data.token;
+      const coins = response?.data?.data.coins;
+      const userId = response?.data?.data.id;
+      if (response.data.message === "OK") {
+        await SecureStore.setItemAsync("loginToken", loginToken);
+        await SecureStore.setItemAsync("coins", coins.toString());
+        await SecureStore.setItemAsync("id", userId.toString());
+        // Navigate to TabNavigator after successful login
+        navigation.navigate("TabNavigator", {
+          coin: coins,
+        });
+      } else {
+        setErrorMessage("Invalid email or password. Please try again.");
+      }
+    } catch (error) {
+      console.error("Login error:", error);
+      setErrorMessage("Invalid email or password. Please try again.");
+    } finally {
+      setLoading(false); // Set loading to false in the finally block
+    }
+  };
   return (
     <SafeAreaView style={styles.container}>
       <Image
@@ -93,17 +128,14 @@ const LoginScreen = ({ navigation }) => {
             value={password}
             onChangeText={setPassword}
             isFocused={passwordFocused}
+            clear={password !== ""}
             onFocus={handlePasswordFocus}
-            InputFunction={togglePasswordVisibility}
+            InputFunction={clearEmail}
             iconName={showPassword ? "eye-outline" : "eye-off-outline"}
             secureTextEntry={!showPassword}
           />
-          {isLoading ? (
-            <ActivityIndicator size="large" color="#0000ff" />
-          ) : (
-            <ButtonComponent title={"Log In"} onPress={handleLogin} />
-          )}
-
+          <ButtonComponent title={"Log In"} onPress={handleLogin} />
+          <Text style={styles.errorText}>{errorMessage}</Text>
           <TouchableOpacity onPress={() => navigation.navigate("findphone")}>
             <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
           </TouchableOpacity>
@@ -120,6 +152,12 @@ const LoginScreen = ({ navigation }) => {
           </TouchableOpacity>
         </KeyboardAvoidingView>
       </View>
+      {/* Full-screen loading component */}
+      {loading && (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#0000ff" />
+        </View>
+      )}
     </SafeAreaView>
   );
 };
@@ -164,6 +202,17 @@ const styles = StyleSheet.create({
   createAccountButtonText: {
     fontWeight: "bold",
     fontSize: 16,
+  },
+  errorText: {
+    color: "red",
+    textAlign: "center",
+    marginTop: 10,
+  },
+  loadingContainer: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "rgba(255, 255, 255, 0.7)",
+    justifyContent: "center",
+    alignItems: "center",
   },
 });
 

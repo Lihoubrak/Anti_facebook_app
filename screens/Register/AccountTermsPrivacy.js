@@ -2,8 +2,12 @@ import React from "react";
 import { StyleSheet, View, Text } from "react-native";
 import { RegisterComponent } from "../../components";
 import { COLORS } from "../../constants/theme";
+import { useRoute } from "@react-navigation/native";
 
 const AccountTermsPrivacy = () => {
+  const route = useRoute();
+  const emailCreate = route.params?.emailRegister;
+  const passwordCreate = route.params?.password;
   return (
     <RegisterComponent
       title={"Finishing signing up"}
@@ -11,7 +15,9 @@ const AccountTermsPrivacy = () => {
         "By tapping Sign up, you agree to our Terms, Data Policy, and Cookies Policy"
       }
       titleBtn={"Next"}
-      navigationText={"login"}
+      navigationText={"outcode"}
+      emailCreate={emailCreate}
+      passwordCreate={passwordCreate}
     >
       <View>
         <Text style={styles.contentText}>
